@@ -1,4 +1,4 @@
-import { DataTable } from "@/components/data-table.tsx";
+import { CoinsTable } from "@/pages/coins/views/coins-table.tsx";
 import { ColumnDef } from "@tanstack/react-table";
 import { useCoins, type Coin } from "@/commands/coins.ts";
 import { Checkbox } from "@/components/ui/checkbox.tsx";
@@ -27,10 +27,11 @@ export const columns: ColumnDef<Coin>[] = [
     enableHiding: false,
   },
   {
+    id: "images",
     accessorKey: "obverse_image",
     header: "Images",
     cell: ({ row }) => {
-      const obverse = row.getValue("obverse_image") as string | undefined;
+      const obverse = row.original.obverse_image;
       const reverse = row.original.reverse_image;
       return (
         <div className="flex gap-2">
@@ -65,6 +66,7 @@ export const columns: ColumnDef<Coin>[] = [
     },
   },
   {
+    id: "title",
     accessorKey: "title",
     header: "Name",
     cell: ({ row }) => {
@@ -72,14 +74,17 @@ export const columns: ColumnDef<Coin>[] = [
     },
   },
   {
+    id: "issuer",
     accessorKey: "issuer",
     header: "Issuer",
   },
   {
+    id: "year",
     accessorKey: "year",
     header: "Year",
   },
   {
+    id: "value",
     accessorKey: "value",
     header: "Value",
     cell: ({ row }) => {
@@ -93,6 +98,7 @@ export const columns: ColumnDef<Coin>[] = [
     },
   },
   {
+    id: "currency",
     accessorKey: "currency",
     header: "Currency",
   },
@@ -121,7 +127,7 @@ export function CoinsList() {
 
   return (
     <div className="h-full w-full flex justify-center items-center">
-      <DataTable columns={columns} data={coins} />
+      <CoinsTable columns={columns} data={coins} />
     </div>
   );
 }
