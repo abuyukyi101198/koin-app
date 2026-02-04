@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  ColumnDef,
   SortingState,
   ColumnFiltersState,
   VisibilityState,
@@ -30,23 +29,20 @@ import {
 } from "@/components/ui/dropdown-menu.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { ColumnsSettingsIcon } from "lucide-react";
+import { AddCoinDialog } from "@/pages/coins/components/add-coin-dialog.tsx";
+import { useListCoins } from "@/commands/coins.ts";
+import { columns } from "@/pages/coins/views/coins-list.tsx";
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-}
+export function CoinsTable() {
+  const { data, loading, error, refetch } = useListCoins();
 
-export function CoinsTable<TData, TValue>({
-  columns,
-  data,
-}: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const table = useReactTable({
-    data,
+    data: data ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -62,6 +58,24 @@ export function CoinsTable<TData, TValue>({
       rowSelection,
     },
   });
+
+  if (loading) {
+    return <div className="p-4">Loading coins...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 text-red-500">
+        <p>Error loading coins: {error.message}</p>
+        <button
+          onClick={() => refetch()}
+          className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -102,9 +116,7 @@ export function CoinsTable<TData, TValue>({
               })}
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button variant="outline" className="ml-auto cursor-pointer">
-          Add coin
-        </Button>
+        <AddCoinDialog onSuccess={refetch} />
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>

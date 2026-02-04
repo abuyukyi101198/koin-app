@@ -1,6 +1,6 @@
 import { CoinsTable } from "@/pages/coins/views/coins-table.tsx";
 import { ColumnDef } from "@tanstack/react-table";
-import { useCoins, type Coin } from "@/commands/coins.ts";
+import { type Coin } from "@/commands/coins.ts";
 import { Checkbox } from "@/components/ui/checkbox.tsx";
 
 export const columns: ColumnDef<Coin>[] = [
@@ -105,29 +105,9 @@ export const columns: ColumnDef<Coin>[] = [
 ];
 
 export function CoinsList() {
-  const { coins, loading, error, refetch } = useCoins();
-
-  if (loading) {
-    return <div className="p-4">Loading coins...</div>;
-  }
-
-  if (error) {
-    return (
-      <div className="p-4 text-red-500">
-        <p>Error loading coins: {error.message}</p>
-        <button
-          onClick={() => refetch()}
-          className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
-
   return (
     <div className="h-full w-full flex justify-center items-center">
-      <CoinsTable columns={columns} data={coins} />
+      <CoinsTable />
     </div>
   );
 }
