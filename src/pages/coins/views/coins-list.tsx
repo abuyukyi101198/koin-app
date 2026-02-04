@@ -1,113 +1,51 @@
-import { CoinsTable } from "@/pages/coins/views/coins-table.tsx";
-import { ColumnDef } from "@tanstack/react-table";
-import { type Coin } from "@/commands/coins.ts";
-import { Checkbox } from "@/components/ui/checkbox.tsx";
-
-export const columns: ColumnDef<Coin>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    id: "images",
-    accessorKey: "obverse_image",
-    header: "Images",
-    cell: ({ row }) => {
-      const obverse = row.original.obverse_image;
-      const reverse = row.original.reverse_image;
-      return (
-        <div className="flex gap-2">
-          <div className="w-12 h-12 flex items-center justify-center">
-            {reverse ? (
-              <img
-                src={reverse}
-                alt="Coin reverse"
-                className="max-w-full max-h-full object-contain rounded"
-              />
-            ) : (
-              <div className="w-full h-full bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
-                R
-              </div>
-            )}
-          </div>
-          <div className="w-12 h-12 flex items-center justify-center">
-            {obverse ? (
-              <img
-                src={obverse}
-                alt="Coin obverse"
-                className="max-w-full max-h-full object-contain rounded"
-              />
-            ) : (
-              <div className="w-full h-full bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
-                O
-              </div>
-            )}
-          </div>
-        </div>
-      );
-    },
-  },
-  {
-    id: "title",
-    accessorKey: "title",
-    header: "Name",
-    cell: ({ row }) => {
-      return <div className="font-medium">{row.getValue("title")}</div>;
-    },
-  },
-  {
-    id: "issuer",
-    accessorKey: "issuer",
-    header: "Issuer",
-  },
-  {
-    id: "year",
-    accessorKey: "year",
-    header: "Year",
-  },
-  {
-    id: "value",
-    accessorKey: "value",
-    header: "Value",
-    cell: ({ row }) => {
-      const value = row.getValue("value") as number;
-      const unit = row.original.currency;
-      return (
-        <div>
-          {value} {unit}
-        </div>
-      );
-    },
-  },
-  {
-    id: "currency",
-    accessorKey: "currency",
-    header: "Currency",
-  },
-];
+import { DataTable } from "@/pages/coins/components/data-table.tsx";
+import { useListCoins } from "@/commands/coins.ts";
+import { useCoinsTableColumns } from "@/pages/coins/hooks/use-coins-table-columns.tsx";
+import { AddCoinDialog } from "@/pages/coins/components/add-coin-dialog.tsx";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty.tsx";
+import { Button } from "@/components/ui/button.tsx";
 
 export function CoinsList() {
+  const { data, loading, refetch } = useListCoins();
+  const columns = useCoinsTableColumns();
+
   return (
     <div className="h-full w-full flex justify-center items-center">
-      <CoinsTable />
+      <DataTable
+        data={data ?? []}
+        columns={columns}
+        loading={loading}
+        headerConfig={{
+          searchable: true,
+          searchColumnId: "title",
+          searchPlaceholder: "Search your catalogue...",
+          showColumnToggle: true,
+        }}
+        headerActions={<AddCoinDialog onSuccess={refetch} />}
+        empty={
+          <Empty>
+            <EmptyHeader>
+              <EmptyTitle>No Coins Yet</EmptyTitle>
+              <EmptyDescription>
+                You haven&apos;t added any coins to your catalogue yet. Get
+                started by adding your first coins.
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent className="flex-row justify-center gap-2">
+              <Button variant="ghost" onClick={refetch}>
+                Refresh
+              </Button>
+              <AddCoinDialog onSuccess={refetch} />
+            </EmptyContent>
+          </Empty>
+        }
+      />
     </div>
   );
 }
