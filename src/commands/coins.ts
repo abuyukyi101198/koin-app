@@ -16,19 +16,49 @@ export interface Coin {
   created_at: string;
 }
 
-interface UseCoinsResult {
-  coins: Coin[];
+interface TauriHookResult<TData> {
+  data: TData | undefined;
   loading: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
 }
 
-export function useCoins(): UseCoinsResult {
+interface ListCoinsResponse extends TauriHookResult<Coin[]> {}
+
+interface GetCoinOptions {
+  id: number;
+}
+interface GetCoinResponse extends TauriHookResult<Coin> {}
+
+export interface CreateCoinOptions extends Omit<Coin, "id" | "created_at"> {}
+interface CreateCoinResponse {
+  loading: boolean;
+  error: Error | null;
+  mutate: (data: CreateCoinOptions) => Promise<void>;
+}
+
+interface UpdateCoinOptions extends Omit<Coin, "created_at"> {}
+interface UpdateCoinResponse {
+  loading: boolean;
+  error: Error | null;
+  mutate: (data: UpdateCoinOptions) => Promise<void>;
+}
+
+interface DeleteCoinOptions {
+  id: number;
+}
+interface DeleteCoinResponse {
+  loading: boolean;
+  error: Error | null;
+  mutate: (data: DeleteCoinOptions) => Promise<void>;
+}
+
+export function useListCoins(): ListCoinsResponse {
   const [coins, setCoins] = useState<Coin[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchCoins = async () => {
+  const listCoins = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -44,13 +74,123 @@ export function useCoins(): UseCoinsResult {
   };
 
   useEffect(() => {
-    void fetchCoins();
+    void listCoins();
   }, []);
 
   return {
-    coins,
+    data: coins,
     loading,
     error,
-    refetch: fetchCoins,
+    refetch: listCoins,
+  };
+}
+
+export function useGetCoin(options: GetCoinOptions): GetCoinResponse {
+  const [coin, setCoin] = useState<Coin>();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const getCoin = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await invoke<Coin>("get_coin", { id: options.id });
+      setCoin(result);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      setError(error);
+      console.error("Failed to fetch coin:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void getCoin();
+  }, [options.id]);
+
+  return {
+    data: coin,
+    loading,
+    error,
+    refetch: getCoin,
+  };
+}
+
+export function useCreateCoin(): CreateCoinResponse {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const createCoin = async (data: CreateCoinOptions) => {
+    try {
+      setLoading(true);
+      setError(null);
+      await invoke<Coin>("create_coin", { coin: data });
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      setError(error);
+      console.error("Failed to create coin:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    loading,
+    error,
+    mutate: createCoin,
+  };
+}
+
+export function useUpdateCoin(): UpdateCoinResponse {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const updateCoin = async (data: UpdateCoinOptions) => {
+    try {
+      setLoading(true);
+      setError(null);
+      await invoke<Coin>("update_coin", { request: data });
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      setError(error);
+      console.error("Failed to update coin:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    loading,
+    error,
+    mutate: updateCoin,
+  };
+}
+
+export function useDeleteCoin(): DeleteCoinResponse {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const deleteCoin = async (data: DeleteCoinOptions) => {
+    try {
+      setLoading(true);
+      setError(null);
+      await invoke<void>("delete_coin", { id: data.id });
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      setError(error);
+      console.error("Failed to delete coin:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    loading,
+    error,
+    mutate: deleteCoin,
   };
 }
