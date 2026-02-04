@@ -18,15 +18,47 @@ pub struct Coin {
     pub created_at: String,
 }
 
-#[tauri::command]
-fn get_coins(app_handle: tauri::AppHandle) -> Result<Vec<Coin>, String> {
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CreateCoinRequest {
+    pub title: String,
+    pub value: f64,
+    pub currency: String,
+    pub year: i32,
+    pub issuer: String,
+    pub obverse_image: Option<String>,
+    pub reverse_image: Option<String>,
+    pub quantity: Option<i32>,
+    pub sale_value: Option<f64>,
+    pub notes: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct UpdateCoinRequest {
+    pub id: i32,
+    pub title: Option<String>,
+    pub value: Option<f64>,
+    pub currency: Option<String>,
+    pub year: Option<i32>,
+    pub issuer: Option<String>,
+    pub obverse_image: Option<String>,
+    pub reverse_image: Option<String>,
+    pub quantity: Option<i32>,
+    pub sale_value: Option<f64>,
+    pub notes: Option<String>,
+}
+
+fn get_db_connection(app_handle: &tauri::AppHandle) -> Result<rusqlite::Connection, String> {
     let app_dir = app_handle
         .path()
         .app_data_dir()
         .map_err(|e| format!("Failed to get app data dir: {}", e))?;
     let db_path = app_dir.join("koin-app.db");
-    let conn = rusqlite::Connection::open(db_path)
-        .map_err(|e| format!("Failed to open database: {}", e))?;
+    rusqlite::Connection::open(db_path).map_err(|e| format!("Failed to open database: {}", e))
+}
+
+#[tauri::command]
+fn get_coins(app_handle: tauri::AppHandle) -> Result<Vec<Coin>, String> {
+    let conn = get_db_connection(&app_handle)?;
     let mut stmt = conn.prepare(
         "SELECT id, title, value, currency, year, issuer, obverse_image, reverse_image, quantity, sale_value, notes, created_at FROM coins ORDER BY year DESC, issuer ASC"
     ).map_err(|e| format!("Failed to prepare statement: {}", e))?;
@@ -54,8 +86,130 @@ fn get_coins(app_handle: tauri::AppHandle) -> Result<Vec<Coin>, String> {
 }
 
 #[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+fn get_coin(app_handle: tauri::AppHandle, id: i32) -> Result<Coin, String> {
+    let conn = get_db_connection(&app_handle)?;
+    let mut stmt = conn.prepare(
+        "SELECT id, title, value, currency, year, issuer, obverse_image, reverse_image, quantity, sale_value, notes, created_at FROM coins WHERE id = ?1"
+    ).map_err(|e| format!("Failed to prepare statement: {}", e))?;
+
+    stmt.query_row([id], |row| {
+        Ok(Coin {
+            id: row.get(0)?,
+            title: row.get(1)?,
+            value: row.get(2)?,
+            currency: row.get(3)?,
+            year: row.get(4)?,
+            issuer: row.get(5)?,
+            obverse_image: row.get(6)?,
+            reverse_image: row.get(7)?,
+            quantity: row.get(8)?,
+            sale_value: row.get(9)?,
+            notes: row.get(10)?,
+            created_at: row.get(11)?,
+        })
+    })
+    .map_err(|e| format!("Failed to get coin: {}", e))
+}
+
+#[tauri::command]
+fn create_coin(app_handle: tauri::AppHandle, coin: CreateCoinRequest) -> Result<Coin, String> {
+    let conn = get_db_connection(&app_handle)?;
+
+    conn.execute(
+        "INSERT INTO coins (title, value, currency, year, issuer, obverse_image, reverse_image, quantity, sale_value, notes) 
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+        rusqlite::params![
+            coin.title,
+            coin.value,
+            coin.currency,
+            coin.year,
+            coin.issuer,
+            coin.obverse_image,
+            coin.reverse_image,
+            coin.quantity.unwrap_or(1),
+            coin.sale_value,
+            coin.notes,
+        ],
+    ).map_err(|e| format!("Failed to insert coin: {}", e))?;
+
+    let id = conn.last_insert_rowid() as i32;
+
+    // Fetch and return the created coin
+    get_coin(app_handle, id)
+}
+
+#[tauri::command]
+fn update_coin(app_handle: tauri::AppHandle, request: UpdateCoinRequest) -> Result<Coin, String> {
+    let conn = get_db_connection(&app_handle)?;
+
+    // Build dynamic update query
+    let mut updates = Vec::new();
+    let mut params: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
+
+    if let Some(title) = request.title {
+        updates.push("title = ?");
+        params.push(Box::new(title));
+    }
+    if let Some(value) = request.value {
+        updates.push("value = ?");
+        params.push(Box::new(value));
+    }
+    if let Some(currency) = request.currency {
+        updates.push("currency = ?");
+        params.push(Box::new(currency));
+    }
+    if let Some(year) = request.year {
+        updates.push("year = ?");
+        params.push(Box::new(year));
+    }
+    if let Some(issuer) = request.issuer {
+        updates.push("issuer = ?");
+        params.push(Box::new(issuer));
+    }
+    if let Some(obverse_image) = request.obverse_image {
+        updates.push("obverse_image = ?");
+        params.push(Box::new(obverse_image));
+    }
+    if let Some(reverse_image) = request.reverse_image {
+        updates.push("reverse_image = ?");
+        params.push(Box::new(reverse_image));
+    }
+    if let Some(quantity) = request.quantity {
+        updates.push("quantity = ?");
+        params.push(Box::new(quantity));
+    }
+    if let Some(sale_value) = request.sale_value {
+        updates.push("sale_value = ?");
+        params.push(Box::new(sale_value));
+    }
+    if let Some(notes) = request.notes {
+        updates.push("notes = ?");
+        params.push(Box::new(notes));
+    }
+
+    if updates.is_empty() {
+        return Err("No fields to update".to_string());
+    }
+
+    params.push(Box::new(request.id));
+
+    let query = format!("UPDATE coins SET {} WHERE id = ?", updates.join(", "));
+
+    conn.execute(&query, rusqlite::params_from_iter(params))
+        .map_err(|e| format!("Failed to update coin: {}", e))?;
+
+    // Fetch and return the updated coin
+    get_coin(app_handle, request.id)
+}
+
+#[tauri::command]
+fn delete_coin(app_handle: tauri::AppHandle, id: i32) -> Result<(), String> {
+    let conn = get_db_connection(&app_handle)?;
+
+    conn.execute("DELETE FROM coins WHERE id = ?1", [id])
+        .map_err(|e| format!("Failed to delete coin: {}", e))?;
+
+    Ok(())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -63,7 +217,13 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_sql::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet, get_coins])
+        .invoke_handler(tauri::generate_handler![
+            get_coins,
+            get_coin,
+            create_coin,
+            update_coin,
+            delete_coin
+        ])
         .setup(|app| {
             // Initialize database on app startup
             let app_dir = app
