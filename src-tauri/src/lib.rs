@@ -1,19 +1,15 @@
 mod commands;
 mod db;
+use crate::commands::coins::{create_coin, delete_coin, get_coin, list_coins, update_coin};
+use crate::commands::issuers::{create_issuer, list_issuers};
 use serde::{Deserialize, Serialize};
 use tauri::Manager;
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Currency {
-    pub id: i32,
-    pub name: String,
-    pub created_at: String,
-}
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Issuer {
     pub id: i32,
     pub name: String,
+    pub flag: Option<String>,
     pub created_at: String,
 }
 
@@ -22,7 +18,7 @@ pub struct Coin {
     pub id: i32,
     pub title: String,
     pub value: f64,
-    pub currency: Currency,
+    pub currency: String,
     pub year: i32,
     pub issuer: Issuer,
     pub obverse_image: Option<String>,
@@ -31,13 +27,6 @@ pub struct Coin {
     pub sale_value: Option<f64>,
     pub notes: Option<String>,
     pub created_at: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(untagged)]
-pub enum CurrencyInput {
-    ById { id: i32 },
-    ByName { name: String },
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -51,7 +40,7 @@ pub enum IssuerInput {
 pub struct CreateCoinRequest {
     pub title: String,
     pub value: f64,
-    pub currency: CurrencyInput,
+    pub currency: String,
     pub year: i32,
     pub issuer: IssuerInput,
     pub obverse_image: Option<String>,
@@ -66,7 +55,7 @@ pub struct UpdateCoinRequest {
     pub id: i32,
     pub title: Option<String>,
     pub value: Option<f64>,
-    pub currency: Option<CurrencyInput>,
+    pub currency: Option<String>,
     pub year: Option<i32>,
     pub issuer: Option<IssuerInput>,
     pub obverse_image: Option<String>,
@@ -88,15 +77,13 @@ pub fn run() {
         .plugin(tauri_plugin_sql::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
-            commands::coins::list_coins,
-            commands::coins::get_coin,
-            commands::coins::create_coin,
-            commands::coins::update_coin,
-            commands::coins::delete_coin,
-            commands::issuers::list_currencies,
-            commands::issuers::list_issuers,
-            commands::issuers::create_currency,
-            commands::issuers::create_issuer
+            list_coins,
+            get_coin,
+            create_coin,
+            update_coin,
+            delete_coin,
+            list_issuers,
+            create_issuer
         ])
         .setup(|app| {
             // Initialize database on app startup

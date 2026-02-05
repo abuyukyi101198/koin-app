@@ -1,35 +1,9 @@
 use crate::commands::utils::get_db_connection;
 use crate::{
-    Coin, CreateCoinRequest, CurrencyInput, IssuerInput, PaginatedCoinsResponse, UpdateCoinRequest,
+    Coin, CreateCoinRequest, IssuerInput, PaginatedCoinsResponse, UpdateCoinRequest,
 };
 use rusqlite::Connection;
 
-fn get_or_create_currency(conn: &Connection, input: &CurrencyInput) -> Result<i32, String> {
-    match input {
-        CurrencyInput::ById { id } => Ok(*id),
-        CurrencyInput::ByName { name } => {
-            let trimmed_name = name.trim();
-
-            // Try to find existing currency
-            let mut stmt = conn
-                .prepare("SELECT id FROM currencies WHERE name = ?1")
-                .map_err(|e| format!("Failed to prepare statement: {}", e))?;
-
-            if let Ok(id) = stmt.query_row([trimmed_name], |row| row.get::<_, i32>(0)) {
-                return Ok(id);
-            }
-
-            // Create new currency
-            conn.execute(
-                "INSERT INTO currencies (name) VALUES (?1)",
-                rusqlite::params![trimmed_name],
-            )
-            .map_err(|e| format!("Failed to insert currency: {}", e))?;
-
-            Ok(conn.last_insert_rowid() as i32)
-        }
-    }
-}
 
 fn get_or_create_issuer(conn: &Connection, input: &IssuerInput) -> Result<i32, String> {
     match input {
@@ -59,29 +33,26 @@ fn get_or_create_issuer(conn: &Connection, input: &IssuerInput) -> Result<i32, S
 }
 
 fn build_coin_from_row(row: &rusqlite::Row) -> Result<Coin, rusqlite::Error> {
-    use crate::{Currency, Issuer};
+    use crate::Issuer;
 
     Ok(Coin {
         id: row.get(0)?,
         title: row.get(1)?,
         value: row.get(2)?,
-        currency: Currency {
-            id: row.get(3)?,
-            name: row.get(4)?,
-            created_at: row.get(5)?,
-        },
-        year: row.get(6)?,
+        currency: row.get(3)?,
+        year: row.get(4)?,
         issuer: Issuer {
-            id: row.get(7)?,
-            name: row.get(8)?,
-            created_at: row.get(9)?,
+            id: row.get(5)?,
+            name: row.get(6)?,
+            flag: row.get(7)?,
+            created_at: row.get(8)?,
         },
-        obverse_image: row.get(10)?,
-        reverse_image: row.get(11)?,
-        quantity: row.get(12)?,
-        sale_value: row.get(13)?,
-        notes: row.get(14)?,
-        created_at: row.get(15)?,
+        obverse_image: row.get(9)?,
+        reverse_image: row.get(10)?,
+        quantity: row.get(11)?,
+        sale_value: row.get(12)?,
+        notes: row.get(13)?,
+        created_at: row.get(14)?,
     })
 }
 
@@ -112,7 +83,7 @@ pub fn list_coins(
         "id",
         "title",
         "value",
-        "currency_id",
+        "currency",
         "year",
         "issuer_id",
         "quantity",
@@ -127,7 +98,7 @@ pub fn list_coins(
     let where_clause = if let Some(ref query) = search {
         let search_term = format!("%{}%", query);
         format!(
-            "WHERE c.title LIKE '{}' OR i.name LIKE '{}' OR cu.name LIKE '{}' OR c.notes LIKE '{}'",
+            "WHERE c.title LIKE '{}' OR i.name LIKE '{}' OR c.currency LIKE '{}' OR c.notes LIKE '{}'",
             search_term.replace("'", "''"),
             search_term.replace("'", "''"),
             search_term.replace("'", "''"),
@@ -139,7 +110,7 @@ pub fn list_coins(
 
     // Get total count
     let count_query = format!(
-        "SELECT COUNT(*) FROM coins c LEFT JOIN issuers i ON c.issuer_id = i.id LEFT JOIN currencies cu ON c.currency_id = cu.id {}",
+        "SELECT COUNT(*) FROM coins c LEFT JOIN issuers i ON c.issuer_id = i.id {}",
         where_clause
     );
 
@@ -149,10 +120,9 @@ pub fn list_coins(
 
     // Get paginated coins
     let query = format!(
-        "SELECT c.id, c.title, c.value, cu.id, cu.name, cu.created_at, c.year, i.id, i.name, i.created_at, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at
+        "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.flag, i.created_at, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at
          FROM coins c
          LEFT JOIN issuers i ON c.issuer_id = i.id
-         LEFT JOIN currencies cu ON c.currency_id = cu.id
          {} ORDER BY c.{} {} LIMIT ?1 OFFSET ?2",
         where_clause, sort_field, sort_direction
     );
@@ -174,10 +144,9 @@ pub fn list_coins(
 pub fn get_coin(app_handle: tauri::AppHandle, id: i32) -> Result<Coin, String> {
     let conn = get_db_connection(&app_handle)?;
 
-    let query = "SELECT c.id, c.title, c.value, cu.id, cu.name, cu.created_at, c.year, i.id, i.name, i.created_at, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at 
-                FROM coins c 
+    let query = "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.flag, i.created_at, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at
+                FROM coins c
                 LEFT JOIN issuers i ON c.issuer_id = i.id 
-                LEFT JOIN currencies cu ON c.currency_id = cu.id 
                 WHERE c.id = ?1";
 
     let mut stmt = conn
@@ -192,11 +161,10 @@ pub fn get_coin(app_handle: tauri::AppHandle, id: i32) -> Result<Coin, String> {
 pub fn create_coin(app_handle: tauri::AppHandle, coin: CreateCoinRequest) -> Result<Coin, String> {
     let conn = get_db_connection(&app_handle)?;
 
-    // Get or create currency and issuer
-    let currency_id = get_or_create_currency(&conn, &coin.currency)?;
+    // Get or create issuer
     let issuer_id = get_or_create_issuer(&conn, &coin.issuer)?;
 
-    const INSERT_QUERY: &str = "INSERT INTO coins (title, value, currency_id, year, issuer_id, obverse_image, reverse_image, quantity, sale_value, notes)
+    const INSERT_QUERY: &str = "INSERT INTO coins (title, value, currency, year, issuer_id, obverse_image, reverse_image, quantity, sale_value, notes)
          VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)";
 
     conn.execute(
@@ -204,7 +172,7 @@ pub fn create_coin(app_handle: tauri::AppHandle, coin: CreateCoinRequest) -> Res
         rusqlite::params![
             coin.title,
             coin.value,
-            currency_id,
+            coin.currency,
             coin.year,
             issuer_id,
             coin.obverse_image,
@@ -241,10 +209,9 @@ pub fn update_coin(
         updates.push("value = ?");
         params.push(Box::new(value));
     }
-    if let Some(currency) = &request.currency {
-        let currency_id = get_or_create_currency(&conn, currency)?;
-        updates.push("currency_id = ?");
-        params.push(Box::new(currency_id));
+    if let Some(currency) = request.currency {
+        updates.push("currency = ?");
+        params.push(Box::new(currency));
     }
     if let Some(year) = request.year {
         updates.push("year = ?");

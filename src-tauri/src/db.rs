@@ -24,29 +24,15 @@ fn run_migrations(conn: &Connection) -> SqliteResult<()> {
         [],
     )?;
 
-    // Migration 1: Create currencies table
+    // Migration 1: Create issuers table
     apply_migration(
         conn,
-        "001_create_currencies_table",
-        r#"
-            CREATE TABLE currencies (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL UNIQUE,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-            );
-
-            CREATE INDEX idx_currencies_name ON currencies(name);
-        "#,
-    )?;
-
-    // Migration 2: Create issuers table
-    apply_migration(
-        conn,
-        "002_create_issuers_table",
+        "001_create_issuers_table",
         r#"
             CREATE TABLE issuers (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL UNIQUE,
+                flag TEXT,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
 
@@ -54,16 +40,16 @@ fn run_migrations(conn: &Connection) -> SqliteResult<()> {
         "#,
     )?;
 
-    // Migration 3: Create coins table with foreign keys
+    // Migration 2: Create coins table with issuer foreign key
     apply_migration(
         conn,
-        "003_create_coins_table",
+        "002_create_coins_table",
         r#"
             CREATE TABLE coins (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL,
                 value REAL NOT NULL,
-                currency_id INTEGER NOT NULL,
+                currency TEXT NOT NULL,
                 year INTEGER NOT NULL,
                 issuer_id INTEGER NOT NULL,
                 obverse_image TEXT,
@@ -72,13 +58,12 @@ fn run_migrations(conn: &Connection) -> SqliteResult<()> {
                 sale_value REAL,
                 notes TEXT,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE RESTRICT,
                 FOREIGN KEY (issuer_id) REFERENCES issuers(id) ON DELETE RESTRICT
             );
 
             CREATE INDEX idx_coins_issuer_id ON coins(issuer_id);
             CREATE INDEX idx_coins_year ON coins(year);
-            CREATE INDEX idx_coins_currency_id ON coins(currency_id);
+            CREATE INDEX idx_coins_currency ON coins(currency);
         "#,
     )?;
 
