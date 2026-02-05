@@ -1,13 +1,25 @@
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 
+export interface Currency {
+  id: number;
+  name: string;
+  created_at: string;
+}
+
+export interface Issuer {
+  id: number;
+  name: string;
+  created_at: string;
+}
+
 export interface Coin {
   id: number;
   title: string;
   value: number;
-  currency: string;
+  currency: Currency;
   year: number;
-  issuer: string;
+  issuer: Issuer;
   obverse_image?: string;
   reverse_image?: string;
   quantity: number;
@@ -15,6 +27,9 @@ export interface Coin {
   notes?: string;
   created_at: string;
 }
+
+export type CurrencyInput = { id?: number; name?: string };
+export type IssuerInput = { id?: number; name?: string };
 
 interface TauriHookResult<TData> {
   data: TData | undefined;
@@ -48,7 +63,18 @@ interface GetCoinOptions {
 }
 interface GetCoinResponse extends TauriHookResult<Coin> {}
 
-export interface CreateCoinOptions extends Omit<Coin, "id" | "created_at"> {}
+export interface CreateCoinOptions {
+  title: string;
+  value: number;
+  currency: CurrencyInput;
+  year: number;
+  issuer: IssuerInput;
+  obverse_image?: string;
+  reverse_image?: string;
+  quantity?: number;
+  sale_value?: number;
+  notes?: string;
+}
 interface CreateCoinResponse {
   loading: boolean;
   error: Error | null;
@@ -244,5 +270,243 @@ export function useDeleteCoin(): DeleteCoinResponse {
     loading,
     error,
     mutate: deleteCoin,
+  };
+}
+
+interface ListCurrenciesResponse extends TauriHookResult<Currency[]> {}
+
+export function useListCurrencies(): ListCurrenciesResponse {
+  const [currencies, setCurrencies] = useState<Currency[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const listCurrencies = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await invoke<Currency[]>("list_currencies");
+      setCurrencies(result);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      setError(error);
+      console.error("Failed to fetch currencies:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void listCurrencies();
+  }, []);
+
+  return {
+    data: currencies,
+    loading,
+    error,
+    refetch: listCurrencies,
+  };
+}
+
+interface SearchCurrenciesResponse {
+  items: Currency[];
+  total: number;
+  hasMore: boolean;
+  loading: boolean;
+  error: Error | null;
+}
+
+export function useSearchCurrencies(
+  query: string,
+  page: number = 0,
+  pageSize: number = 10
+): SearchCurrenciesResponse {
+  const [items, setItems] = useState<Currency[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const search = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const result = await invoke<Currency[]>("list_currencies");
+
+        // Client-side filtering
+        const filtered = result.filter((c) =>
+          c.name.toLowerCase().includes(query.toLowerCase())
+        );
+
+        setTotal(filtered.length);
+        setItems(filtered.slice(page * pageSize, (page + 1) * pageSize));
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void search();
+  }, [query, page, pageSize]);
+
+  return {
+    items,
+    total,
+    hasMore: (page + 1) * pageSize < total,
+    loading,
+    error,
+  };
+}
+
+interface ListIssuersResponse extends TauriHookResult<Issuer[]> {}
+
+export function useListIssuers(): ListIssuersResponse {
+  const [issuers, setIssuers] = useState<Issuer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const listIssuers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await invoke<Issuer[]>("list_issuers");
+      setIssuers(result);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      setError(error);
+      console.error("Failed to fetch issuers:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void listIssuers();
+  }, []);
+
+  return {
+    data: issuers,
+    loading,
+    error,
+    refetch: listIssuers,
+  };
+}
+
+interface SearchIssuersResponse {
+  items: Issuer[];
+  total: number;
+  hasMore: boolean;
+  loading: boolean;
+  error: Error | null;
+}
+
+export function useSearchIssuers(
+  query: string,
+  page: number = 0,
+  pageSize: number = 10
+): SearchIssuersResponse {
+  const [items, setItems] = useState<Issuer[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const search = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const result = await invoke<Issuer[]>("list_issuers");
+
+        // Client-side filtering
+        const filtered = result.filter((i) =>
+          i.name.toLowerCase().includes(query.toLowerCase())
+        );
+
+        setTotal(filtered.length);
+        setItems(filtered.slice(page * pageSize, (page + 1) * pageSize));
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void search();
+  }, [query, page, pageSize]);
+
+  return {
+    items,
+    total,
+    hasMore: (page + 1) * pageSize < total,
+    loading,
+    error,
+  };
+}
+
+interface CreateCurrencyResponse {
+  loading: boolean;
+  error: Error | null;
+  mutate: (name: string) => Promise<Currency>;
+}
+
+export function useCreateCurrency(): CreateCurrencyResponse {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const createCurrency = async (name: string): Promise<Currency> => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await invoke<Currency>("create_currency", { name });
+      return result;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      setError(error);
+      console.error("Failed to create currency:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    loading,
+    error,
+    mutate: createCurrency,
+  };
+}
+
+interface CreateIssuerResponse {
+  loading: boolean;
+  error: Error | null;
+  mutate: (name: string) => Promise<Issuer>;
+}
+
+export function useCreateIssuer(): CreateIssuerResponse {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const createIssuer = async (name: string): Promise<Issuer> => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await invoke<Issuer>("create_issuer", { name });
+      return result;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      setError(error);
+      console.error("Failed to create issuer:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    loading,
+    error,
+    mutate: createIssuer,
   };
 }
