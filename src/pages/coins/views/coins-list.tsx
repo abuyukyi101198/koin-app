@@ -12,7 +12,8 @@ import {
 import { Button } from "@/components/ui/button.tsx";
 
 export function CoinsList() {
-  const { data, loading, refetch } = useListCoins();
+  const { data, loading, refetch, page, totalPages, pageSize, setPage } =
+    useListCoins();
   const columns = useCoinsTableColumns();
 
   return (
@@ -21,11 +22,20 @@ export function CoinsList() {
         data={data ?? []}
         columns={columns}
         loading={loading}
-        headerConfig={{
-          searchable: true,
-          searchColumnId: "title",
-          searchPlaceholder: "Search your catalogue...",
-          showColumnToggle: true,
+        search={{
+          enabled: true,
+          columnId: "title",
+          placeholder: "Search your catalogue...",
+        }}
+        columnToggle={{
+          enabled: true,
+        }}
+        pagination={{
+          enabled: true,
+          pageIndex: page,
+          pageSize: pageSize,
+          pageCount: totalPages,
+          onPaginationChange: setPage,
         }}
         headerActions={<AddCoinDialog onSuccess={refetch} />}
         empty={

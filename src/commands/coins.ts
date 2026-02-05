@@ -23,7 +23,19 @@ interface TauriHookResult<TData> {
   refetch: () => Promise<void>;
 }
 
-interface ListCoinsResponse extends TauriHookResult<Coin[]> {}
+interface PaginatedCoinsResponse {
+  data: Coin[];
+  total: number;
+}
+
+interface ListCoinsResponse extends TauriHookResult<Coin[]> {
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  totalCoins: number;
+  setPage: (page: number) => Promise<void>;
+  setPageSize: (size: number) => Promise<void>;
+}
 
 interface GetCoinOptions {
   id: number;
@@ -57,13 +69,23 @@ export function useListCoins(): ListCoinsResponse {
   const [coins, setCoins] = useState<Coin[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [page, setPageState] = useState(0);
+  const [pageSize, setPageSizeState] = useState(10);
+  const [totalCoins, setTotalCoins] = useState(0);
 
-  const listCoins = async () => {
+  const listCoins = async (
+    offset: number = page * pageSize,
+    limit: number = pageSize
+  ) => {
     try {
       setLoading(true);
       setError(null);
-      const result = await invoke<Coin[]>("get_coins");
-      setCoins(result);
+      const result = await invoke<PaginatedCoinsResponse>("list_coins", {
+        offset,
+        limit,
+      });
+      setCoins(result.data);
+      setTotalCoins(result.total);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
       setError(error);
@@ -73,15 +95,34 @@ export function useListCoins(): ListCoinsResponse {
     }
   };
 
+  const setPage = async (newPage: number) => {
+    setPageState(newPage);
+    await listCoins(newPage * pageSize, pageSize);
+  };
+
+  const setPageSize = async (newSize: number) => {
+    setPageSizeState(newSize);
+    setPageState(0);
+    await listCoins(0, newSize);
+  };
+
   useEffect(() => {
     void listCoins();
   }, []);
+
+  const totalPages = Math.ceil(totalCoins / pageSize);
 
   return {
     data: coins,
     loading,
     error,
-    refetch: listCoins,
+    refetch: () => listCoins(page * pageSize, pageSize),
+    page,
+    pageSize,
+    totalPages,
+    totalCoins,
+    setPage,
+    setPageSize,
   };
 }
 

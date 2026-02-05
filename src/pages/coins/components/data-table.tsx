@@ -29,21 +29,38 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { ColumnsSettingsIcon, LoaderIcon } from "lucide-react";
-
-export interface DataTableHeaderConfig {
-  searchable?: boolean;
-  searchColumnId?: string;
-  searchPlaceholder?: string;
-  showColumnToggle?: boolean;
-  excludeColumnsFromToggle?: string[];
-}
+import {
+  ColumnsSettingsIcon,
+  LoaderIcon,
+  ChevronsLeft,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsRight,
+} from "lucide-react";
 
 interface DataTableProps<TData> extends ComponentProps<"table"> {
   data: TData[];
   columns: ColumnDef<TData>[];
   loading: boolean;
-  headerConfig?: DataTableHeaderConfig;
+  // Search configuration
+  search?: {
+    enabled: boolean;
+    columnId: string;
+    placeholder?: string;
+  };
+  // Column visibility configuration
+  columnToggle?: {
+    enabled: boolean;
+    excludeColumns?: string[];
+  };
+  // Pagination configuration matching React Table
+  pagination?: {
+    enabled: boolean;
+    pageIndex: number;
+    pageSize: number;
+    pageCount: number;
+    onPaginationChange: (pageIndex: number, pageSize: number) => Promise<void>;
+  };
   headerActions?: ReactNode;
   empty?: ReactNode;
 }
@@ -52,7 +69,9 @@ export function DataTable<TData>({
   data,
   columns,
   loading,
-  headerConfig,
+  search,
+  columnToggle,
+  pagination,
   headerActions,
   empty,
   ...props
@@ -80,65 +99,129 @@ export function DataTable<TData>({
     },
   });
 
-  const {
-    searchable = false,
-    searchColumnId,
-    searchPlaceholder = "Search...",
-    showColumnToggle = false,
-    excludeColumnsFromToggle = [],
-  } = headerConfig || {};
-
   return (
     <div className="w-full p-4">
-      {(searchable || showColumnToggle || headerActions) && (
-        <div className="w-full flex items-center py-3.5 gap-2.5">
-          {searchable && searchColumnId && (
+      {(search?.enabled ||
+        columnToggle?.enabled ||
+        headerActions ||
+        pagination?.enabled) && (
+        <div className="w-full flex items-center justify-between py-3.5 gap-2.5">
+          {search?.enabled && (
             <Input
-              placeholder={searchPlaceholder}
+              placeholder={search.placeholder || "Search..."}
               value={
-                (table.getColumn(searchColumnId)?.getFilterValue() as string) ||
-                ""
+                (table
+                  .getColumn(search.columnId)
+                  ?.getFilterValue() as string) || ""
               }
               onChange={(event) =>
                 table
-                  .getColumn(searchColumnId)
+                  .getColumn(search.columnId)
                   ?.setFilterValue(event.target.value)
               }
               className="max-w-full"
             />
           )}
-          {showColumnToggle && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <ColumnsSettingsIcon className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {table
-                  .getAllColumns()
-                  .filter(
-                    (column) =>
-                      column.getCanHide() &&
-                      !excludeColumnsFromToggle.includes(column.id)
-                  )
-                  .map((column) => (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
 
-          {headerActions && <div>{headerActions}</div>}
+          <div className="flex items-center gap-2.5 ml-auto">
+            {columnToggle?.enabled && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <ColumnsSettingsIcon className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {table
+                    .getAllColumns()
+                    .filter(
+                      (column) =>
+                        column.getCanHide() &&
+                        !columnToggle.excludeColumns?.includes(column.id)
+                    )
+                    .map((column) => (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) =>
+                          column.toggleVisibility(value)
+                        }
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+
+            {headerActions && <div>{headerActions}</div>}
+
+            {pagination?.enabled && (
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="hidden size-8 lg:flex"
+                  onClick={() =>
+                    pagination.onPaginationChange(0, pagination.pageSize)
+                  }
+                  disabled={pagination.pageIndex === 0}
+                >
+                  <span className="sr-only">Go to first page</span>
+                  <ChevronsLeft />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="size-8"
+                  onClick={() =>
+                    pagination.onPaginationChange(
+                      pagination.pageIndex - 1,
+                      pagination.pageSize
+                    )
+                  }
+                  disabled={pagination.pageIndex === 0}
+                >
+                  <span className="sr-only">Go to previous page</span>
+                  <ChevronLeft />
+                </Button>
+                <div className="flex w-25 items-center justify-center text-sm font-medium">
+                  Page {pagination.pageIndex + 1} of {pagination.pageCount}
+                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="size-8"
+                  onClick={() =>
+                    pagination.onPaginationChange(
+                      pagination.pageIndex + 1,
+                      pagination.pageSize
+                    )
+                  }
+                  disabled={pagination.pageIndex >= pagination.pageCount - 1}
+                >
+                  <span className="sr-only">Go to next page</span>
+                  <ChevronRight />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="hidden size-8 lg:flex"
+                  onClick={() =>
+                    pagination.onPaginationChange(
+                      pagination.pageCount - 1,
+                      pagination.pageSize
+                    )
+                  }
+                  disabled={pagination.pageIndex >= pagination.pageCount - 1}
+                >
+                  <span className="sr-only">Go to last page</span>
+                  <ChevronsRight />
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
