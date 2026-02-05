@@ -63,7 +63,8 @@ export function DataTableActionHeader<TData>({
               <ChevronLeft />
             </Button>
             <div className="flex w-25 items-center justify-center text-sm font-medium">
-              Page {pagination.pageIndex + 1} of {pagination.pageCount}
+              Page {pagination.pageIndex + 1} of{" "}
+              {pagination.pageCount ? pagination.pageCount : 1}
             </div>
             <Button
               variant="outline"

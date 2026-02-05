@@ -2,17 +2,10 @@ import { DataTable } from "@/components/composite/data-table.tsx";
 import { useListCoins, type ListCoinsOptions } from "@/commands/coins.ts";
 import { useCoinsTableColumns } from "@/pages/coins/hooks/use-coins-table-columns.tsx";
 import { AddCoinDialog } from "@/pages/coins/components/add-coin-dialog.tsx";
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@/components/ui/empty.tsx";
-import { Button } from "@/components/ui/button.tsx";
 import { useState } from "react";
 import { SortingState } from "@tanstack/react-table";
 import { useDebounce } from "@/hooks/use-debounce.ts";
+import { EmptyCoins } from "@/pages/coins/components/empty-coins.tsx";
 
 export function CoinsList() {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -58,21 +51,10 @@ export function CoinsList() {
         }}
         actions={<AddCoinDialog onSuccess={refetch} />}
         empty={
-          <Empty>
-            <EmptyHeader>
-              <EmptyTitle>No Coins Yet</EmptyTitle>
-              <EmptyDescription>
-                You haven&apos;t added any coins to your catalogue yet. Get
-                started by adding your first coins.
-              </EmptyDescription>
-            </EmptyHeader>
-            <EmptyContent className="flex-row justify-center gap-2">
-              <Button variant="ghost" onClick={refetch}>
-                Refresh
-              </Button>
-              <AddCoinDialog onSuccess={refetch} />
-            </EmptyContent>
-          </Empty>
+          <EmptyCoins
+            type={searchQuery.length ? "no match" : "no data"}
+            refresh={refetch}
+          />
         }
       />
     </div>
