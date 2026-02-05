@@ -12,9 +12,9 @@
   "app": {
     "windows": [
       {
-        "title": "koin-app",
-        "width": 800,
-        "height": 600
+        "title": "Koin",
+        "width": 1280,
+        "height": 720
       }
     ],
     "security": {
