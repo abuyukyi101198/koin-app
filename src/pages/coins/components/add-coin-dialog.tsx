@@ -17,7 +17,7 @@ import {
   FieldContent,
 } from "@/components/ui/field.tsx";
 import { Input } from "@/components/ui/input.tsx";
-import { ImageUploadField } from "@/pages/coins/components/image-upload.tsx";
+import { ImageUploadField } from "@/components/composite/image-upload.tsx";
 import { useCreateCoin, type CreateCoinOptions } from "@/commands/coins.ts";
 
 interface AddCoinDialogForm {

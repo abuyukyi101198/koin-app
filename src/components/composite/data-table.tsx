@@ -20,17 +20,10 @@ import {
   TableRow,
 } from "@/components/ui/table.tsx";
 import { ComponentProps, useState, ReactNode } from "react";
-import { Input } from "@/components/ui/input.tsx";
-import { Button } from "@/components/ui/button.tsx";
-import {
-  LoaderIcon,
-  ChevronsLeft,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsRight,
-} from "lucide-react";
+import { LoaderIcon } from "lucide-react";
+import { DataTableActionHeader } from "@/components/composite/data-table-action-header.tsx";
 
-interface DataTableProps<TData> extends ComponentProps<"table"> {
+export interface DataTableProps<TData> extends ComponentProps<"table"> {
   data: TData[];
   columns: ColumnDef<TData>[];
   loading: boolean;
@@ -55,7 +48,7 @@ interface DataTableProps<TData> extends ComponentProps<"table"> {
     pageCount: number;
     onPaginationChange: (pageIndex: number, pageSize: number) => Promise<void>;
   };
-  headerActions?: ReactNode;
+  actions?: ReactNode;
   empty?: ReactNode;
 }
 
@@ -66,7 +59,7 @@ export function DataTable<TData>({
   search,
   sort,
   pagination,
-  headerActions,
+  actions,
   empty,
   ...props
 }: DataTableProps<TData>) {
@@ -90,88 +83,13 @@ export function DataTable<TData>({
 
   return (
     <div className="w-full p-4">
-      {(search?.enabled || headerActions || pagination?.enabled) && (
-        <div className="w-full flex items-center justify-between py-3.5 gap-2.5">
-          {search?.enabled && (
-            <Input
-              placeholder={search.placeholder || "Search..."}
-              value={search.value}
-              onChange={(event) => search.onChange(event.target.value)}
-              className="max-w-full"
-            />
-          )}
-
-          <div className="flex items-center gap-2.5 ml-auto">
-            {headerActions && <div>{headerActions}</div>}
-
-            {pagination?.enabled && (
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="hidden size-8 lg:flex"
-                  onClick={() =>
-                    pagination.onPaginationChange(0, pagination.pageSize)
-                  }
-                  disabled={pagination.pageIndex === 0}
-                >
-                  <span className="sr-only">Go to first page</span>
-                  <ChevronsLeft />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="size-8"
-                  onClick={() =>
-                    pagination.onPaginationChange(
-                      pagination.pageIndex - 1,
-                      pagination.pageSize
-                    )
-                  }
-                  disabled={pagination.pageIndex === 0}
-                >
-                  <span className="sr-only">Go to previous page</span>
-                  <ChevronLeft />
-                </Button>
-                <div className="flex w-25 items-center justify-center text-sm font-medium">
-                  Page {pagination.pageIndex + 1} of {pagination.pageCount}
-                </div>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="size-8"
-                  onClick={() =>
-                    pagination.onPaginationChange(
-                      pagination.pageIndex + 1,
-                      pagination.pageSize
-                    )
-                  }
-                  disabled={pagination.pageIndex >= pagination.pageCount - 1}
-                >
-                  <span className="sr-only">Go to next page</span>
-                  <ChevronRight />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="hidden size-8 lg:flex"
-                  onClick={() =>
-                    pagination.onPaginationChange(
-                      pagination.pageCount - 1,
-                      pagination.pageSize
-                    )
-                  }
-                  disabled={pagination.pageIndex >= pagination.pageCount - 1}
-                >
-                  <span className="sr-only">Go to last page</span>
-                  <ChevronsRight />
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
+      {(search?.enabled || actions || pagination?.enabled) && (
+        <DataTableActionHeader
+          search={search}
+          pagination={pagination}
+          actions={actions}
+        />
       )}
-
       <div className="overflow-hidden rounded-md border">
         <Table {...props}>
           <TableHeader>

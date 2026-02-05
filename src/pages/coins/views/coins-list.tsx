@@ -1,4 +1,4 @@
-import { DataTable } from "@/pages/coins/components/data-table.tsx";
+import { DataTable } from "@/components/composite/data-table.tsx";
 import { useListCoins, type ListCoinsOptions } from "@/commands/coins.ts";
 import { useCoinsTableColumns } from "@/pages/coins/hooks/use-coins-table-columns.tsx";
 import { AddCoinDialog } from "@/pages/coins/components/add-coin-dialog.tsx";
@@ -56,7 +56,7 @@ export function CoinsList() {
           pageCount: totalPages,
           onPaginationChange: setPage,
         }}
-        headerActions={<AddCoinDialog onSuccess={refetch} />}
+        actions={<AddCoinDialog onSuccess={refetch} />}
         empty={
           <Empty>
             <EmptyHeader>
