@@ -67,20 +67,57 @@ fn list_coins(
     app_handle: tauri::AppHandle,
     offset: Option<i64>,
     limit: Option<i64>,
+    search: Option<String>,
+    sort_field: Option<String>,
+    sort_direction: Option<String>,
 ) -> Result<PaginatedCoinsResponse, String> {
     let conn = get_db_connection(&app_handle)?;
     let offset = offset.unwrap_or(0);
     let limit = limit.unwrap_or(10);
+    let sort_direction = sort_direction.unwrap_or_else(|| "DESC".to_string()).to_uppercase();
+    let sort_field = sort_field.unwrap_or_else(|| "year".to_string());
+
+    // Validate sort direction
+    if sort_direction != "ASC" && sort_direction != "DESC" {
+        return Err("Invalid sort direction".to_string());
+    }
+
+    // Validate sort field
+    let valid_fields = vec!["id", "title", "value", "currency", "year", "issuer", "quantity", "sale_value", "created_at"];
+    if !valid_fields.contains(&sort_field.as_str()) {
+        return Err("Invalid sort field".to_string());
+    }
+
+    // Build WHERE clause for search
+    let where_clause = if let Some(ref query) = search {
+        let search_term = format!("%{}%", query);
+        // Search across title, issuer, currency, and notes
+        format!(
+            "WHERE title LIKE '{}' OR issuer LIKE '{}' OR currency LIKE '{}' OR notes LIKE '{}'",
+            search_term.replace("'", "''"),
+            search_term.replace("'", "''"),
+            search_term.replace("'", "''"),
+            search_term.replace("'", "''")
+        )
+    } else {
+        String::new()
+    };
 
     // Get total count
+    let count_query = format!("SELECT COUNT(*) FROM coins {}", where_clause);
     let total: i64 = conn
-        .query_row("SELECT COUNT(*) FROM coins", [], |row| row.get(0))
+        .query_row(&count_query, [], |row| row.get(0))
         .map_err(|e| format!("Failed to count coins: {}", e))?;
 
     // Get paginated coins
-    let mut stmt = conn.prepare(
-        "SELECT id, title, value, currency, year, issuer, obverse_image, reverse_image, quantity, sale_value, notes, created_at FROM coins ORDER BY year DESC, issuer ASC LIMIT ?1 OFFSET ?2"
-    ).map_err(|e| format!("Failed to prepare statement: {}", e))?;
+    let query = format!(
+        "SELECT id, title, value, currency, year, issuer, obverse_image, reverse_image, quantity, sale_value, notes, created_at 
+         FROM coins {} ORDER BY {} {} LIMIT ?1 OFFSET ?2",
+        where_clause, sort_field, sort_direction
+    );
+
+    let mut stmt = conn.prepare(&query)
+        .map_err(|e| format!("Failed to prepare statement: {}", e))?;
     let coins = stmt
         .query_map([limit, offset], |row| {
             Ok(Coin {

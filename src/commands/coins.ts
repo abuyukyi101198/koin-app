@@ -28,6 +28,12 @@ interface PaginatedCoinsResponse {
   total: number;
 }
 
+export interface ListCoinsOptions {
+  search?: string;
+  sortField?: string;
+  sortDirection?: "asc" | "desc";
+}
+
 interface ListCoinsResponse extends TauriHookResult<Coin[]> {
   page: number;
   pageSize: number;
@@ -65,7 +71,7 @@ interface DeleteCoinResponse {
   mutate: (data: DeleteCoinOptions) => Promise<void>;
 }
 
-export function useListCoins(): ListCoinsResponse {
+export function useListCoins(options?: ListCoinsOptions): ListCoinsResponse {
   const [coins, setCoins] = useState<Coin[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -75,7 +81,8 @@ export function useListCoins(): ListCoinsResponse {
 
   const listCoins = async (
     offset: number = page * pageSize,
-    limit: number = pageSize
+    limit: number = pageSize,
+    listOptions?: ListCoinsOptions
   ) => {
     try {
       setLoading(true);
@@ -83,6 +90,10 @@ export function useListCoins(): ListCoinsResponse {
       const result = await invoke<PaginatedCoinsResponse>("list_coins", {
         offset,
         limit,
+        search: listOptions?.search || options?.search,
+        sortField: listOptions?.sortField || options?.sortField || "year",
+        sortDirection:
+          listOptions?.sortDirection || options?.sortDirection || "desc",
       });
       setCoins(result.data);
       setTotalCoins(result.total);
@@ -97,18 +108,18 @@ export function useListCoins(): ListCoinsResponse {
 
   const setPage = async (newPage: number) => {
     setPageState(newPage);
-    await listCoins(newPage * pageSize, pageSize);
+    await listCoins(newPage * pageSize, pageSize, options);
   };
 
   const setPageSize = async (newSize: number) => {
     setPageSizeState(newSize);
     setPageState(0);
-    await listCoins(0, newSize);
+    await listCoins(0, newSize, options);
   };
 
   useEffect(() => {
-    void listCoins();
-  }, []);
+    void listCoins(0, pageSize, options);
+  }, [options?.search, options?.sortField, options?.sortDirection]);
 
   const totalPages = Math.ceil(totalCoins / pageSize);
 
@@ -116,7 +127,7 @@ export function useListCoins(): ListCoinsResponse {
     data: coins,
     loading,
     error,
-    refetch: () => listCoins(page * pageSize, pageSize),
+    refetch: () => listCoins(page * pageSize, pageSize, options),
     page,
     pageSize,
     totalPages,
