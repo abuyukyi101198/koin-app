@@ -1,5 +1,18 @@
 use rusqlite::{Connection, Result as SqliteResult};
+use serde::{Deserialize, Serialize};
 use std::path::Path;
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct IssuerData {
+    pub name: String,
+    pub flag: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct IssuersJson {
+    pub count: i32,
+    pub issuers: Vec<IssuerData>,
+}
 
 pub fn init_database(db_path: &Path) -> SqliteResult<()> {
     let conn = Connection::open(db_path)?;
@@ -9,6 +22,11 @@ pub fn init_database(db_path: &Path) -> SqliteResult<()> {
 
     // Run migrations
     run_migrations(&conn)?;
+
+    // Populate issuers from JSON if the table is empty
+    if is_issuers_table_empty(&conn)? {
+        populate_issuers_from_json(&conn).ok();
+    }
 
     Ok(())
 }
@@ -90,3 +108,48 @@ fn apply_migration(conn: &Connection, name: &str, sql: &str) -> SqliteResult<()>
     println!("Applied migration: {}", name);
     Ok(())
 }
+
+fn is_issuers_table_empty(conn: &Connection) -> SqliteResult<bool> {
+    let mut stmt = conn.prepare("SELECT COUNT(*) FROM issuers")?;
+    let count: i64 = stmt.query_row([], |row| row.get(0))?;
+    Ok(count == 0)
+}
+
+fn populate_issuers_from_json(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
+    // Load issuers.json from the data directory
+    let manifest_dir = env!("CARGO_MANIFEST_DIR");
+    let json_path = Path::new(manifest_dir)
+        .parent()
+        .ok_or("Could not get parent directory")?
+        .join("data/issuers.json");
+
+    println!("Loading issuers from: {}", json_path.display());
+
+    if !json_path.exists() {
+        eprintln!("Warning: issuers.json not found at {}", json_path.display());
+        return Ok(());
+    }
+
+    // Read and parse JSON
+    let json_content = std::fs::read_to_string(&json_path)?;
+    let data: IssuersJson = serde_json::from_str(&json_content)?;
+
+    // Insert issuers into database
+    let mut stmt = conn.prepare(
+        "INSERT INTO issuers (name, flag) VALUES (?1, ?2)"
+    )?;
+
+    let mut count = 0;
+    for issuer in &data.issuers {
+        stmt.execute(rusqlite::params![
+            &issuer.name,
+            &issuer.flag
+        ])?;
+        count += 1;
+    }
+
+    println!("Populated {} issuers from JSON", count);
+
+    Ok(())
+}
+
