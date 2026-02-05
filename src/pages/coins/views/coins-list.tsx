@@ -27,9 +27,6 @@ export function CoinsList() {
           columnId: "title",
           placeholder: "Search your catalogue...",
         }}
-        columnToggle={{
-          enabled: true,
-        }}
         pagination={{
           enabled: true,
           pageIndex: page,

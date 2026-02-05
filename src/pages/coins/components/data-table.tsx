@@ -22,15 +22,8 @@ import {
 } from "@/components/ui/table.tsx";
 import { ComponentProps, useState, ReactNode } from "react";
 import { Input } from "@/components/ui/input.tsx";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import {
-  ColumnsSettingsIcon,
   LoaderIcon,
   ChevronsLeft,
   ChevronLeft,
@@ -47,11 +40,6 @@ interface DataTableProps<TData> extends ComponentProps<"table"> {
     enabled: boolean;
     columnId: string;
     placeholder?: string;
-  };
-  // Column visibility configuration
-  columnToggle?: {
-    enabled: boolean;
-    excludeColumns?: string[];
   };
   // Pagination configuration matching React Table
   pagination?: {
@@ -70,7 +58,6 @@ export function DataTable<TData>({
   columns,
   loading,
   search,
-  columnToggle,
   pagination,
   headerActions,
   empty,
@@ -101,10 +88,7 @@ export function DataTable<TData>({
 
   return (
     <div className="w-full p-4">
-      {(search?.enabled ||
-        columnToggle?.enabled ||
-        headerActions ||
-        pagination?.enabled) && (
+      {(search?.enabled || headerActions || pagination?.enabled) && (
         <div className="w-full flex items-center justify-between py-3.5 gap-2.5">
           {search?.enabled && (
             <Input
@@ -124,37 +108,6 @@ export function DataTable<TData>({
           )}
 
           <div className="flex items-center gap-2.5 ml-auto">
-            {columnToggle?.enabled && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon">
-                    <ColumnsSettingsIcon className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {table
-                    .getAllColumns()
-                    .filter(
-                      (column) =>
-                        column.getCanHide() &&
-                        !columnToggle.excludeColumns?.includes(column.id)
-                    )
-                    .map((column) => (
-                      <DropdownMenuCheckboxItem
-                        key={column.id}
-                        className="capitalize"
-                        checked={column.getIsVisible()}
-                        onCheckedChange={(value) =>
-                          column.toggleVisibility(value)
-                        }
-                      >
-                        {column.id}
-                      </DropdownMenuCheckboxItem>
-                    ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-
             {headerActions && <div>{headerActions}</div>}
 
             {pagination?.enabled && (
@@ -264,15 +217,14 @@ export function DataTable<TData>({
               ))
             ) : loading ? (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  <LoaderIcon
-                    role="status"
-                    aria-label="Loading"
-                    className="size-4 animate-spin"
-                  />
+                <TableCell colSpan={columns.length} className="h-24">
+                  <div className="flex items-center justify-center h-full">
+                    <LoaderIcon
+                      role="status"
+                      aria-label="Loading"
+                      className="size-4 animate-spin"
+                    />
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (
