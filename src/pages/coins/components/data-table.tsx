@@ -2,14 +2,13 @@
 
 import {
   SortingState,
-  ColumnFiltersState,
   VisibilityState,
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
-  getFilteredRowModel,
   useReactTable,
   ColumnDef,
+  Updater,
 } from "@tanstack/react-table";
 
 import {
@@ -35,11 +34,18 @@ interface DataTableProps<TData> extends ComponentProps<"table"> {
   data: TData[];
   columns: ColumnDef<TData>[];
   loading: boolean;
-  // Search configuration
+  // Search state - controlled from parent
   search?: {
     enabled: boolean;
-    columnId: string;
+    value: string;
+    onChange: (value: string) => void;
     placeholder?: string;
+  };
+  // Sort configuration
+  sort?: {
+    enabled: boolean;
+    sorting: SortingState;
+    onSortingChange: (updaterOrValue: Updater<SortingState>) => void;
   };
   // Pagination configuration matching React Table
   pagination?: {
@@ -58,29 +64,25 @@ export function DataTable<TData>({
   columns,
   loading,
   search,
+  sort,
   pagination,
   headerActions,
   empty,
   ...props
 }: DataTableProps<TData>) {
-  const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState({});
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
+    onSortingChange: sort?.onSortingChange,
+    getSortedRowModel: sort?.enabled ? getSortedRowModel() : undefined,
     onRowSelectionChange: setRowSelection,
     onColumnVisibilityChange: setColumnVisibility,
     state: {
-      sorting,
-      columnFilters,
+      sorting: sort?.sorting || [],
       columnVisibility,
       rowSelection,
     },
@@ -93,16 +95,8 @@ export function DataTable<TData>({
           {search?.enabled && (
             <Input
               placeholder={search.placeholder || "Search..."}
-              value={
-                (table
-                  .getColumn(search.columnId)
-                  ?.getFilterValue() as string) || ""
-              }
-              onChange={(event) =>
-                table
-                  .getColumn(search.columnId)
-                  ?.setFilterValue(event.target.value)
-              }
+              value={search.value}
+              onChange={(event) => search.onChange(event.target.value)}
               className="max-w-full"
             />
           )}

@@ -1,35 +1,11 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Coin } from "@/commands/coins.ts";
 import { useMemo } from "react";
-import { Checkbox } from "@/components/ui/checkbox.tsx";
+import { DataTableColumnHeader } from "../components/data-table-column-header";
 
 export function useCoinsTableColumns(): ColumnDef<Coin>[] {
   return useMemo(
     () => [
-      {
-        id: "select",
-        header: ({ table }) => (
-          <Checkbox
-            checked={
-              table.getIsAllPageRowsSelected() ||
-              (table.getIsSomePageRowsSelected() && "indeterminate")
-            }
-            onCheckedChange={(value) =>
-              table.toggleAllPageRowsSelected(!!value)
-            }
-            aria-label="Select all"
-          />
-        ),
-        cell: ({ row }) => (
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label="Select row"
-          />
-        ),
-        enableSorting: false,
-        enableHiding: false,
-      },
       {
         id: "images",
         accessorKey: "obverse_image",
@@ -72,7 +48,9 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
       {
         id: "title",
         accessorKey: "title",
-        header: "Name",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Title" />
+        ),
         cell: ({ row }) => {
           return <div className="font-medium">{row.getValue("title")}</div>;
         },
@@ -80,17 +58,23 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
       {
         id: "issuer",
         accessorKey: "issuer",
-        header: "Issuer",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Issuer" />
+        ),
       },
       {
         id: "year",
         accessorKey: "year",
-        header: "Year",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Year" />
+        ),
       },
       {
         id: "value",
         accessorKey: "value",
-        header: "Value",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Value" />
+        ),
         cell: ({ row }) => {
           const value = row.getValue("value") as number;
           const unit = row.original.currency;
@@ -104,7 +88,9 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
       {
         id: "currency",
         accessorKey: "currency",
-        header: "Currency",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Currency" />
+        ),
       },
     ],
     []
