@@ -1,20 +1,16 @@
 use rusqlite::{Connection, Result as SqliteResult};
-use serde::{Deserialize, Serialize};
+use std::fs;
 use std::path::Path;
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct IssuerData {
-    pub name: String,
-    pub flag: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct IssuersJson {
-    pub count: i32,
-    pub issuers: Vec<IssuerData>,
-}
-
 pub fn init_database(db_path: &Path) -> SqliteResult<()> {
+    // Check if database already exists at the target location
+    if db_path.exists() {
+        println!("Database already exists at: {}", db_path.display());
+        return Ok(());
+    }
+
+    // Fallback: Create database from scratch with migrations and data seeding
+    println!("Creating fresh database with migrations and seeding...");
     let conn = Connection::open(db_path)?;
 
     // Enable foreign keys
@@ -116,40 +112,72 @@ fn is_issuers_table_empty(conn: &Connection) -> SqliteResult<bool> {
 }
 
 fn populate_issuers_from_json(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
-    // Load issuers.json from the data directory
-    let manifest_dir = env!("CARGO_MANIFEST_DIR");
-    let json_path = Path::new(manifest_dir)
-        .parent()
-        .ok_or("Could not get parent directory")?
-        .join("data/issuers.json");
+    #[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
+    struct IssuerData {
+        name: String,
+        flag: Option<String>,
+    }
 
-    println!("Loading issuers from: {}", json_path.display());
+    #[derive(Debug, serde::Serialize, serde::Deserialize)]
+    struct IssuersJson {
+        count: i32,
+        issuers: Vec<IssuerData>,
+    }
+
+    // Try multiple paths to locate issuers.json
+    let json_path = find_issuers_json()?;
 
     if !json_path.exists() {
         eprintln!("Warning: issuers.json not found at {}", json_path.display());
+        println!("Continuing with empty issuers table");
         return Ok(());
     }
 
-    // Read and parse JSON
-    let json_content = std::fs::read_to_string(&json_path)?;
+    println!("Loading issuers from: {}", json_path.display());
+
+    let json_content = fs::read_to_string(&json_path)?;
     let data: IssuersJson = serde_json::from_str(&json_content)?;
 
-    // Insert issuers into database
-    let mut stmt = conn.prepare(
-        "INSERT INTO issuers (name, flag) VALUES (?1, ?2)"
-    )?;
+    // Insert issuers
+    let mut stmt = conn.prepare("INSERT INTO issuers (name, flag) VALUES (?1, ?2)")?;
 
     let mut count = 0;
     for issuer in &data.issuers {
-        stmt.execute(rusqlite::params![
-            &issuer.name,
-            &issuer.flag
-        ])?;
+        stmt.execute(rusqlite::params![&issuer.name, &issuer.flag])?;
         count += 1;
     }
 
-    println!("Populated {} issuers from JSON", count);
+    println!("✓ Populated {} issuers from JSON", count);
 
     Ok(())
 }
 
+fn find_issuers_json() -> Result<std::path::PathBuf, Box<dyn std::error::Error>> {
+    // List of paths to check in order of preference
+    let possible_paths = vec![
+        // Development: current working directory (from project root)
+        std::env::current_dir()?.join("../resources/issuers.json"),
+        // Development: relative to executable in target/debug or target/release
+        std::env::current_exe()?
+            .parent()
+            .ok_or("Could not get executable directory")?
+            .join("../../resources/issuers.json"),
+        // macOS app bundle: Contents/Resources/issuers.json
+        std::env::current_exe()?
+            .parent()
+            .and_then(|p| p.parent())
+            .and_then(|p| p.parent())
+            .ok_or("Could not traverse to app bundle")?
+            .join("Resources/issuers.json"),
+    ];
+
+    // Return the first path that exists, or the first one tried if none exist
+    for path in possible_paths.iter() {
+        if path.exists() {
+            return Ok(path.clone());
+        }
+    }
+
+    // Return the first path anyway (for error messaging)
+    Ok(possible_paths.into_iter().next().unwrap())
+}
