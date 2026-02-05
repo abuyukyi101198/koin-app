@@ -56,14 +56,33 @@ fn get_db_connection(app_handle: &tauri::AppHandle) -> Result<rusqlite::Connecti
     rusqlite::Connection::open(db_path).map_err(|e| format!("Failed to open database: {}", e))
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PaginatedCoinsResponse {
+    pub data: Vec<Coin>,
+    pub total: i64,
+}
+
 #[tauri::command]
-fn get_coins(app_handle: tauri::AppHandle) -> Result<Vec<Coin>, String> {
+fn list_coins(
+    app_handle: tauri::AppHandle,
+    offset: Option<i64>,
+    limit: Option<i64>,
+) -> Result<PaginatedCoinsResponse, String> {
     let conn = get_db_connection(&app_handle)?;
+    let offset = offset.unwrap_or(0);
+    let limit = limit.unwrap_or(10);
+
+    // Get total count
+    let total: i64 = conn
+        .query_row("SELECT COUNT(*) FROM coins", [], |row| row.get(0))
+        .map_err(|e| format!("Failed to count coins: {}", e))?;
+
+    // Get paginated coins
     let mut stmt = conn.prepare(
-        "SELECT id, title, value, currency, year, issuer, obverse_image, reverse_image, quantity, sale_value, notes, created_at FROM coins ORDER BY year DESC, issuer ASC"
+        "SELECT id, title, value, currency, year, issuer, obverse_image, reverse_image, quantity, sale_value, notes, created_at FROM coins ORDER BY year DESC, issuer ASC LIMIT ?1 OFFSET ?2"
     ).map_err(|e| format!("Failed to prepare statement: {}", e))?;
     let coins = stmt
-        .query_map([], |row| {
+        .query_map([limit, offset], |row| {
             Ok(Coin {
                 id: row.get(0)?,
                 title: row.get(1)?,
@@ -80,9 +99,11 @@ fn get_coins(app_handle: tauri::AppHandle) -> Result<Vec<Coin>, String> {
             })
         })
         .map_err(|e| format!("Failed to query coins: {}", e))?;
-    coins
+    let data = coins
         .collect::<Result<Vec<_>, _>>()
-        .map_err(|e| format!("Failed to collect coins: {}", e))
+        .map_err(|e| format!("Failed to collect coins: {}", e))?;
+
+    Ok(PaginatedCoinsResponse { data, total })
 }
 
 #[tauri::command]
@@ -218,7 +239,7 @@ pub fn run() {
         .plugin(tauri_plugin_sql::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
-            get_coins,
+            list_coins,
             get_coin,
             create_coin,
             update_coin,
