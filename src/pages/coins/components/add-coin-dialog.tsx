@@ -113,7 +113,7 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
             </Field>
           </FieldGroup>
 
-          <FieldGroup className="flex-row gap-4">
+          <FieldGroup className="flex-row gap-6">
             <Field orientation="vertical" className="flex-1">
               <FieldLabel>Reverse Image</FieldLabel>
               <FieldContent>
@@ -121,7 +121,6 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
                   label="Reverse image"
                   value={reverseImage}
                   onChange={setReverseImage}
-                  size={150}
                 />
               </FieldContent>
             </Field>
@@ -132,7 +131,6 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
                   label="Obverse image"
                   value={obverseImage}
                   onChange={setObverseImage}
-                  size={150}
                 />
               </FieldContent>
             </Field>

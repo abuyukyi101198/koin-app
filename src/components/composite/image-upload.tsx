@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, ChangeEvent } from "react";
+import { useState, useRef, ChangeEvent, HTMLAttributes } from "react";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -19,36 +19,30 @@ import { Input } from "@/components/ui/input.tsx";
 import { cn } from "@/lib/utils.ts";
 import { Upload, Link as LinkIcon, XIcon } from "lucide-react";
 
-interface ImageUploadFieldProps {
+interface ImageUploadFieldProps extends Omit<
+  HTMLAttributes<HTMLDivElement>,
+  "onChange"
+> {
   label?: string;
   value?: string;
   onChange?: (imageUrl: string) => void;
-  size?: number;
-  className?: string;
 }
 
 export function ImageUploadField({
   label,
   value,
   onChange,
-  size = 256,
   className,
+  ...props
 }: ImageUploadFieldProps) {
-  const [imageUrl, setImageUrl] = useState<string | undefined>(value);
   const [showUrlDialog, setShowUrlDialog] = useState(false);
   const [urlInput, setUrlInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [urlError, setUrlError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleImageChange = useCallback(
-    (url: string) => {
-      setImageUrl(url);
-      onChange?.(url);
-      setError(null);
-    },
-    [onChange]
-  );
+  // Max file size: 10MB
+  const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
   const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -56,7 +50,15 @@ export function ImageUploadField({
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      setError("Please select a valid image file");
+      setUploadError("Please select a valid image file.");
+      e.target.value = "";
+      return;
+    }
+
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      setUploadError("File is too large (max 10MB).");
+      e.target.value = "";
       return;
     }
 
@@ -64,68 +66,72 @@ export function ImageUploadField({
     const reader = new FileReader();
     reader.onload = (event) => {
       const result = event.target?.result as string;
-      handleImageChange(result);
+      onChange?.(result);
+      setUploadError(null);
+      setUrlError(null);
+      e.target.value = "";
     };
     reader.onerror = () => {
-      setError("Failed to read file");
+      setUploadError("Failed to read file.");
+      e.target.value = "";
     };
     reader.readAsDataURL(file);
   };
 
   const handleUrlSubmit = async () => {
     if (!urlInput.trim()) {
-      setError("Please enter a URL");
+      setUrlError("Please enter a URL.");
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
+    setUrlError(null);
 
     try {
-      // Validate URL by attempting to load it
-      const img = new Image();
-      img.onload = () => {
-        handleImageChange(urlInput);
-        setUrlInput("");
-        setShowUrlDialog(false);
-        setIsLoading(false);
-      };
-      img.onerror = () => {
-        setError("Failed to load image from URL");
-        setIsLoading(false);
-      };
-      img.src = urlInput;
+      // Validate URL syntax
+      new URL(urlInput);
+
+      // Lightweight HEAD request to verify content type
+      try {
+        const response = await fetch(urlInput, { method: "HEAD" });
+        const contentType = response.headers.get("content-type");
+        if (contentType && !contentType.startsWith("image/")) {
+          setUrlError("URL does not point to a valid image.");
+          return;
+        }
+      } catch {
+        // HEAD request failed, but that's okay - accept URL optimistically
+        // Broken images will fail gracefully in the <img> tag
+      }
+
+      // Accept URL optimistically
+      onChange?.(urlInput);
+      setUploadError(null);
+      setUrlError(null);
+      setUrlInput("");
+      setShowUrlDialog(false);
     } catch (err) {
-      setError("Invalid URL");
-      setIsLoading(false);
+      setUrlError("Invalid URL.");
     }
   };
 
-  const handleRemoveImage = () => {
-    setImageUrl(undefined);
-    onChange?.("");
-    setError(null);
-  };
-
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
+    <div className={cn("flex flex-col gap-2", className)} {...props}>
       <ContextMenu>
         <ContextMenuTrigger asChild>
           <div
             className={cn(
               "relative rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/50 transition-colors hover:bg-muted",
-              imageUrl && "border-solid border-border bg-transparent",
-              error && "border-destructive/50 bg-destructive/5"
+              value && "border-solid border-border bg-transparent",
+              uploadError && "border-destructive/50 bg-destructive/5"
             )}
             style={{
-              width: size,
-              height: size,
+              aspectRatio: 1,
               cursor: "context-menu",
             }}
           >
-            {imageUrl ? (
+            {value ? (
               <img
-                src={imageUrl}
+                src={value}
                 alt={label || "Uploaded image"}
                 className="h-full w-full rounded-[6px] object-contain"
               />
@@ -138,10 +144,12 @@ export function ImageUploadField({
             )}
           </div>
         </ContextMenuTrigger>
-
         <ContextMenuContent>
           <ContextMenuItem
-            onClick={() => setShowUrlDialog(true)}
+            onClick={() => {
+              setShowUrlDialog(true);
+              setUrlError(null);
+            }}
             className="flex gap-2"
           >
             <LinkIcon className="h-4 w-4" />
@@ -154,11 +162,15 @@ export function ImageUploadField({
             <Upload className="h-4 w-4" />
             Upload image
           </ContextMenuItem>
-          {imageUrl && (
+          {value && (
             <>
               <div className="my-1" data-slot="separator" />
               <ContextMenuItem
-                onClick={handleRemoveImage}
+                onClick={() => {
+                  onChange?.("");
+                  setUploadError(null);
+                  setUrlError(null);
+                }}
                 className="text-destructive focus:text-destructive"
               >
                 <XIcon className="h-4 w-4 text-destructive focus:text-destructive" />
@@ -168,8 +180,6 @@ export function ImageUploadField({
           )}
         </ContextMenuContent>
       </ContextMenu>
-
-      {/* Hidden file input */}
       <input
         ref={fileInputRef}
         type="file"
@@ -178,9 +188,15 @@ export function ImageUploadField({
         className="hidden"
         alt={label || "Upload image"}
       />
-
-      {/* URL Input Dialog */}
-      <Dialog open={showUrlDialog} onOpenChange={setShowUrlDialog}>
+      <Dialog
+        open={showUrlDialog}
+        onOpenChange={(open) => {
+          setShowUrlDialog(open);
+          if (!open) {
+            setUrlError(null);
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>Embed Image URL</DialogTitle>
@@ -194,29 +210,25 @@ export function ImageUploadField({
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
               onKeyDown={async (e) => {
-                if (e.key === "Enter" && !isLoading) {
+                if (e.key === "Enter") {
                   await handleUrlSubmit();
                 }
               }}
-              disabled={isLoading}
             />
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {urlError && (
+              <p className="text-sm text-destructive italic">{urlError}</p>
+            )}
           </div>
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline" disabled={isLoading}>
-                Cancel
-              </Button>
+              <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button onClick={handleUrlSubmit} disabled={isLoading}>
-              {isLoading ? "Loading..." : "Embed"}
-            </Button>
+            <Button onClick={handleUrlSubmit}>Embed</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {error && !showUrlDialog && (
-        <p className="text-sm text-destructive">{error}</p>
+      {uploadError && !showUrlDialog && (
+        <p className="text-xs text-destructive">{uploadError}</p>
       )}
     </div>
   );
