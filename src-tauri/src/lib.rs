@@ -1,75 +1,9 @@
 mod commands;
 mod db;
+mod types;
 use crate::commands::coins::{create_coin, delete_coin, get_coin, list_coins, update_coin};
 use crate::commands::issuers::list_issuers;
-use serde::{Deserialize, Serialize};
 use tauri::Manager;
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Issuer {
-    pub id: i32,
-    pub name: String,
-    pub flag: Option<String>,
-    pub created_at: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Coin {
-    pub id: i32,
-    pub title: String,
-    pub value: f64,
-    pub currency: String,
-    pub year: i32,
-    pub issuer: Issuer,
-    pub obverse_image: Option<String>,
-    pub reverse_image: Option<String>,
-    pub quantity: i32,
-    pub sale_value: Option<f64>,
-    pub notes: Option<String>,
-    pub created_at: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(untagged)]
-pub enum IssuerInput {
-    ById { id: i32 },
-    ByName { name: String },
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct CreateCoinRequest {
-    pub title: String,
-    pub value: f64,
-    pub currency: String,
-    pub year: i32,
-    pub issuer: IssuerInput,
-    pub obverse_image: Option<String>,
-    pub reverse_image: Option<String>,
-    pub quantity: Option<i32>,
-    pub sale_value: Option<f64>,
-    pub notes: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct UpdateCoinRequest {
-    pub id: i32,
-    pub title: Option<String>,
-    pub value: Option<f64>,
-    pub currency: Option<String>,
-    pub year: Option<i32>,
-    pub issuer: Option<IssuerInput>,
-    pub obverse_image: Option<String>,
-    pub reverse_image: Option<String>,
-    pub quantity: Option<i32>,
-    pub sale_value: Option<f64>,
-    pub notes: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct PaginatedCoinsResponse {
-    pub data: Vec<Coin>,
-    pub total: i64,
-}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
