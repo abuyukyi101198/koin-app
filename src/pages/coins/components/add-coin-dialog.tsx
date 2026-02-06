@@ -18,7 +18,9 @@ import {
 } from "@/components/ui/field.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { ImageUploadField } from "@/components/composite/image-upload.tsx";
-import { useCreateCoin, type CreateCoinOptions } from "@/commands/coins.ts";
+import { useCreateCoin } from "@/query/commands/coins.ts";
+import { CreateCoinRequest, Issuer } from "@/query/types";
+import { IssuerField } from "@/pages/coins/components/issuer-field.tsx";
 
 interface AddCoinDialogForm {
   onSuccess: () => void | Promise<void>;
@@ -31,7 +33,7 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
   const [value, setValue] = useState<string>("");
   const [currency, setCurrency] = useState<string>("");
   const [year, setYear] = useState<string>("");
-  const [issuer, setIssuer] = useState<string>("");
+  const [issuer, setIssuer] = useState<Issuer | null>(null);
   const [quantity, setQuantity] = useState<string>("1");
   const [saleValue, setSaleValue] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
@@ -43,23 +45,17 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
     e.preventDefault();
 
     // Validation
-    if (
-      !title.trim() ||
-      !value ||
-      !currency.trim() ||
-      !year ||
-      !issuer.trim()
-    ) {
+    if (!title.trim() || !value || !currency.trim() || !year || !issuer) {
       alert("Please fill in all required fields");
       return;
     }
 
-    const coinData: CreateCoinOptions = {
+    const coinData: CreateCoinRequest = {
       title: title.trim(),
       value: parseFloat(value),
       currency: currency.trim(),
       year: parseInt(year),
-      issuer: issuer.trim(),
+      issuer_id: issuer?.id,
       obverse_image: obverseImage || undefined,
       reverse_image: reverseImage || undefined,
       quantity: quantity ? parseInt(quantity) : 1,
@@ -75,7 +71,7 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
       setValue("");
       setCurrency("");
       setYear("");
-      setIssuer("");
+      setIssuer(null);
       setQuantity("1");
       setSaleValue("");
       setNotes("");
@@ -90,7 +86,7 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen} modal={false}>
       <DialogTrigger asChild>
         <Button variant="outline">Add Coin</Button>
       </DialogTrigger>
@@ -188,13 +184,7 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
             <Field orientation="vertical" className="flex-1">
               <FieldLabel htmlFor="issuer">Issuer *</FieldLabel>
               <FieldContent>
-                <Input
-                  id="issuer"
-                  placeholder="Country or mint"
-                  value={issuer}
-                  onChange={(e) => setIssuer(e.target.value)}
-                  required
-                />
+                <IssuerField value={issuer} setValue={setIssuer} required />
               </FieldContent>
             </Field>
           </FieldGroup>
