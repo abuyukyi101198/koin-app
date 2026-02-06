@@ -1,5 +1,5 @@
 {
-  "count": 236,
+  "count": 237,
   "issuers": [
     {
       "name": "Abkhazia",
@@ -790,6 +790,10 @@
       "flag": "https://commons.wikimedia.org/w/thumb.php?f=Flag%20of%20South%20Sudan.svg&w=64"
     },
     {
+      "name": "Soviet Union",
+      "flag": "https://commons.wikimedia.org/w/thumb.php?f=Flag%20of%20the%20Soviet%20Union.svg&w=64"
+    },
+    {
       "name": "Spain",
       "flag": "https://commons.wikimedia.org/w/thumb.php?f=Flag%20of%20Spain.svg&w=64"
     },
@@ -891,7 +895,7 @@
     },
     {
       "name": "United States",
-      "flag": "https://commons.wikimedia.org/w/thumb.php?f=Flag%20of%20the%20United%20States%20%281776%E2%80%931777%29.svg&w=64"
+      "flag": "https://commons.wikimedia.org/w/thumb.php?f=Flag%20of%20the%20United%20States%20(DDD-F-416E%20specifications).svg&w=64"
     },
     {
       "name": "Uruguay",
