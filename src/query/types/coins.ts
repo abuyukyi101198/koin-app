@@ -33,7 +33,6 @@ export interface ListCoinsResponse extends TauriHookResult<Coin[]> {
   page: number;
   pageSize: number;
   totalPages: number;
-  totalCoins: number;
   setPage: (page: number) => Promise<void>;
   setPageSize: (size: number) => Promise<void>;
 }
@@ -41,7 +40,7 @@ export interface ListCoinsResponse extends TauriHookResult<Coin[]> {
 export interface GetCoinRequest {
   id: number;
 }
-export interface GetCoinResponse extends TauriHookResult<Coin> {}
+export interface GetCoinResponse extends Omit<TauriHookResult<Coin>, "total"> {}
 
 export interface CreateCoinRequest {
   title: string;

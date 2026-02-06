@@ -1,5 +1,6 @@
 export interface TauriHookResult<TData> {
   data: TData | undefined;
+  total: number;
   loading: boolean;
   error: Error | null;
   refetch: () => Promise<void>;

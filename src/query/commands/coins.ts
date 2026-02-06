@@ -17,11 +17,11 @@ import {
 
 export function useListCoins(options?: ListCoinsRequest): ListCoinsResponse {
   const [coins, setCoins] = useState<Coin[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [page, setPageState] = useState(0);
   const [pageSize, setPageSizeState] = useState(10);
-  const [totalCoins, setTotalCoins] = useState(0);
 
   const listCoins = async (
     offset: number = page * pageSize,
@@ -40,7 +40,7 @@ export function useListCoins(options?: ListCoinsRequest): ListCoinsResponse {
           listOptions?.sortDirection || options?.sortDirection || "desc",
       });
       setCoins(result.data);
-      setTotalCoins(result.total);
+      setTotal(result.total);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
       setError(error);
@@ -65,17 +65,17 @@ export function useListCoins(options?: ListCoinsRequest): ListCoinsResponse {
     void listCoins(0, pageSize, options);
   }, [options?.search, options?.sortField, options?.sortDirection]);
 
-  const totalPages = Math.ceil(totalCoins / pageSize);
+  const totalPages = Math.ceil(total / pageSize);
 
   return {
     data: coins,
+    total,
     loading,
     error,
     refetch: () => listCoins(page * pageSize, pageSize, options),
     page,
     pageSize,
     totalPages,
-    totalCoins,
     setPage,
     setPageSize,
   };

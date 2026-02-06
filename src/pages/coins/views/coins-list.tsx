@@ -1,11 +1,12 @@
 import { DataTable } from "@/components/composite/data-table.tsx";
-import { useListCoins, type ListCoinsOptions } from "@/commands/coins.ts";
+import { useListCoins } from "@/query/commands/coins.ts";
 import { useCoinsTableColumns } from "@/pages/coins/hooks/use-coins-table-columns.tsx";
 import { AddCoinDialog } from "@/pages/coins/components/add-coin-dialog.tsx";
 import { useState } from "react";
 import { SortingState } from "@tanstack/react-table";
 import { useDebounce } from "@/hooks/use-debounce.ts";
 import { EmptyCoins } from "@/pages/coins/components/empty-coins.tsx";
+import { ListCoinsRequest } from "@/query/types";
 
 export function CoinsList() {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -15,7 +16,7 @@ export function CoinsList() {
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // Build search/sort options for the hook
-  const listCoinsOptions: ListCoinsOptions = {
+  const listCoinsOptions: ListCoinsRequest = {
     search: debouncedSearchQuery || undefined,
     sortField: sorting.length > 0 ? sorting[0].id : "year",
     sortDirection: sorting.length > 0 && !sorting[0].desc ? "asc" : "desc",

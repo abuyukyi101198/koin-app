@@ -3,6 +3,7 @@ import { TauriHookResult } from "@/query/types/index.ts";
 export interface Issuer {
   id: number;
   name: string;
+  flag: string;
   created_at: string;
 }
 
@@ -11,11 +12,7 @@ export interface PaginatedIssuers {
   total: number;
 }
 
-export interface ListIssuersRequest {
-  search?: string;
-}
-export interface ListIssuersResponse extends TauriHookResult<Issuer[]> {
-  pageSize: number;
-  totalIssuers: number;
-  setPageSize: (size: number) => Promise<void>;
-}
+export interface ListIssuersResponse extends Omit<
+  TauriHookResult<Issuer[]>,
+  "refetch"
+> {}

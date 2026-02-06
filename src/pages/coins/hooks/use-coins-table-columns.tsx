@@ -1,7 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Coin } from "@/commands/coins.ts";
 import { useMemo } from "react";
-import { DataTableColumnHeader } from "../../../components/composite/data-table-column-header.tsx";
+import { DataTableColumnHeader } from "@/components/composite/data-table-column-header.tsx";
+import { Coin } from "@/query/types";
 
 export function useCoinsTableColumns(): ColumnDef<Coin>[] {
   return useMemo(
