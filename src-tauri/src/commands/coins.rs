@@ -1,39 +1,8 @@
 use crate::commands::utils::get_db_connection;
-use crate::{
-    Coin, CreateCoinRequest, IssuerInput, PaginatedCoinsResponse, UpdateCoinRequest,
-};
-use rusqlite::Connection;
-
-
-fn get_or_create_issuer(conn: &Connection, input: &IssuerInput) -> Result<i32, String> {
-    match input {
-        IssuerInput::ById { id } => Ok(*id),
-        IssuerInput::ByName { name } => {
-            let trimmed_name = name.trim();
-
-            // Try to find existing issuer
-            let mut stmt = conn
-                .prepare("SELECT id FROM issuers WHERE name = ?1")
-                .map_err(|e| format!("Failed to prepare statement: {}", e))?;
-
-            if let Ok(id) = stmt.query_row([trimmed_name], |row| row.get::<_, i32>(0)) {
-                return Ok(id);
-            }
-
-            // Create new issuer
-            conn.execute(
-                "INSERT INTO issuers (name) VALUES (?1)",
-                rusqlite::params![trimmed_name],
-            )
-            .map_err(|e| format!("Failed to insert issuer: {}", e))?;
-
-            Ok(conn.last_insert_rowid() as i32)
-        }
-    }
-}
+use crate::types::coins::{Coin, CreateCoinRequest, PaginatedCoinsResponse, UpdateCoinRequest};
 
 fn build_coin_from_row(row: &rusqlite::Row) -> Result<Coin, rusqlite::Error> {
-    use crate::Issuer;
+    use crate::types::issuers::Issuer;
 
     Ok(Coin {
         id: row.get(0)?,
@@ -161,9 +130,6 @@ pub fn get_coin(app_handle: tauri::AppHandle, id: i32) -> Result<Coin, String> {
 pub fn create_coin(app_handle: tauri::AppHandle, coin: CreateCoinRequest) -> Result<Coin, String> {
     let conn = get_db_connection(&app_handle)?;
 
-    // Get or create issuer
-    let issuer_id = get_or_create_issuer(&conn, &coin.issuer)?;
-
     const INSERT_QUERY: &str = "INSERT INTO coins (title, value, currency, year, issuer_id, obverse_image, reverse_image, quantity, sale_value, notes)
          VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)";
 
@@ -174,7 +140,7 @@ pub fn create_coin(app_handle: tauri::AppHandle, coin: CreateCoinRequest) -> Res
             coin.value,
             coin.currency,
             coin.year,
-            issuer_id,
+            coin.issuer_id,
             coin.obverse_image,
             coin.reverse_image,
             coin.quantity.unwrap_or(1),
@@ -217,8 +183,7 @@ pub fn update_coin(
         updates.push("year = ?");
         params.push(Box::new(year));
     }
-    if let Some(issuer) = &request.issuer {
-        let issuer_id = get_or_create_issuer(&conn, issuer)?;
+    if let Some(issuer_id) = request.issuer_id {
         updates.push("issuer_id = ?");
         params.push(Box::new(issuer_id));
     }
