@@ -1,7 +1,7 @@
 mod commands;
 mod db;
 use crate::commands::coins::{create_coin, delete_coin, get_coin, list_coins, update_coin};
-use crate::commands::issuers::{create_issuer, list_issuers};
+use crate::commands::issuers::list_issuers;
 use serde::{Deserialize, Serialize};
 use tauri::Manager;
 
@@ -82,8 +82,7 @@ pub fn run() {
             create_coin,
             update_coin,
             delete_coin,
-            list_issuers,
-            create_issuer
+            list_issuers
         ])
         .setup(|app| {
             // Initialize database on app startup
