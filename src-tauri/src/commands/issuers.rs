@@ -133,7 +133,7 @@ pub fn list_issuers(
 
             // Fetch predecessors: if search is active, only fetch matching predecessors
             // Otherwise, fetch all predecessors
-            let pred_query = if let Some(ref pattern) = &search_pattern {
+            let pred_query = if let Some(_pattern) = &search_pattern {
                 "SELECT id, name, continent, start_year, end_year, flag, created_at
                  FROM issuers
                  WHERE parent_id = ?1 AND name LIKE ?2

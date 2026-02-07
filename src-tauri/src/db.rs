@@ -49,7 +49,7 @@ fn run_migrations(conn: &Connection) -> SqliteResult<()> {
                 continent TEXT,
                 start_year INTEGER,
                 end_year INTEGER,
-                flag TEXT,
+                flag TEXT NOT NULL,
                 parent_id INTEGER,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (parent_id) REFERENCES issuers(id) ON DELETE CASCADE
@@ -126,7 +126,7 @@ fn populate_issuers_from_json(conn: &Connection) -> Result<(), Box<dyn std::erro
         continent: Option<String>,
         start_year: Option<i32>,
         end_year: Option<i32>,
-        flag: Option<String>,
+        flag: String,
     }
 
     // Root issuer struct: can have predecessors, but they cannot have their own predecessors
@@ -136,7 +136,7 @@ fn populate_issuers_from_json(conn: &Connection) -> Result<(), Box<dyn std::erro
         continent: Option<String>,
         start_year: Option<i32>,
         end_year: Option<i32>,
-        flag: Option<String>,
+        flag: String,
         #[serde(default)]
         predecessors: Vec<PredecessorIssuer>,
     }
@@ -162,7 +162,7 @@ fn populate_issuers_from_json(conn: &Connection) -> Result<(), Box<dyn std::erro
         name: &str,
         start_year: Option<i32>,
         end_year: Option<i32>,
-        flag: Option<&str>,
+        flag: &str,
     ) -> Result<bool, rusqlite::Error> {
         let mut stmt = conn.prepare(
             "SELECT COUNT(*) FROM issuers WHERE name = ?1 AND start_year IS ?2 AND end_year IS ?3 AND flag IS ?4"
@@ -185,7 +185,7 @@ fn populate_issuers_from_json(conn: &Connection) -> Result<(), Box<dyn std::erro
             &issuer.name,
             issuer.start_year,
             issuer.end_year,
-            issuer.flag.as_deref(),
+            &issuer.flag,
         )? {
             // Insert the modern issuer first (parent_id = NULL for base-level issuers)
             conn.execute(
@@ -212,7 +212,7 @@ fn populate_issuers_from_json(conn: &Connection) -> Result<(), Box<dyn std::erro
                     &predecessor.name,
                     predecessor.start_year,
                     predecessor.end_year,
-                    predecessor.flag.as_deref(),
+                    &predecessor.flag,
                 )? {
                     conn.execute(
                         "INSERT INTO issuers (name, continent, start_year, end_year, flag, parent_id) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",

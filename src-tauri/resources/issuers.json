@@ -3584,7 +3584,7 @@
     "continent": null,
     "start_year": null,
     "end_year": null,
-    "flag": null,
+    "flag": "",
     "predecessors": []
   }
 ]
