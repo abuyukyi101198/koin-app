@@ -1,5 +1,5 @@
+use crate::types::issuers::IssuerDisplay;
 use serde::{Deserialize, Serialize};
-use crate::types::issuers::Issuer;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Coin {
@@ -8,7 +8,7 @@ pub struct Coin {
     pub value: f64,
     pub currency: String,
     pub year: i32,
-    pub issuer: Issuer,
+    pub issuer: IssuerDisplay,
     pub obverse_image: Option<String>,
     pub reverse_image: Option<String>,
     pub quantity: i32,

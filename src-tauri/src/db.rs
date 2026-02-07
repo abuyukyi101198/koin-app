@@ -164,10 +164,10 @@ fn populate_issuers_from_json(conn: &Connection) -> Result<(), Box<dyn std::erro
         let mut stmt = conn.prepare(
             "SELECT COUNT(*) FROM issuers WHERE name = ?1 AND start_year IS ?2 AND end_year IS ?3 AND flag IS ?4"
         )?;
-        let count: i64 = stmt.query_row(
-            rusqlite::params![name, start_year, end_year, flag],
-            |row| row.get(0),
-        )?;
+        let count: i64 = stmt
+            .query_row(rusqlite::params![name, start_year, end_year, flag], |row| {
+                row.get(0)
+            })?;
         Ok(count > 0)
     }
 
@@ -181,7 +181,13 @@ fn populate_issuers_from_json(conn: &Connection) -> Result<(), Box<dyn std::erro
 
     for issuer in &data {
         // Check if modern issuer already exists by composite key
-        if !issuer_exists(conn, &issuer.name, issuer.start_year, issuer.end_year, issuer.flag.as_deref())? {
+        if !issuer_exists(
+            conn,
+            &issuer.name,
+            issuer.start_year,
+            issuer.end_year,
+            issuer.flag.as_deref(),
+        )? {
             // Insert the modern issuer first
             stmt.execute(rusqlite::params![
                 &issuer.name,
@@ -200,7 +206,13 @@ fn populate_issuers_from_json(conn: &Connection) -> Result<(), Box<dyn std::erro
         // No deduplication occurs across modern/predecessor boundaries
         for predecessor in &issuer.predecessors {
             // Check if predecessor already exists by composite key
-            if !issuer_exists(conn, &predecessor.name, predecessor.start_year, predecessor.end_year, predecessor.flag.as_deref())? {
+            if !issuer_exists(
+                conn,
+                &predecessor.name,
+                predecessor.start_year,
+                predecessor.end_year,
+                predecessor.flag.as_deref(),
+            )? {
                 stmt.execute(rusqlite::params![
                     &predecessor.name,
                     &predecessor.continent,
@@ -215,7 +227,10 @@ fn populate_issuers_from_json(conn: &Connection) -> Result<(), Box<dyn std::erro
         }
     }
 
-    println!("✓ Populated {} issuers from JSON (skipped {} duplicates)", count, skipped);
+    println!(
+        "✓ Populated {} issuers from JSON (skipped {} duplicates)",
+        count, skipped
+    );
 
     Ok(())
 }

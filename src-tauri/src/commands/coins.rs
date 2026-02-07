@@ -2,7 +2,7 @@ use crate::commands::utils::get_db_connection;
 use crate::types::coins::{Coin, CreateCoinRequest, PaginatedCoinsResponse, UpdateCoinRequest};
 
 fn build_coin_from_row(row: &rusqlite::Row) -> Result<Coin, rusqlite::Error> {
-    use crate::types::issuers::Issuer;
+    use crate::types::issuers::IssuerDisplay;
 
     Ok(Coin {
         id: row.get(0)?,
@@ -10,18 +10,17 @@ fn build_coin_from_row(row: &rusqlite::Row) -> Result<Coin, rusqlite::Error> {
         value: row.get(2)?,
         currency: row.get(3)?,
         year: row.get(4)?,
-        issuer: Issuer {
+        issuer: IssuerDisplay {
             id: row.get(5)?,
             name: row.get(6)?,
             flag: row.get(7)?,
-            created_at: row.get(8)?,
         },
-        obverse_image: row.get(9)?,
-        reverse_image: row.get(10)?,
-        quantity: row.get(11)?,
-        sale_value: row.get(12)?,
-        notes: row.get(13)?,
-        created_at: row.get(14)?,
+        obverse_image: row.get(8)?,
+        reverse_image: row.get(9)?,
+        quantity: row.get(10)?,
+        sale_value: row.get(11)?,
+        notes: row.get(12)?,
+        created_at: row.get(13)?,
     })
 }
 
@@ -89,7 +88,7 @@ pub fn list_coins(
 
     // Get paginated coins
     let query = format!(
-        "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.flag, i.created_at, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at
+        "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.flag, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at
          FROM coins c
          LEFT JOIN issuers i ON c.issuer_id = i.id
          {} ORDER BY c.{} {} LIMIT ?1 OFFSET ?2",
