@@ -50,11 +50,14 @@ fn run_migrations(conn: &Connection) -> SqliteResult<()> {
                 start_year INTEGER,
                 end_year INTEGER,
                 flag TEXT,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                parent_id INTEGER,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (parent_id) REFERENCES issuers(id) ON DELETE CASCADE
             );
 
             CREATE INDEX idx_issuers_name ON issuers(name);
             CREATE INDEX idx_issuers_temporal ON issuers(name, start_year, end_year, flag);
+            CREATE INDEX idx_issuers_parent_id ON issuers(parent_id);
         "#,
     )?;
 
@@ -172,10 +175,6 @@ fn populate_issuers_from_json(conn: &Connection) -> Result<(), Box<dyn std::erro
     }
 
     // Insert issuers and their predecessors (one level only)
-    let mut stmt = conn.prepare(
-        "INSERT INTO issuers (name, continent, start_year, end_year, flag) VALUES (?1, ?2, ?3, ?4, ?5)"
-    )?;
-
     let mut count = 0;
     let mut skipped = 0;
 
@@ -188,42 +187,52 @@ fn populate_issuers_from_json(conn: &Connection) -> Result<(), Box<dyn std::erro
             issuer.end_year,
             issuer.flag.as_deref(),
         )? {
-            // Insert the modern issuer first
-            stmt.execute(rusqlite::params![
-                &issuer.name,
-                &issuer.continent,
-                &issuer.start_year,
-                &issuer.end_year,
-                &issuer.flag
-            ])?;
+            // Insert the modern issuer first (parent_id = NULL for base-level issuers)
+            conn.execute(
+                "INSERT INTO issuers (name, continent, start_year, end_year, flag, parent_id) VALUES (?1, ?2, ?3, ?4, ?5, NULL)",
+                rusqlite::params![
+                    &issuer.name,
+                    &issuer.continent,
+                    &issuer.start_year,
+                    &issuer.end_year,
+                    &issuer.flag
+                ],
+            )
+            .map_err(|e| format!("Failed to insert issuer: {}", e))?;
+
+            let parent_id = conn.last_insert_rowid();
             count += 1;
+
+            // Then iterate predecessors in order (recent → old)
+            // Predecessors are linked to the modern issuer via parent_id
+            for predecessor in &issuer.predecessors {
+                // Check if predecessor already exists by composite key
+                if !issuer_exists(
+                    conn,
+                    &predecessor.name,
+                    predecessor.start_year,
+                    predecessor.end_year,
+                    predecessor.flag.as_deref(),
+                )? {
+                    conn.execute(
+                        "INSERT INTO issuers (name, continent, start_year, end_year, flag, parent_id) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                        rusqlite::params![
+                            &predecessor.name,
+                            &predecessor.continent,
+                            &predecessor.start_year,
+                            &predecessor.end_year,
+                            &predecessor.flag,
+                            parent_id
+                        ],
+                    )
+                    .map_err(|e| format!("Failed to insert predecessor: {}", e))?;
+                    count += 1;
+                } else {
+                    skipped += 1;
+                }
+            }
         } else {
             skipped += 1;
-        }
-
-        // Then iterate predecessors in order (recent → old)
-        // Insertion order is preserved: predecessors are listed chronologically (newest first)
-        // No deduplication occurs across modern/predecessor boundaries
-        for predecessor in &issuer.predecessors {
-            // Check if predecessor already exists by composite key
-            if !issuer_exists(
-                conn,
-                &predecessor.name,
-                predecessor.start_year,
-                predecessor.end_year,
-                predecessor.flag.as_deref(),
-            )? {
-                stmt.execute(rusqlite::params![
-                    &predecessor.name,
-                    &predecessor.continent,
-                    &predecessor.start_year,
-                    &predecessor.end_year,
-                    &predecessor.flag
-                ])?;
-                count += 1;
-            } else {
-                skipped += 1;
-            }
         }
     }
 
