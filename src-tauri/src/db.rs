@@ -45,12 +45,16 @@ fn run_migrations(conn: &Connection) -> SqliteResult<()> {
         r#"
             CREATE TABLE issuers (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL UNIQUE,
+                name TEXT NOT NULL,
+                continent TEXT,
+                start_year INTEGER,
+                end_year INTEGER,
                 flag TEXT,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
 
             CREATE INDEX idx_issuers_name ON issuers(name);
+            CREATE INDEX idx_issuers_temporal ON issuers(name, start_year, end_year, flag);
         "#,
     )?;
 
@@ -112,19 +116,29 @@ fn is_issuers_table_empty(conn: &Connection) -> SqliteResult<bool> {
 }
 
 fn populate_issuers_from_json(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
+    // Predecessor struct: no predecessors of its own (one-level-only nesting)
     #[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
-    struct IssuerData {
+    struct PredecessorIssuer {
         name: String,
+        continent: Option<String>,
+        start_year: Option<i32>,
+        end_year: Option<i32>,
         flag: Option<String>,
     }
 
-    #[derive(Debug, serde::Serialize, serde::Deserialize)]
-    struct IssuersJson {
-        count: i32,
-        issuers: Vec<IssuerData>,
+    // Root issuer struct: can have predecessors, but they cannot have their own predecessors
+    #[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
+    struct Issuer {
+        name: String,
+        continent: Option<String>,
+        start_year: Option<i32>,
+        end_year: Option<i32>,
+        flag: Option<String>,
+        #[serde(default)]
+        predecessors: Vec<PredecessorIssuer>,
     }
 
-    // Try multiple paths to locate issuers.json
+    // Load issuers as a top-level array (new format)
     let json_path = find_issuers_json()?;
 
     if !json_path.exists() {
@@ -136,18 +150,72 @@ fn populate_issuers_from_json(conn: &Connection) -> Result<(), Box<dyn std::erro
     println!("Loading issuers from: {}", json_path.display());
 
     let json_content = fs::read_to_string(&json_path)?;
-    let data: IssuersJson = serde_json::from_str(&json_content)?;
+    let data: Vec<Issuer> = serde_json::from_str(&json_content)?;
 
-    // Insert issuers
-    let mut stmt = conn.prepare("INSERT INTO issuers (name, flag) VALUES (?1, ?2)")?;
-
-    let mut count = 0;
-    for issuer in &data.issuers {
-        stmt.execute(rusqlite::params![&issuer.name, &issuer.flag])?;
-        count += 1;
+    // Helper function to check if an issuer already exists by composite key
+    // Conflict is based on (name, start_year, end_year, flag) equality
+    fn issuer_exists(
+        conn: &Connection,
+        name: &str,
+        start_year: Option<i32>,
+        end_year: Option<i32>,
+        flag: Option<&str>,
+    ) -> Result<bool, rusqlite::Error> {
+        let mut stmt = conn.prepare(
+            "SELECT COUNT(*) FROM issuers WHERE name = ?1 AND start_year IS ?2 AND end_year IS ?3 AND flag IS ?4"
+        )?;
+        let count: i64 = stmt.query_row(
+            rusqlite::params![name, start_year, end_year, flag],
+            |row| row.get(0),
+        )?;
+        Ok(count > 0)
     }
 
-    println!("✓ Populated {} issuers from JSON", count);
+    // Insert issuers and their predecessors (one level only)
+    let mut stmt = conn.prepare(
+        "INSERT INTO issuers (name, continent, start_year, end_year, flag) VALUES (?1, ?2, ?3, ?4, ?5)"
+    )?;
+
+    let mut count = 0;
+    let mut skipped = 0;
+
+    for issuer in &data {
+        // Check if modern issuer already exists by composite key
+        if !issuer_exists(conn, &issuer.name, issuer.start_year, issuer.end_year, issuer.flag.as_deref())? {
+            // Insert the modern issuer first
+            stmt.execute(rusqlite::params![
+                &issuer.name,
+                &issuer.continent,
+                &issuer.start_year,
+                &issuer.end_year,
+                &issuer.flag
+            ])?;
+            count += 1;
+        } else {
+            skipped += 1;
+        }
+
+        // Then iterate predecessors in order (recent → old)
+        // Insertion order is preserved: predecessors are listed chronologically (newest first)
+        // No deduplication occurs across modern/predecessor boundaries
+        for predecessor in &issuer.predecessors {
+            // Check if predecessor already exists by composite key
+            if !issuer_exists(conn, &predecessor.name, predecessor.start_year, predecessor.end_year, predecessor.flag.as_deref())? {
+                stmt.execute(rusqlite::params![
+                    &predecessor.name,
+                    &predecessor.continent,
+                    &predecessor.start_year,
+                    &predecessor.end_year,
+                    &predecessor.flag
+                ])?;
+                count += 1;
+            } else {
+                skipped += 1;
+            }
+        }
+    }
+
+    println!("✓ Populated {} issuers from JSON (skipped {} duplicates)", count, skipped);
 
     Ok(())
 }
