@@ -13,6 +13,7 @@ import { useListIssuers } from "@/query/commands";
 import { Dispatch, SetStateAction, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button.tsx";
 import { Issuer } from "@/query/types";
+import { SearchIcon } from "lucide-react";
 
 interface IssuerFieldProps {
   value: Issuer | null;
@@ -71,6 +72,7 @@ export function IssuerField({ value, setValue, required }: IssuerFieldProps) {
 
   return (
     <Combobox
+      aria-required={required}
       items={itemsWithSelectedValue}
       value={value}
       onValueChange={setValue}
@@ -88,10 +90,13 @@ export function IssuerField({ value, setValue, required }: IssuerFieldProps) {
                 item ? (
                   <IssuerItemContent issuer={item} />
                 ) : (
-                  <span className="text-muted-foreground">Select issuer</span>
+                  <span className="text-muted-foreground">
+                    Issuing authority or state
+                  </span>
                 )
               }
             </ComboboxValue>
+            <SearchIcon className="text-muted-foreground" />
           </Button>
         }
       />
