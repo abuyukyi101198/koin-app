@@ -7,7 +7,7 @@ pub struct Issuer {
     pub continent: Option<String>,
     pub start_year: Option<i32>,
     pub end_year: Option<i32>,
-    pub flag: Option<String>,
+    pub flag: String,
     #[serde(default)]
     pub predecessors: Option<Vec<Issuer>>,
     pub created_at: String,
