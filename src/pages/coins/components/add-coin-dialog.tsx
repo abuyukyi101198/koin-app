@@ -193,7 +193,7 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
             <FieldLegend className="pt-2.5">Description</FieldLegend>
             <FieldDescription>
               Additional description in case you want distinguish your coin from
-              others of its mintage such as features or even personal history.
+              others of its mintage such as condition or even personal history.
             </FieldDescription>
             <FieldGroup>
               <Field orientation="vertical" className="gap-1">
@@ -201,7 +201,7 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
                   <Input
                     aria-required
                     id="title"
-                    placeholder="Brief description, features, or context"
+                    placeholder="Condition, provenance, or personal remarks"
                     maxLength={100}
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
