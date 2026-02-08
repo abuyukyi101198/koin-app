@@ -5,7 +5,7 @@ export interface Issuer {
   start_year: number;
   end_year: number | null;
   flag: string;
-  predecessors?: Issuer[];
+  predecessors: Omit<Issuer, "predecessors">[];
   created_at: string;
 }
 

@@ -10,18 +10,22 @@ import {
   ComboboxValue,
 } from "@/components/ui/combobox.tsx";
 import { useListIssuers } from "@/query/commands";
-import { Dispatch, SetStateAction, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button.tsx";
 import { Issuer } from "@/query/types";
 import { SearchIcon } from "lucide-react";
 
 interface IssuerFieldProps {
   value: Issuer | null;
-  setValue: Dispatch<SetStateAction<Issuer | null>>;
+  onChange?: (value: Issuer | null) => void;
   required?: boolean | undefined;
 }
 
-const IssuerItemContent = ({ issuer }: { issuer: Issuer }) => (
+const IssuerItemContent = ({
+  issuer,
+}: {
+  issuer: Issuer | Omit<Issuer, "predecessors">;
+}) => (
   <div className="w-full flex justify-between">
     <div className="flex items-start gap-2">
       <span className="pt-0.5">
@@ -40,7 +44,7 @@ const IssuerItemContent = ({ issuer }: { issuer: Issuer }) => (
   </div>
 );
 
-export function IssuerField({ value, setValue, required }: IssuerFieldProps) {
+export function IssuerField({ value, onChange, required }: IssuerFieldProps) {
   const [search, setSearch] = useState<string | null>(null);
   const { data } = useListIssuers({ search });
 
@@ -48,7 +52,7 @@ export function IssuerField({ value, setValue, required }: IssuerFieldProps) {
   // Flatten issuers: include both base issuers and their predecessors
   // This allows all items to be properly selectable and managed in state
   const flattenedIssuers = useMemo(() => {
-    const flattened: Issuer[] = [];
+    const flattened: (Issuer | Omit<Issuer, "predecessors">)[] = [];
     issuers.forEach((baseIssuer) => {
       flattened.push(baseIssuer);
       if (baseIssuer.predecessors) {
@@ -75,7 +79,7 @@ export function IssuerField({ value, setValue, required }: IssuerFieldProps) {
       aria-required={required}
       items={itemsWithSelectedValue}
       value={value}
-      onValueChange={setValue}
+      onValueChange={onChange}
       onInputValueChange={(inputValue) => setSearch(inputValue)}
       required={required}
     >
