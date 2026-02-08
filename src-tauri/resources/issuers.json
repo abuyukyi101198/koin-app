@@ -359,7 +359,7 @@
     "flag": "https://upload.wikimedia.org/wikipedia/en/thumb/0/05/Flag_of_Brazil.svg/40px-Flag_of_Brazil.svg.png",
     "predecessors": [
       {
-        "name": "Federative Republic of Brazil (Military Dictatorship)",
+        "name": "Federative Republic of Brazil",
         "continent": "The Americas",
         "start_year": 1964,
         "end_year": 1985,
@@ -373,7 +373,7 @@
         "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Flag_of_Brazil_%281960%E2%80%931968%29.svg/40px-Flag_of_Brazil_%281960%E2%80%931968%29.svg.png"
       },
       {
-        "name": "United States of Brazil (Vargas Era)",
+        "name": "United States of Brazil",
         "continent": "The Americas",
         "start_year": 1930,
         "end_year": 1946,
@@ -697,14 +697,14 @@
         "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Flag_of_Zaire_%281971%E2%80%931997%29.svg/40px-Flag_of_Zaire_%281971%E2%80%931997%29.svg.png"
       },
       {
-        "name": "Democratic Republic of the Congo (Kinshasa)",
+        "name": "Democratic Republic of the Congo",
         "continent": "Africa",
         "start_year": 1964,
         "end_year": 1971,
         "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Flag_of_the_Republic_of_the_Congo_%28L%C3%A9opoldville%29_%281963%E2%80%931966%29.svg/40px-Flag_of_the_Republic_of_the_Congo_%28L%C3%A9opoldville%29_%281963%E2%80%931966%29.svg.png"
       },
       {
-        "name": "Republic of the Congo (Léopoldville)",
+        "name": "Republic of the Congo",
         "continent": "Africa",
         "start_year": 1960,
         "end_year": 1964,
@@ -727,7 +727,7 @@
         "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Flag_of_the_People%27s_Republic_of_the_Congo.svg/40px-Flag_of_the_People%27s_Republic_of_the_Congo.svg.png"
       },
       {
-        "name": "Republic of the Congo (Brazzaville)",
+        "name": "Republic of the Congo",
         "continent": "Africa",
         "start_year": 1960,
         "end_year": 1969,
@@ -1629,24 +1629,10 @@
         "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Flag_of_Iran.svg/40px-Flag_of_Iran.svg.png"
       },
       {
-        "name": "Guarded Domains of Persia (Qajar dynasty)",
-        "continent": "Asia",
-        "start_year": 1796,
-        "end_year": 1925,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Flag_of_Iran.svg/40px-Flag_of_Iran.svg.png"
-      },
-      {
-        "name": "Guarded Domains of Persia (Afsharid dynasty)",
-        "continent": "Asia",
-        "start_year": 1736,
-        "end_year": 1796,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Flag_of_Iran.svg/40px-Flag_of_Iran.svg.png"
-      },
-      {
-        "name": "Guarded Domains of Persia (Safavid dynasty)",
+        "name": "Guarded Domains of Persia",
         "continent": "Asia",
         "start_year": 1501,
-        "end_year": 1736,
+        "end_year": 1925,
         "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Flag_of_Iran.svg/40px-Flag_of_Iran.svg.png"
       }
     ]
@@ -2682,17 +2668,10 @@
         "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Flag_of_Portugal_%28official%29.svg/40px-Flag_of_Portugal_%28official%29.svg.png"
       },
       {
-        "name": "Second Portuguese Republic (Estado Novo/New State)",
-        "continent": "Europe",
-        "start_year": 1933,
-        "end_year": 1974,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Flag_of_Portugal_%28official%29.svg/40px-Flag_of_Portugal_%28official%29.svg.png"
-      },
-      {
-        "name": "Second Portuguese Republic (National Dictatorship)",
+        "name": "Second Portuguese Republic",
         "continent": "Europe",
         "start_year": 1926,
-        "end_year": 1933,
+        "end_year": 1974,
         "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Flag_of_Portugal_%28official%29.svg/40px-Flag_of_Portugal_%28official%29.svg.png"
       },
       {
@@ -2724,7 +2703,7 @@
         "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Flag_of_the_United_Kingdom_of_Portugal%2C_Brazil%2C_and_the_Algarves.svg/20px-Flag_of_the_United_Kingdom_of_Portugal%2C_Brazil%2C_and_the_Algarves.svg.png"
       },
       {
-        "name": "Kingdom of Portugal and the Algarves (Napoleonic era)",
+        "name": "Kingdom of Portugal and the Algarves",
         "continent": "Europe",
         "start_year": 1777,
         "end_year": 1834,
@@ -3091,7 +3070,7 @@
     "flag": "https://upload.wikimedia.org/wikipedia/en/thumb/9/9a/Flag_of_Spain.svg/40px-Flag_of_Spain.svg.png",
     "predecessors": [
       {
-        "name": "Kingdom of Spain (restored thrice; transition to democracy)",
+        "name": "Kingdom of Spain",
         "continent": "Europe",
         "start_year": 1975,
         "end_year": 1982,
@@ -3238,7 +3217,7 @@
     "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Flag_of_Switzerland_%28Pantone%29.svg/20px-Flag_of_Switzerland_%28Pantone%29.svg.png",
     "predecessors": [
       {
-        "name": "Swiss Confederation (in Restoration and Regeneration)",
+        "name": "Swiss Confederation",
         "continent": "Europe",
         "start_year": 1814,
         "end_year": 1848,
