@@ -15,12 +15,13 @@ fn build_coin_from_row(row: &rusqlite::Row) -> Result<Coin, rusqlite::Error> {
             name: row.get(6)?,
             flag: row.get(7)?,
         },
-        obverse_image: row.get(8)?,
-        reverse_image: row.get(9)?,
-        quantity: row.get(10)?,
-        sale_value: row.get(11)?,
-        notes: row.get(12)?,
-        created_at: row.get(13)?,
+        description: row.get(8)?,
+        obverse_image: row.get(9)?,
+        reverse_image: row.get(10)?,
+        quantity: row.get(11)?,
+        sale_value: row.get(12)?,
+        notes: row.get(13)?,
+        created_at: row.get(14)?,
     })
 }
 
@@ -66,8 +67,7 @@ pub fn list_coins(
     let where_clause = if let Some(ref query) = search {
         let search_term = format!("%{}%", query);
         format!(
-            "WHERE c.title LIKE '{}' OR i.name LIKE '{}' OR c.currency LIKE '{}' OR c.notes LIKE '{}'",
-            search_term.replace("'", "''"),
+            "WHERE c.title LIKE '{}' OR i.name LIKE '{}' OR c.description LIKE '{}'",
             search_term.replace("'", "''"),
             search_term.replace("'", "''"),
             search_term.replace("'", "''")
@@ -88,7 +88,7 @@ pub fn list_coins(
 
     // Get paginated coins
     let query = format!(
-        "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.flag, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at
+        "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.flag, c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at
          FROM coins c
          LEFT JOIN issuers i ON c.issuer_id = i.id
          {} ORDER BY c.{} {} LIMIT ?1 OFFSET ?2",
@@ -112,7 +112,7 @@ pub fn list_coins(
 pub fn get_coin(app_handle: tauri::AppHandle, id: i32) -> Result<Coin, String> {
     let conn = get_db_connection(&app_handle)?;
 
-    let query = "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.flag, i.created_at, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at
+    let query = "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.flag, c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at
                 FROM coins c
                 LEFT JOIN issuers i ON c.issuer_id = i.id 
                 WHERE c.id = ?1";
@@ -129,17 +129,21 @@ pub fn get_coin(app_handle: tauri::AppHandle, id: i32) -> Result<Coin, String> {
 pub fn create_coin(app_handle: tauri::AppHandle, coin: CreateCoinRequest) -> Result<Coin, String> {
     let conn = get_db_connection(&app_handle)?;
 
-    const INSERT_QUERY: &str = "INSERT INTO coins (title, value, currency, year, issuer_id, obverse_image, reverse_image, quantity, sale_value, notes)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)";
+    // Generate title from value, currency, and year
+    let title = format!("{} {} {}", coin.value, coin.currency, coin.year);
+
+    const INSERT_QUERY: &str = "INSERT INTO coins (title, value, currency, year, issuer_id, description, obverse_image, reverse_image, quantity, sale_value, notes)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)";
 
     conn.execute(
         INSERT_QUERY,
         rusqlite::params![
-            coin.title,
+            title,
             coin.value,
             coin.currency,
             coin.year,
             coin.issuer_id,
+            coin.description,
             coin.obverse_image,
             coin.reverse_image,
             coin.quantity.unwrap_or(1),
@@ -166,9 +170,19 @@ pub fn update_coin(
     let mut updates = Vec::new();
     let mut params: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
 
-    if let Some(title) = request.title {
+    // Check if any of value, currency, year are being updated to regenerate title
+    let should_update_title = request.value.is_some() || request.currency.is_some() || request.year.is_some();
+
+    if should_update_title {
+        // Fetch current coin to get missing fields
+        let current_coin = get_coin(app_handle.clone(), request.id)?;
+        let value = request.value.unwrap_or(current_coin.value);
+        let currency = request.currency.clone().unwrap_or(current_coin.currency);
+        let year = request.year.unwrap_or(current_coin.year);
+        let new_title = format!("{} {} {}", value, currency, year);
+
         updates.push("title = ?");
-        params.push(Box::new(title));
+        params.push(Box::new(new_title));
     }
     if let Some(value) = request.value {
         updates.push("value = ?");
@@ -185,6 +199,10 @@ pub fn update_coin(
     if let Some(issuer_id) = request.issuer_id {
         updates.push("issuer_id = ?");
         params.push(Box::new(issuer_id));
+    }
+    if let Some(description) = request.description {
+        updates.push("description = ?");
+        params.push(Box::new(description));
     }
     if let Some(obverse_image) = request.obverse_image {
         updates.push("obverse_image = ?");

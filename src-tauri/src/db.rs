@@ -73,6 +73,7 @@ fn run_migrations(conn: &Connection) -> SqliteResult<()> {
                 currency TEXT NOT NULL,
                 year INTEGER NOT NULL,
                 issuer_id INTEGER NOT NULL,
+                description TEXT,
                 obverse_image TEXT,
                 reverse_image TEXT,
                 quantity INTEGER DEFAULT 1,

@@ -7,6 +7,7 @@ export interface Coin {
   currency: string;
   year: number;
   issuer: IssuerDisplay;
+  description?: string;
   obverse_image?: string;
   reverse_image?: string;
   quantity: number;
@@ -33,11 +34,11 @@ export interface GetCoinRequest {
 }
 
 export interface CreateCoinRequest {
-  title: string;
   value: number;
   currency: string;
   year: number;
   issuer_id: number;
+  description?: string;
   obverse_image?: string;
   reverse_image?: string;
   quantity?: number;
@@ -47,11 +48,11 @@ export interface CreateCoinRequest {
 
 export interface UpdateCoinRequest {
   id: number;
-  title?: string;
   value?: number;
   currency?: string;
   year?: number;
   issuer_id?: number;
+  description?: string;
   obverse_image?: string;
   reverse_image?: string;
   quantity?: number;
