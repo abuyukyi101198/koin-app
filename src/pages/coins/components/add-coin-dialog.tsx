@@ -163,9 +163,6 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
                 />
               </FieldContent>
             </Field>
-          </FieldGroup>
-
-          <FieldGroup className="flex-row gap-4">
             <Field orientation="vertical" className="flex-1">
               <FieldLabel htmlFor="year">Year *</FieldLabel>
               <FieldContent>
@@ -179,13 +176,14 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
                 />
               </FieldContent>
             </Field>
-            <Field orientation="vertical" className="flex-1">
-              <FieldLabel htmlFor="issuer">Issuer *</FieldLabel>
-              <FieldContent>
-                <IssuerField value={issuer} setValue={setIssuer} required />
-              </FieldContent>
-            </Field>
           </FieldGroup>
+
+          <Field orientation="vertical" className="flex-1">
+            <FieldLabel htmlFor="issuer">Issuer *</FieldLabel>
+            <FieldContent>
+              <IssuerField value={issuer} setValue={setIssuer} required />
+            </FieldContent>
+          </Field>
 
           <FieldGroup className="flex-row gap-4">
             <Field orientation="vertical" className="flex-1">
@@ -233,8 +231,8 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button type="submit" disabled={createCoinMutation.loading}>
-              {createCoinMutation.loading ? "Saving..." : "Save Coin"}
+            <Button type="submit" disabled={createCoinMutation.isPending}>
+              {createCoinMutation.isPending ? "Saving..." : "Save Coin"}
             </Button>
           </DialogFooter>
         </form>

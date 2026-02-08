@@ -20,16 +20,22 @@ interface IssuerFieldProps {
   required?: boolean | undefined;
 }
 
-// Helper to render issuer item with flag
 const IssuerItemContent = ({ issuer }: { issuer: Issuer }) => (
-  <div className="flex items-center gap-2">
-    <img
-      src={issuer.flag?.length ? issuer.flag : undefined}
-      className="h-4 w-6"
-      alt={`${issuer.name} flag`}
-      loading="lazy"
-    />
-    <span>{issuer.name}</span>
+  <div className="w-full flex justify-between">
+    <div className="flex items-start gap-2">
+      <span className="pt-0.5">
+        <img
+          src={issuer.flag?.length ? issuer.flag : undefined}
+          className="h-4 w-6"
+          alt={`${issuer.name} flag`}
+          loading="lazy"
+        />
+      </span>
+      <span>{issuer.name}</span>
+    </div>
+    <span className="text-xs italic text-muted-foreground">
+      ({issuer.start_year}-{issuer.end_year ?? "pres."})
+    </span>
   </div>
 );
 
@@ -37,7 +43,6 @@ export function IssuerField({ value, setValue, required }: IssuerFieldProps) {
   const [search, setSearch] = useState<string | null>(null);
   const { data } = useListIssuers({ search });
 
-  console.log(data);
   const issuers = data?.items ?? [];
   // Flatten issuers: include both base issuers and their predecessors
   // This allows all items to be properly selectable and managed in state
@@ -76,7 +81,7 @@ export function IssuerField({ value, setValue, required }: IssuerFieldProps) {
         render={
           <Button
             variant="outline"
-            className="w-64 justify-between font-normal"
+            className="w-full justify-between font-normal"
           >
             <ComboboxValue>
               {(item: Issuer) =>
@@ -95,7 +100,7 @@ export function IssuerField({ value, setValue, required }: IssuerFieldProps) {
         <ComboboxList>
           {issuers.map((baseIssuer) => (
             <ComboboxGroup key={baseIssuer.id} className="overflow-hidden">
-              <ComboboxItem value={baseIssuer}>
+              <ComboboxItem value={baseIssuer} className="pl-4">
                 <IssuerItemContent issuer={baseIssuer} />
               </ComboboxItem>
               {baseIssuer.predecessors?.map((pred) => (
