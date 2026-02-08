@@ -42,14 +42,12 @@ pub fn list_issuers(
                      WHERE i2.parent_id = i1.id AND i2.name LIKE ?1
                    )
                  )
-                 ORDER BY i1.id"
+                 ORDER BY i1.id",
             )
             .map_err(|e| format!("Failed to prepare matching IDs statement: {}", e))?;
 
         let ids = stmt
-            .query_map(rusqlite::params![pattern], |row| {
-                row.get::<_, i32>(0)
-            })
+            .query_map(rusqlite::params![pattern], |row| row.get::<_, i32>(0))
             .map_err(|e| format!("Failed to query matching base-level IDs: {}", e))?
             .collect::<Result<Vec<i32>, _>>()
             .map_err(|e| format!("Failed to collect matching IDs: {}", e))?;
@@ -62,9 +60,7 @@ pub fn list_issuers(
             .map_err(|e| format!("Failed to prepare all IDs statement: {}", e))?;
 
         let ids = stmt
-            .query_map([], |row| {
-                row.get::<_, i32>(0)
-            })
+            .query_map([], |row| row.get::<_, i32>(0))
             .map_err(|e| format!("Failed to query all base-level IDs: {}", e))?
             .collect::<Result<Vec<i32>, _>>()
             .map_err(|e| format!("Failed to collect all IDs: {}", e))?;
@@ -83,7 +79,7 @@ pub fn list_issuers(
         .copied()
         .collect();
 
-    let mut data: Vec<Issuer> = Vec::new();
+    let mut items: Vec<Issuer> = Vec::new();
 
     // Step 3: Fetch all base-level issuers for the paginated set (in order)
     // Build a SQL list of IDs for efficient batch fetching
@@ -128,8 +124,8 @@ pub fn list_issuers(
 
         // Step 4: Fetch and attach relevant predecessors for each base-level issuer
         for issuer_result in base_issuers {
-            let mut issuer = issuer_result
-                .map_err(|e| format!("Failed to map issuer row: {}", e))?;
+            let mut issuer =
+                issuer_result.map_err(|e| format!("Failed to map issuer row: {}", e))?;
 
             // Fetch predecessors: if search is active, only fetch matching predecessors
             // Otherwise, fetch all predecessors
@@ -149,41 +145,42 @@ pub fn list_issuers(
                 .prepare(pred_query)
                 .map_err(|e| format!("Failed to prepare predecessor statement: {}", e))?;
 
-            let predecessors: Box<dyn Iterator<Item = rusqlite::Result<Issuer>>> = if let Some(ref pattern) = &search_pattern {
-                Box::new(
-                    pred_stmt
-                        .query_map(rusqlite::params![issuer.id, pattern], |row| {
-                            Ok(Issuer {
-                                id: row.get(0)?,
-                                name: row.get(1)?,
-                                continent: row.get(2)?,
-                                start_year: row.get(3)?,
-                                end_year: row.get(4)?,
-                                flag: row.get(5)?,
-                                created_at: row.get(6)?,
-                                predecessors: None,
+            let predecessors: Box<dyn Iterator<Item = rusqlite::Result<Issuer>>> =
+                if let Some(ref pattern) = &search_pattern {
+                    Box::new(
+                        pred_stmt
+                            .query_map(rusqlite::params![issuer.id, pattern], |row| {
+                                Ok(Issuer {
+                                    id: row.get(0)?,
+                                    name: row.get(1)?,
+                                    continent: row.get(2)?,
+                                    start_year: row.get(3)?,
+                                    end_year: row.get(4)?,
+                                    flag: row.get(5)?,
+                                    created_at: row.get(6)?,
+                                    predecessors: None,
+                                })
                             })
-                        })
-                        .map_err(|e| format!("Failed to query matching predecessors: {}", e))?
-                )
-            } else {
-                Box::new(
-                    pred_stmt
-                        .query_map(rusqlite::params![issuer.id], |row| {
-                            Ok(Issuer {
-                                id: row.get(0)?,
-                                name: row.get(1)?,
-                                continent: row.get(2)?,
-                                start_year: row.get(3)?,
-                                end_year: row.get(4)?,
-                                flag: row.get(5)?,
-                                created_at: row.get(6)?,
-                                predecessors: None,
+                            .map_err(|e| format!("Failed to query matching predecessors: {}", e))?,
+                    )
+                } else {
+                    Box::new(
+                        pred_stmt
+                            .query_map(rusqlite::params![issuer.id], |row| {
+                                Ok(Issuer {
+                                    id: row.get(0)?,
+                                    name: row.get(1)?,
+                                    continent: row.get(2)?,
+                                    start_year: row.get(3)?,
+                                    end_year: row.get(4)?,
+                                    flag: row.get(5)?,
+                                    created_at: row.get(6)?,
+                                    predecessors: None,
+                                })
                             })
-                        })
-                        .map_err(|e| format!("Failed to query all predecessors: {}", e))?
-                )
-            };
+                            .map_err(|e| format!("Failed to query all predecessors: {}", e))?,
+                    )
+                };
 
             let pred_list: Vec<Issuer> = predecessors
                 .collect::<Result<Vec<_>, _>>()
@@ -193,9 +190,9 @@ pub fn list_issuers(
                 issuer.predecessors = Some(pred_list);
             }
 
-            data.push(issuer);
+            items.push(issuer);
         }
     }
 
-    Ok(PaginatedIssuersResponse { data, total })
+    Ok(PaginatedIssuersResponse { items, total })
 }

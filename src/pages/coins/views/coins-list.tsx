@@ -7,6 +7,7 @@ import { SortingState } from "@tanstack/react-table";
 import { useDebounce } from "@/hooks/use-debounce.ts";
 import { EmptyCoins } from "@/pages/coins/components/empty-coins.tsx";
 import { ListCoinsRequest } from "@/query/types";
+import usePagination from "@/hooks/use-pagination.ts";
 
 export function CoinsList() {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -22,16 +23,24 @@ export function CoinsList() {
     sortDirection: sorting.length > 0 && !sorting[0].desc ? "asc" : "desc",
   };
 
-  const { data, loading, refetch, page, totalPages, pageSize, setPage } =
-    useListCoins(listCoinsOptions);
+  const { data, isLoading, refetch } = useListCoins(listCoinsOptions);
   const columns = useCoinsTableColumns();
+  const { page, size, setPage } = usePagination();
+
+  const handlePaginationChange = async (pageIndex: number) => {
+    setPage(pageIndex);
+  };
+
+  const handleRefresh = async () => {
+    await refetch();
+  };
 
   return (
     <div className="h-full w-full flex justify-center items-start">
       <DataTable
-        data={data ?? []}
+        data={data?.items ?? []}
         columns={columns}
-        loading={loading}
+        loading={isLoading}
         search={{
           enabled: true,
           value: searchQuery,
@@ -46,15 +55,15 @@ export function CoinsList() {
         pagination={{
           enabled: true,
           pageIndex: page,
-          pageSize: pageSize,
-          pageCount: totalPages,
-          onPaginationChange: setPage,
+          pageSize: size,
+          pageCount: Math.ceil(data?.total ?? 0 / size),
+          onPaginationChange: handlePaginationChange,
         }}
-        actions={<AddCoinDialog onSuccess={refetch} />}
+        actions={<AddCoinDialog onSuccess={handleRefresh} />}
         empty={
           <EmptyCoins
             type={searchQuery.length ? "no match" : "no data"}
-            refresh={refetch}
+            refresh={handleRefresh}
           />
         }
       />

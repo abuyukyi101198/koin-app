@@ -48,6 +48,6 @@ pub struct UpdateCoinRequest {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PaginatedCoinsResponse {
-    pub data: Vec<Coin>,
+    pub items: Vec<Coin>,
     pub total: i64,
 }

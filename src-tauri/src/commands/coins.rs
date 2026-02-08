@@ -101,11 +101,11 @@ pub fn list_coins(
     let coins = stmt
         .query_map([limit, offset], |row| build_coin_from_row(row))
         .map_err(|e| format!("Failed to query coins: {}", e))?;
-    let data = coins
+    let items = coins
         .collect::<Result<Vec<_>, _>>()
         .map_err(|e| format!("Failed to collect coins: {}", e))?;
 
-    Ok(PaginatedCoinsResponse { data, total })
+    Ok(PaginatedCoinsResponse { items, total })
 }
 
 #[tauri::command]

@@ -22,6 +22,6 @@ pub struct IssuerDisplay {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PaginatedIssuersResponse {
-    pub data: Vec<Issuer>,
+    pub items: Vec<Issuer>,
     pub total: i64,
 }
