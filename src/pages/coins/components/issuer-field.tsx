@@ -33,7 +33,7 @@ const IssuerItemContent = ({ issuer }: { issuer: Issuer }) => (
       </span>
       <span>{issuer.name}</span>
     </div>
-    <span className="text-xs italic text-muted-foreground">
+    <span className="text-xs italic text-muted-foreground leading-5">
       ({issuer.start_year}-{issuer.end_year ?? "pres."})
     </span>
   </div>
@@ -81,7 +81,7 @@ export function IssuerField({ value, setValue, required }: IssuerFieldProps) {
         render={
           <Button
             variant="outline"
-            className="w-full justify-between font-normal"
+            className="w-full justify-between font-normal px-3"
           >
             <ComboboxValue>
               {(item: Issuer) =>
