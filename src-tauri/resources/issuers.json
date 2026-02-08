@@ -90,7 +90,7 @@
         "continent": "Europe",
         "start_year": 1914,
         "end_year": 1925,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Flag_of_the_Principality_of_Albania_%281915%29.svg/20px-Flag_of_the_Principality_of_Albania_%281915%29.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Flag_of_the_Principality_of_Albania_%281915%29.svg/40px-Flag_of_the_Principality_of_Albania_%281915%29.svg.png"
       },
       {
         "name": "Independent Albania",
@@ -205,14 +205,14 @@
         "continent": "Europe",
         "start_year": 1918,
         "end_year": 1919,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Flag_of_Austria.svg/60px-Flag_of_Austria.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Flag_of_Austria.svg/40px-Flag_of_Austria.svg.png"
       },
       {
         "name": "Austria-Hungary",
         "continent": "Europe",
         "start_year": 1867,
         "end_year": 1918,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Ensign_of_Austro-Hungarian_civil_fleet_%281869-1918%29.svg/250px-Ensign_of_Austro-Hungarian_civil_fleet_%281869-1918%29.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Ensign_of_Austro-Hungarian_civil_fleet_%281869-1918%29.svg/40px-Ensign_of_Austro-Hungarian_civil_fleet_%281869-1918%29.svg.png"
       }
     ]
   },
@@ -269,7 +269,7 @@
     "continent": "Europe",
     "start_year": 1830,
     "end_year": null,
-    "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Flag_of_Belgium.svg/20px-Flag_of_Belgium.svg.png",
+    "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Flag_of_Belgium.svg/40px-Flag_of_Belgium.svg.png",
     "predecessors": []
   },
   {
@@ -687,7 +687,7 @@
     "continent": "Africa",
     "start_year": 1997,
     "end_year": null,
-    "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Flag_of_the_Democratic_Republic_of_the_Congo.svg/20px-Flag_of_the_Democratic_Republic_of_the_Congo.svg.png",
+    "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Flag_of_the_Democratic_Republic_of_the_Congo.svg/40px-Flag_of_the_Democratic_Republic_of_the_Congo.svg.png",
     "predecessors": [
       {
         "name": "Republic of Zaire",
@@ -802,35 +802,35 @@
         "continent": "Europe",
         "start_year": 1990,
         "end_year": 1992,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Flag_of_the_Czech_Republic.svg/60px-Flag_of_the_Czech_Republic.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Flag_of_the_Czech_Republic.svg/40px-Flag_of_the_Czech_Republic.svg.png"
       },
       {
         "name": "Czechoslovak Socialist Republic",
         "continent": "Europe",
         "start_year": 1948,
         "end_year": 1989,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Flag_of_the_Czech_Republic.svg/60px-Flag_of_the_Czech_Republic.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Flag_of_the_Czech_Republic.svg/40px-Flag_of_the_Czech_Republic.svg.png"
       },
       {
         "name": "Third Czechoslovak Republic",
         "continent": "Europe",
         "start_year": 1945,
         "end_year": 1948,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Flag_of_the_Czech_Republic.svg/60px-Flag_of_the_Czech_Republic.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Flag_of_the_Czech_Republic.svg/40px-Flag_of_the_Czech_Republic.svg.png"
       },
       {
         "name": "Second Czechoslovak Republic",
         "continent": "Europe",
         "start_year": 1938,
         "end_year": 1939,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Flag_of_the_Czech_Republic.svg/60px-Flag_of_the_Czech_Republic.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Flag_of_the_Czech_Republic.svg/40px-Flag_of_the_Czech_Republic.svg.png"
       },
       {
         "name": "First Czechoslovak Republic",
         "continent": "Europe",
         "start_year": 1918,
         "end_year": 1938,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Flag_of_the_Czech_Republic.svg/60px-Flag_of_the_Czech_Republic.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Flag_of_the_Czech_Republic.svg/40px-Flag_of_the_Czech_Republic.svg.png"
       }
     ]
   },
@@ -839,28 +839,28 @@
     "continent": "Europe",
     "start_year": 1864,
     "end_year": null,
-    "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Flag_of_Denmark.svg/20px-Flag_of_Denmark.svg.png",
+    "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Flag_of_Denmark.svg/40px-Flag_of_Denmark.svg.png",
     "predecessors": [
       {
         "name": "Danish Unitary State",
         "continent": "Europe",
         "start_year": 1814,
         "end_year": 1864,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Flag_of_Denmark.svg/20px-Flag_of_Denmark.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Flag_of_Denmark.svg/40px-Flag_of_Denmark.svg.png"
       },
       {
         "name": "Denmark-Norway",
         "continent": "Europe",
         "start_year": 1537,
         "end_year": 1814,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Flag_of_Denmark.svg/20px-Flag_of_Denmark.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Flag_of_Denmark.svg/40px-Flag_of_Denmark.svg.png"
       },
       {
         "name": "Kingdom of Denmark",
         "continent": "Europe",
         "start_year": 714,
         "end_year": 1523,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Flag_of_Denmark.svg/20px-Flag_of_Denmark.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Flag_of_Denmark.svg/40px-Flag_of_Denmark.svg.png"
       }
     ]
   },
@@ -1088,7 +1088,7 @@
     "continent": "Europe",
     "start_year": 1999,
     "end_year": null,
-    "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Flag_of_Europe.svg/250px-Flag_of_Europe.svg.png",
+    "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Flag_of_Europe.svg/40px-Flag_of_Europe.svg.png",
     "predecessors": []
   },
   {
@@ -1214,7 +1214,7 @@
     "continent": "Africa",
     "start_year": 1960,
     "end_year": null,
-    "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Flag_of_Gabon.svg/20px-Flag_of_Gabon.svg.png",
+    "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Flag_of_Gabon.svg/40px-Flag_of_Gabon.svg.png",
     "predecessors": []
   },
   {
@@ -1274,7 +1274,7 @@
         "continent": "Europe",
         "start_year": 1949,
         "end_year": 1990,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Flag_of_East_Germany.svg/60px-Flag_of_East_Germany.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Flag_of_East_Germany.svg/40px-Flag_of_East_Germany.svg.png"
       },
       {
         "name": "Allied-occupied Germany",
@@ -1367,7 +1367,7 @@
         "continent": "Europe",
         "start_year": 395,
         "end_year": 1453,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Byzantine_imperial_flag%2C_14th_century_according_to_portolan_charts.svg/250px-Byzantine_imperial_flag%2C_14th_century_according_to_portolan_charts.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Byzantine_imperial_flag%2C_14th_century_according_to_portolan_charts.svg/40px-Byzantine_imperial_flag%2C_14th_century_according_to_portolan_charts.svg.png"
       }
     ]
   },
@@ -2227,7 +2227,7 @@
     "continent": "Europe",
     "start_year": 1911,
     "end_year": null,
-    "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Flag_of_Monaco.svg/20px-Flag_of_Monaco.svg.png",
+    "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Flag_of_Monaco.svg/40px-Flag_of_Monaco.svg.png",
     "predecessors": []
   },
   {
@@ -2256,7 +2256,7 @@
         "continent": "Asia",
         "start_year": 1921,
         "end_year": 1924,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Flag_of_Bogd_Khaanate_Mongolia.svg/20px-Flag_of_Bogd_Khaanate_Mongolia.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Flag_of_Bogd_Khaanate_Mongolia.svg/40px-Flag_of_Bogd_Khaanate_Mongolia.svg.png"
       }
     ]
   },
@@ -2272,7 +2272,7 @@
         "continent": "Europe",
         "start_year": 2003,
         "end_year": 2006,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Flag_of_Serbia_and_Montenegro_%281992–2006%29.svg/60px-Flag_of_Serbia_and_Montenegro_%281992–2006%29.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Flag_of_Serbia_and_Montenegro_%281992–2006%29.svg/40px-Flag_of_Serbia_and_Montenegro_%281992–2006%29.svg.png"
       }
     ]
   },
@@ -2321,21 +2321,21 @@
     "continent": "Asia",
     "start_year": 2008,
     "end_year": null,
-    "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Flag_of_Nepal.svg/20px-Flag_of_Nepal.svg.png",
+    "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Flag_of_Nepal.svg/40px-Flag_of_Nepal.svg.png",
     "predecessors": [
       {
         "name": "Kingdom of Nepal",
         "continent": "Asia",
         "start_year": 1768,
         "end_year": 2008,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Flag_of_Nepal.svg/20px-Flag_of_Nepal.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Flag_of_Nepal.svg/40px-Flag_of_Nepal.svg.png"
       },
       {
         "name": "Gorkha Kingdom",
         "continent": "Asia",
         "start_year": 1559,
         "end_year": 1768,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Flag_of_Nepal.svg/20px-Flag_of_Nepal.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Flag_of_Nepal.svg/40px-Flag_of_Nepal.svg.png"
       }
     ]
   },
@@ -2405,7 +2405,7 @@
     "continent": "Africa",
     "start_year": 1960,
     "end_year": null,
-    "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Flag_of_Niger.svg/20px-Flag_of_Niger.svg.png",
+    "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Flag_of_Niger.svg/40px-Flag_of_Niger.svg.png",
     "predecessors": []
   },
   {
@@ -2552,7 +2552,7 @@
     "continent": "Australia",
     "start_year": 1975,
     "end_year": null,
-    "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Flag_of_Papua_New_Guinea.svg/20px-Flag_of_Papua_New_Guinea.svg.png",
+    "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Flag_of_Papua_New_Guinea.svg/40px-Flag_of_Papua_New_Guinea.svg.png",
     "predecessors": []
   },
   {
@@ -2700,7 +2700,7 @@
         "continent": "Europe",
         "start_year": 1815,
         "end_year": 1825,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Flag_of_the_United_Kingdom_of_Portugal%2C_Brazil%2C_and_the_Algarves.svg/20px-Flag_of_the_United_Kingdom_of_Portugal%2C_Brazil%2C_and_the_Algarves.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Flag_of_the_United_Kingdom_of_Portugal%2C_Brazil%2C_and_the_Algarves.svg/40px-Flag_of_the_United_Kingdom_of_Portugal%2C_Brazil%2C_and_the_Algarves.svg.png"
       },
       {
         "name": "Kingdom of Portugal and the Algarves",
@@ -2728,14 +2728,14 @@
         "continent": "Europe",
         "start_year": 1415,
         "end_year": 1580,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/PortugueseFlag1385.svg/20px-PortugueseFlag1385.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/PortugueseFlag1385.svg/40px-PortugueseFlag1385.svg.png"
       },
       {
         "name": "Kingdom of Portugal",
         "continent": "Europe",
         "start_year": 1139,
         "end_year": 1415,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/PortugueseFlag1248.svg/20px-PortugueseFlag1248.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/PortugueseFlag1248.svg/40px-PortugueseFlag1248.svg.png"
       }
     ]
   },
@@ -2905,21 +2905,21 @@
         "continent": "Europe",
         "start_year": 2003,
         "end_year": 2006,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Flag_of_Serbia_and_Montenegro_%281992–2006%29.svg/60px-Flag_of_Serbia_and_Montenegro_%281992–2006%29.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Flag_of_Serbia_and_Montenegro_%281992–2006%29.svg/40px-Flag_of_Serbia_and_Montenegro_%281992–2006%29.svg.png"
       },
       {
         "name": "Federal Republic of Yugoslavia",
         "continent": "Europe",
         "start_year": 1992,
         "end_year": 2003,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Flag_of_Serbia_and_Montenegro_%281992–2006%29.svg/60px-Flag_of_Serbia_and_Montenegro_%281992–2006%29.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Flag_of_Serbia_and_Montenegro_%281992–2006%29.svg/40px-Flag_of_Serbia_and_Montenegro_%281992–2006%29.svg.png"
       },
       {
         "name": "Yugoslavia",
         "continent": "Europe",
         "start_year": 1945,
         "end_year": 1992,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Flag_of_Yugoslavia_%281946-1992%29.svg/60px-Flag_of_Yugoslavia_%281946-1992%29.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Flag_of_Yugoslavia_%281946-1992%29.svg/40px-Flag_of_Yugoslavia_%281946-1992%29.svg.png"
       }
     ]
   },
@@ -3144,7 +3144,7 @@
         "continent": "Europe",
         "start_year": 1580,
         "end_year": 1640,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Escudo_de_Armas_de_Felipe_II_a_Carlos_II.svg/20px-Escudo_de_Armas_de_Felipe_II_a_Carlos_II.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Escudo_de_Armas_de_Felipe_II_a_Carlos_II.svg/40px-Escudo_de_Armas_de_Felipe_II_a_Carlos_II.svg.png"
       },
       {
         "name": "Hispanic Monarchy",
@@ -3158,7 +3158,7 @@
         "continent": "Europe",
         "start_year": 1479,
         "end_year": 1516,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Royal_Banner_of_the_Crown_of_Castile_%28Early_Style%29-Variant.svg/20px-Royal_Banner_of_the_Crown_of_Castile_%28Early_Style%29-Variant.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Royal_Banner_of_the_Crown_of_Castile_%28Early_Style%29-Variant.svg/40px-Royal_Banner_of_the_Crown_of_Castile_%28Early_Style%29-Variant.svg.png"
       }
     ]
   },
@@ -3214,35 +3214,35 @@
     "continent": "Europe",
     "start_year": 1848,
     "end_year": null,
-    "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Flag_of_Switzerland_%28Pantone%29.svg/20px-Flag_of_Switzerland_%28Pantone%29.svg.png",
+    "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Flag_of_Switzerland_%28Pantone%29.svg/40px-Flag_of_Switzerland_%28Pantone%29.svg.png",
     "predecessors": [
       {
         "name": "Swiss Confederation",
         "continent": "Europe",
         "start_year": 1814,
         "end_year": 1848,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Swiss_flag_Bachmann_1815.png/20px-Swiss_flag_Bachmann_1815.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Swiss_flag_Bachmann_1815.png/40px-Swiss_flag_Bachmann_1815.png"
       },
       {
         "name": "Napoleonic Swiss Confederation",
         "continent": "Europe",
         "start_year": 1803,
         "end_year": 1814,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Flag_of_Switzerland_%28Pantone%29.svg/20px-Flag_of_Switzerland_%28Pantone%29.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Flag_of_Switzerland_%28Pantone%29.svg/40px-Flag_of_Switzerland_%28Pantone%29.svg.png"
       },
       {
         "name": "Helvetic Republic",
         "continent": "Europe",
         "start_year": 1798,
         "end_year": 1803,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Flag_of_the_Helvetic_Republic_%28French%29.svg/20px-Flag_of_the_Helvetic_Republic_%28French%29.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Flag_of_the_Helvetic_Republic_%28French%29.svg/40px-Flag_of_the_Helvetic_Republic_%28French%29.svg.png"
       },
       {
         "name": "Swiss Confederation",
         "continent": "Europe",
         "start_year": 1648,
         "end_year": 1798,
-        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Early_Swiss_cross.svg/20px-Early_Swiss_cross.svg.png"
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Early_Swiss_cross.svg/40px-Early_Swiss_cross.svg.png"
       }
     ]
   },
@@ -3471,7 +3471,7 @@
     "continent": "Europe",
     "start_year": 1929,
     "end_year": null,
-    "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Flag_of_Vatican_City_%282023%E2%80%93present%29.svg/20px-Flag_of_Vatican_City_%282023%E2%80%93present%29.svg.png",
+    "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Flag_of_Vatican_City_%282023%E2%80%93present%29.svg/40px-Flag_of_Vatican_City_%282023%E2%80%93present%29.svg.png",
     "predecessors": []
   },
   {
