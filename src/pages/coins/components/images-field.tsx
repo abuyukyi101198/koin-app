@@ -19,7 +19,7 @@ export function ImagesField({
 }: ImagesFieldProps) {
   return (
     <>
-      <Field orientation="vertical" className="flex-1 gap-1">
+      <Field orientation="vertical" className="flex-1 gap-2">
         <FieldLabel>Reverse Image</FieldLabel>
         <FieldContent>
           <ImageUploadField
@@ -32,7 +32,7 @@ export function ImagesField({
           />
         </FieldContent>
       </Field>
-      <Field orientation="vertical" className="flex-1 gap-1">
+      <Field orientation="vertical" className="flex-1 gap-2">
         <FieldLabel>Obverse Image</FieldLabel>
         <FieldContent>
           <ImageUploadField

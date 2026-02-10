@@ -24,8 +24,8 @@ export function NotesField({
   };
 
   return (
-    <Field orientation="vertical">
-      <FieldContent>
+    <Field orientation="vertical" className="h-full flex flex-col">
+      <FieldContent className="flex-1 flex">
         <Textarea
           aria-invalid={touched && !!error}
           aria-describedby={touched && error ? "notes-error" : undefined}
@@ -33,8 +33,10 @@ export function NotesField({
           placeholder="Additional notes"
           autoComplete="off"
           autoCapitalize="off"
+          spellCheck="true"
           value={value}
           onChange={async (e) => validateInputOnChange(e.target.value)}
+          className="flex-1 resize-none"
         />
       </FieldContent>
     </Field>

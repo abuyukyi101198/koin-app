@@ -83,8 +83,8 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
       <DialogTrigger asChild>
         <Button variant="outline">Add new coin</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg p-8" showCloseButton={false}>
-        <DialogHeader>
+      <DialogContent className="sm:max-w-4xl p-8" showCloseButton={false}>
+        <DialogHeader className="hidden">
           <DialogTitle>Add coin to catalogue</DialogTitle>
           <DialogDescription>
             Add a new coin record to your collection catalogue.
@@ -96,6 +96,8 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
           onSubmit={handleSubmit}
           validateOnChange
           validateOnBlur
+          validateOnMount
+          enableReinitialize
         >
           {({
             values,
@@ -106,123 +108,130 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
             setFieldTouched,
             isValid,
           }) => (
-            <Form className="space-y-4 flex-row!" noValidate>
-              <FieldSet className="gap-2">
-                <FieldLegend>Identification</FieldLegend>
-                <FieldDescription>
-                  Identifying information of your coin like its face value, mint
-                  year, and issuing authority.
-                </FieldDescription>
-                <FieldGroup className="flex-row gap-4">
-                  <div className="flex flex-2 gap-0">
-                    <ValueField
-                      value={values.value}
-                      touched={touched.value}
-                      error={errors.value}
-                      setFieldValue={setFieldValue}
-                      setFieldTouched={setFieldTouched}
-                    />
-                    <CurrencyField
-                      value={values.currency}
-                      touched={touched.currency}
-                      error={errors.currency}
-                      setFieldValue={setFieldValue}
-                      setFieldTouched={setFieldTouched}
-                    />
-                  </div>
-                  <YearField
-                    value={values.year}
-                    touched={touched.year}
-                    error={errors.year}
-                    setFieldValue={setFieldValue}
-                    setFieldTouched={setFieldTouched}
-                  />
-                </FieldGroup>
-                <FieldGroup>
-                  <IssuerField
-                    value={values.issuer}
-                    touched={touched.issuer}
-                    error={errors.issuer}
-                    setFieldValue={setFieldValue}
-                    setFieldTouched={setFieldTouched}
-                  />
-                </FieldGroup>
-              </FieldSet>
-              <FieldSeparator />
-              <FieldSet className="gap-2">
-                <FieldLegend className="pt-2.5">Description</FieldLegend>
-                <FieldDescription>
-                  Additional description in case you want distinguish your coin
-                  from others of its mintage such as condition or even personal
-                  history.
-                </FieldDescription>
-                <FieldGroup>
-                  <DescriptionField
-                    value={values.description}
-                    touched={touched.description}
-                    error={errors.description}
-                    setFieldValue={setFieldValue}
-                    setFieldTouched={setFieldTouched}
-                  />
-                </FieldGroup>
-              </FieldSet>
-              <FieldSeparator />
-              <FieldSet className="gap-2">
-                <FieldLegend className="pt-2.5">Images</FieldLegend>
-                <FieldDescription>
-                  Photographs or scans of your coin.
-                </FieldDescription>
-                <FieldGroup className="flex-row gap-6">
-                  <ImagesField
-                    value={{
-                      reverseImage: values.reverseImage,
-                      obverseImage: values.obverseImage,
-                    }}
-                    setFieldValue={setFieldValue}
-                    setFieldTouched={setFieldTouched}
-                  />
-                </FieldGroup>
-              </FieldSet>
-              <FieldSeparator />
-              <FieldSet className="gap-2">
-                <FieldLegend className="pt-2.5">Inventory</FieldLegend>
-                <FieldDescription>
-                  Number of coins you own of this mintage, and the estimated
-                  sale value of one.
-                </FieldDescription>
-                <FieldGroup className="flex-row gap-4">
-                  <QuantityField
-                    value={values.quantity}
-                    touched={touched.quantity}
-                    error={errors.quantity}
-                    setFieldValue={setFieldValue}
-                    setFieldTouched={setFieldTouched}
-                  />
-                  <SaleValueField
-                    value={values.saleValue}
-                    touched={touched.saleValue}
-                    error={errors.saleValue}
-                    setFieldValue={setFieldValue}
-                    setFieldTouched={setFieldTouched}
-                  />
-                </FieldGroup>
-              </FieldSet>
-              <FieldSeparator />
-              <FieldSet className="gap-2">
-                <FieldLegend className="pt-2.5">Notes</FieldLegend>
-                <FieldDescription>
-                  Additional notes you want to add to your coin.
-                </FieldDescription>
-                <FieldGroup>
-                  <NotesField
-                    value={values.notes}
-                    touched={touched.notes}
-                    error={errors.notes}
-                    setFieldValue={setFieldValue}
-                    setFieldTouched={setFieldTouched}
-                  />
-                </FieldGroup>
-              </FieldSet>
+            <Form className="space-y-4 flex flex-col" noValidate>
+              <div className="grid grid-cols-3 gap-12 flex-1">
+                {/* Left Column */}
+                <div className="space-y-4">
+                  <FieldSet className="gap-2">
+                    <FieldLegend>Images</FieldLegend>
+                    <FieldDescription>
+                      Photographs or scans of your coin.
+                    </FieldDescription>
+                    <FieldGroup className="gap-3">
+                      <ImagesField
+                        value={{
+                          reverseImage: values.reverseImage,
+                          obverseImage: values.obverseImage,
+                        }}
+                        setFieldValue={setFieldValue}
+                        setFieldTouched={setFieldTouched}
+                      />
+                    </FieldGroup>
+                  </FieldSet>
+                </div>
+                {/* Right Column */}
+                <div className="flex flex-col col-span-2 space-y-4">
+                  <FieldSet className="gap-2">
+                    <FieldLegend>Identification</FieldLegend>
+                    <FieldDescription>
+                      Identifying information of your coin like its face value,
+                      mint year, and issuing authority.
+                    </FieldDescription>
+                    <FieldGroup className="flex-row gap-4">
+                      <div className="flex flex-2 gap-0">
+                        <ValueField
+                          value={values.value}
+                          touched={touched.value}
+                          error={errors.value}
+                          setFieldValue={setFieldValue}
+                          setFieldTouched={setFieldTouched}
+                        />
+                        <CurrencyField
+                          value={values.currency}
+                          touched={touched.currency}
+                          error={errors.currency}
+                          setFieldValue={setFieldValue}
+                          setFieldTouched={setFieldTouched}
+                        />
+                      </div>
+                      <YearField
+                        value={values.year}
+                        touched={touched.year}
+                        error={errors.year}
+                        setFieldValue={setFieldValue}
+                        setFieldTouched={setFieldTouched}
+                      />
+                    </FieldGroup>
+                    <FieldGroup>
+                      <IssuerField
+                        value={values.issuer}
+                        touched={touched.issuer}
+                        error={errors.issuer}
+                        setFieldValue={setFieldValue}
+                        setFieldTouched={setFieldTouched}
+                      />
+                    </FieldGroup>
+                  </FieldSet>
+
+                  <FieldSet className="gap-2">
+                    <FieldLegend>Description</FieldLegend>
+                    <FieldDescription>
+                      Additional description in case you want distinguish your
+                      coin from others of its mintage such as condition or even
+                      personal history.
+                    </FieldDescription>
+                    <FieldGroup>
+                      <DescriptionField
+                        value={values.description}
+                        touched={touched.description}
+                        error={errors.description}
+                        setFieldValue={setFieldValue}
+                        setFieldTouched={setFieldTouched}
+                      />
+                    </FieldGroup>
+                  </FieldSet>
+
+                  <FieldSet className="gap-2">
+                    <FieldLegend>Inventory</FieldLegend>
+                    <FieldDescription>
+                      Number of coins you own of this mintage, and the estimated
+                      sale value of one.
+                    </FieldDescription>
+                    <FieldGroup className="flex-row gap-4">
+                      <QuantityField
+                        value={values.quantity}
+                        touched={touched.quantity}
+                        error={errors.quantity}
+                        setFieldValue={setFieldValue}
+                        setFieldTouched={setFieldTouched}
+                      />
+                      <SaleValueField
+                        value={values.saleValue}
+                        touched={touched.saleValue}
+                        error={errors.saleValue}
+                        setFieldValue={setFieldValue}
+                        setFieldTouched={setFieldTouched}
+                      />
+                    </FieldGroup>
+                  </FieldSet>
+
+                  <FieldSet className="gap-2 flex flex-col flex-1">
+                    <FieldLegend>Notes</FieldLegend>
+                    <FieldDescription>
+                      Additional notes you want to add to your coin.
+                    </FieldDescription>
+                    <FieldGroup className="flex-1 flex flex-col">
+                      <NotesField
+                        value={values.notes}
+                        touched={touched.notes}
+                        error={errors.notes}
+                        setFieldValue={setFieldValue}
+                        setFieldTouched={setFieldTouched}
+                      />
+                    </FieldGroup>
+                  </FieldSet>
+                </div>
+              </div>
               <FieldSeparator />
               <DialogFooter className="pt-2.5">
                 <DialogClose asChild>
