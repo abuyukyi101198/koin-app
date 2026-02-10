@@ -14,11 +14,16 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button.tsx";
 import { Issuer } from "@/query/types";
 import { SearchIcon } from "lucide-react";
+import { Field, FieldContent, FieldLabel } from "@/components/ui/field.tsx";
+import { CoinFormData } from "@/pages/coins/components/schemas/coin-form-schema.ts";
+import { FormikProps } from "formik";
 
 interface IssuerFieldProps {
-  value: Issuer | null;
-  onChange?: (value: Issuer | null) => void;
-  required?: boolean | undefined;
+  value: CoinFormData["issuer"];
+  touched: FormikProps<CoinFormData>["touched"]["issuer"];
+  error: FormikProps<CoinFormData>["errors"]["issuer"];
+  setFieldValue: FormikProps<CoinFormData>["setFieldValue"];
+  setFieldTouched: FormikProps<CoinFormData>["setFieldTouched"];
 }
 
 const IssuerItemContent = ({
@@ -44,7 +49,13 @@ const IssuerItemContent = ({
   </div>
 );
 
-export function IssuerField({ value, onChange, required }: IssuerFieldProps) {
+export function IssuerField({
+  value,
+  touched,
+  error,
+  setFieldValue,
+  setFieldTouched,
+}: IssuerFieldProps) {
   const [search, setSearch] = useState<string | null>(null);
   const { data } = useListIssuers({ search });
 
@@ -74,54 +85,70 @@ export function IssuerField({ value, onChange, required }: IssuerFieldProps) {
     return [...flattenedIssuers, value];
   }, [flattenedIssuers, value]);
 
+  const validateInputOnChange = async (value: Issuer | null) => {
+    await setFieldValue("issuer", value, true);
+    await setFieldTouched("issuer", true, false);
+  };
+
   return (
-    <Combobox
-      aria-required={required}
-      items={itemsWithSelectedValue}
-      value={value}
-      onValueChange={onChange}
-      onInputValueChange={(inputValue) => setSearch(inputValue)}
-      required={required}
-    >
-      <ComboboxTrigger
-        render={
-          <Button
-            variant="outline"
-            className="w-full justify-between font-normal px-3"
-          >
-            <ComboboxValue>
-              {(item: Issuer) =>
-                item ? (
-                  <IssuerItemContent issuer={item} />
-                ) : (
-                  <span className="text-muted-foreground">
-                    Issuing authority or state
-                  </span>
-                )
-              }
-            </ComboboxValue>
-            <SearchIcon className="text-muted-foreground" />
-          </Button>
-        }
-      />
-      <ComboboxContent>
-        <ComboboxInput showTrigger={false} placeholder="Search issuer..." />
-        <ComboboxList>
-          {issuers.map((baseIssuer) => (
-            <ComboboxGroup key={baseIssuer.id} className="overflow-hidden">
-              <ComboboxItem value={baseIssuer} className="pl-4">
-                <IssuerItemContent issuer={baseIssuer} />
-              </ComboboxItem>
-              {baseIssuer.predecessors?.map((pred) => (
-                <ComboboxItem key={pred.id} value={pred} className="pl-6">
-                  <IssuerItemContent issuer={pred} />
-                </ComboboxItem>
+    <Field orientation="vertical" className="gap-1">
+      <FieldLabel htmlFor="issuer" className="gap-1">
+        Issuer
+        <span className="text-destructive">*</span>
+      </FieldLabel>
+      <FieldContent>
+        <Combobox<Issuer>
+          aria-required
+          aria-invalid={!!(error && touched)}
+          aria-describedby={error && touched ? "value-error" : undefined}
+          items={itemsWithSelectedValue}
+          value={value}
+          onValueChange={(value) => validateInputOnChange(value)}
+          onInputValueChange={(inputValue) => setSearch(inputValue)}
+          required
+        >
+          <ComboboxTrigger
+            render={
+              <Button
+                variant="outline"
+                className="w-full justify-between font-normal px-3"
+                aria-invalid={!!(error && touched)}
+              >
+                <ComboboxValue>
+                  {(item: Issuer) =>
+                    item ? (
+                      <IssuerItemContent issuer={item} />
+                    ) : (
+                      <span className="text-muted-foreground">
+                        Issuing authority or state
+                      </span>
+                    )
+                  }
+                </ComboboxValue>
+                <SearchIcon className="text-muted-foreground" />
+              </Button>
+            }
+          />
+          <ComboboxContent>
+            <ComboboxInput showTrigger={false} placeholder="Search issuer..." />
+            <ComboboxList>
+              {issuers.map((baseIssuer) => (
+                <ComboboxGroup key={baseIssuer.id} className="overflow-hidden">
+                  <ComboboxItem value={baseIssuer} className="pl-4">
+                    <IssuerItemContent issuer={baseIssuer} />
+                  </ComboboxItem>
+                  {baseIssuer.predecessors?.map((pred) => (
+                    <ComboboxItem key={pred.id} value={pred} className="pl-6">
+                      <IssuerItemContent issuer={pred} />
+                    </ComboboxItem>
+                  ))}
+                </ComboboxGroup>
               ))}
-            </ComboboxGroup>
-          ))}
-        </ComboboxList>
-        <ComboboxEmpty>No issuers found.</ComboboxEmpty>
-      </ComboboxContent>
-    </Combobox>
+            </ComboboxList>
+            <ComboboxEmpty>No issuers found.</ComboboxEmpty>
+          </ComboboxContent>
+        </Combobox>
+      </FieldContent>
+    </Field>
   );
 }
