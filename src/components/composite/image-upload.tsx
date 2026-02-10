@@ -120,7 +120,7 @@ export function ImageUploadField({
         <ContextMenuTrigger asChild>
           <div
             className={cn(
-              "relative rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/50 transition-colors hover:bg-muted",
+              "relative rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/50 transition-colors hover:bg-muted overflow-hidden",
               value && "border-solid border-border bg-transparent",
               uploadError && "border-destructive/50 bg-destructive/5"
             )}
@@ -133,7 +133,7 @@ export function ImageUploadField({
               <img
                 src={value}
                 alt={label || "Uploaded image"}
-                className="h-full w-full rounded-[6px] object-contain"
+                className="max-h-full w-full rounded-[6px] object-contain object-center p-0.5"
               />
             ) : (
               <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">

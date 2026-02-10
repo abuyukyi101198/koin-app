@@ -58,29 +58,39 @@ export const coinFormSchema = yup.object().shape({
   reverseImage: yup
     .string()
     .transform((v) => (v?.trim() === "" ? "" : v))
-    .test("reverse-image-url", "Reverse image must be a valid URL", (value) => {
-      if (value === "" || value === undefined) return true;
-      try {
-        new URL(value);
-        return true;
-      } catch {
-        return false;
+    .test(
+      "reverse-image-url",
+      "Reverse image must be a valid URL or data URL",
+      (value) => {
+        if (value === "" || value === undefined) return true;
+        if (value.startsWith("data:")) return true;
+        try {
+          new URL(value);
+          return true;
+        } catch {
+          return false;
+        }
       }
-    })
+    )
     .default(""),
 
   obverseImage: yup
     .string()
     .transform((v) => (v?.trim() === "" ? "" : v))
-    .test("obverse-image-url", "Obverse image must be a valid URL", (value) => {
-      if (value === "" || value === undefined) return true;
-      try {
-        new URL(value);
-        return true;
-      } catch {
-        return false;
+    .test(
+      "obverse-image-url",
+      "Obverse image must be a valid URL or data URL",
+      (value) => {
+        if (value === "" || value === undefined) return true;
+        if (value.startsWith("data:")) return true;
+        try {
+          new URL(value);
+          return true;
+        } catch {
+          return false;
+        }
       }
-    })
+    )
     .default(""),
 
   quantity: yup
