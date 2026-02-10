@@ -19,7 +19,7 @@ export function YearField({
   setFieldTouched,
 }: YearFieldProps) {
   const validateInputOnChange = async (value: string) => {
-    if (!/^[0-9]{1,4}$/.test(value)) return;
+    if (!/^[0-9]{0,4}$/.test(value)) return;
     await setFieldValue("year", value, true);
     await setFieldTouched("year", true, false);
   };
@@ -37,15 +37,11 @@ export function YearField({
           aria-describedby={error && touched ? "year-error" : undefined}
           className="[&::-webkit-inner-spin-button]:appearance-none text-right"
           id="year"
-          min={0}
-          max={new Date().getFullYear()}
-          maxLength={4}
           placeholder="e.g. 1999"
           autoComplete="off"
           autoCapitalize="off"
           value={value}
           onChange={async (e) => validateInputOnChange(e.target.value)}
-          required
         />
       </FieldContent>
     </Field>

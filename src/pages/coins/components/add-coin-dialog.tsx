@@ -19,7 +19,7 @@ import {
   FieldDescription,
 } from "@/components/ui/field.tsx";
 import { useCreateCoin } from "@/query/commands/coins.ts";
-import { CreateCoinRequest, Issuer } from "@/query/types";
+import { CreateCoinRequest } from "@/query/types";
 import { IssuerField } from "@/pages/coins/components/issuer-field.tsx";
 import {
   CoinFormData,
@@ -46,28 +46,28 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
     reverseImage: "",
     obverseImage: "",
     description: "",
-    value: null,
+    value: "",
     currency: "",
-    year: null,
-    issuer: null as Issuer | null,
+    year: "",
+    issuer: null as any,
     quantity: "1",
-    saleValue: null,
+    saleValue: "",
     notes: "",
   };
 
-  const handleSubmit = async (values: typeof initialValues) => {
+  const handleSubmit = async (values: CoinFormData) => {
     try {
       const coinData: CreateCoinRequest = {
-        value: parseFloat(values.value),
-        currency: values.currency.trim(),
-        year: parseInt(values.year),
+        value: parseFloat(values.value ?? "0"),
+        currency: (values.currency ?? "").trim(),
+        year: parseInt(values.year ?? "0", 10),
         issuer_id: values.issuer!.id,
-        description: values.description.trim() || undefined,
+        description: (values.description ?? "").trim() || undefined,
         obverse_image: values.obverseImage || undefined,
         reverse_image: values.reverseImage || undefined,
-        quantity: values.quantity ? parseInt(values.quantity) : 1,
+        quantity: parseInt(values.quantity ?? "0", 10),
         sale_value: values.saleValue ? parseFloat(values.saleValue) : undefined,
-        notes: values.notes.trim() || undefined,
+        notes: (values.notes ?? "").trim() || undefined,
       };
 
       createCoinMutation.mutate(coinData);
@@ -101,9 +101,10 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
             values,
             errors,
             touched,
+            dirty,
             setFieldValue,
             setFieldTouched,
-            isSubmitting,
+            isValid,
           }) => (
             <Form className="space-y-4 flex-row!" noValidate>
               <FieldSet className="gap-2">
@@ -229,9 +230,11 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
                 </DialogClose>
                 <Button
                   type="submit"
-                  disabled={createCoinMutation.isPending || isSubmitting}
+                  disabled={createCoinMutation.isPending || !(isValid && dirty)}
                 >
-                  {createCoinMutation.isPending ? "Saving..." : "Save Coin"}
+                  {createCoinMutation.isPending
+                    ? "Saving..."
+                    : "Save to catalogue"}
                 </Button>
               </DialogFooter>
             </Form>

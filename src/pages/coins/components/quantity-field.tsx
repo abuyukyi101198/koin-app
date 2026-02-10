@@ -47,6 +47,7 @@ export function QuantityField({
             max="100"
             value={value}
             onChange={async (e) => {
+              if (!/^[0-9]{1,2}$/.test(e.target.value)) return;
               await setFieldValue("quantity", e.target.value);
               await setFieldTouched("quantity", true, false);
             }}
@@ -57,7 +58,7 @@ export function QuantityField({
             type="button"
             aria-label="Increase quantity"
             variant="outline"
-            disabled={Number(value) >= 100}
+            disabled={Number(value) >= 99}
             onClick={async () =>
               await setFieldValue("quantity", (Number(value) + 1).toString())
             }
