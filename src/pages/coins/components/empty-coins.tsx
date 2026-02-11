@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button.tsx";
 import {
   Empty,
   EmptyContent,
@@ -5,7 +6,6 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty.tsx";
-import { Button } from "@/components/ui/button.tsx";
 import { AddCoinDialog } from "@/pages/coins/components/add-coin-dialog.tsx";
 
 interface EmptyCoinsProps {
@@ -27,7 +27,7 @@ export function EmptyCoins({ type, refresh }: EmptyCoinsProps) {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent className="flex-row justify-center gap-2">
-        <Button variant="ghost" onClick={refresh}>
+        <Button onClick={refresh} variant="ghost">
           Refresh
         </Button>
         <AddCoinDialog onSuccess={refresh} />

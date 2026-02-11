@@ -1,7 +1,8 @@
-import { CoinFormData } from "@/pages/coins/components/schemas/coin-form-schema.ts";
 import { FormikProps } from "formik";
+
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field.tsx";
 import { Input } from "@/components/ui/input.tsx";
+import { CoinFormData } from "@/pages/coins/components/schemas/coin-form-schema.ts";
 
 interface CurrencyFieldProps {
   value: CoinFormData["currency"];
@@ -24,24 +25,24 @@ export function CurrencyField({
   };
 
   return (
-    <Field orientation="vertical" className="flex-1 gap-1">
-      <FieldLabel htmlFor="currency" className="justify-end gap-1">
+    <Field className="flex-1 gap-1" orientation="vertical">
+      <FieldLabel className="justify-end gap-1" htmlFor="currency">
         Currency
         <span className="text-destructive">*</span>
       </FieldLabel>
       <FieldContent>
         <Input
-          aria-required
-          aria-invalid={!!(error && touched)}
           aria-describedby={error && touched ? "currency-error" : undefined}
+          aria-invalid={!!(error && touched)}
+          aria-required
+          autoCapitalize="off"
+          autoComplete="off"
           className="border-l-0 rounded-l-none text-right"
           id="currency"
-          placeholder="e.g. Lira"
-          autoComplete="off"
-          autoCapitalize="off"
-          value={value}
           onChange={async (e) => validateInputOnChange(e.target.value)}
+          placeholder="e.g. Lira"
           required
+          value={value}
         />
       </FieldContent>
     </Field>

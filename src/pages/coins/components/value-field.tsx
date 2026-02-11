@@ -1,7 +1,8 @@
 import { FormikProps } from "formik";
-import { CoinFormData } from "@/pages/coins/components/schemas/coin-form-schema.ts";
+
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field.tsx";
 import { Input } from "@/components/ui/input.tsx";
+import { CoinFormData } from "@/pages/coins/components/schemas/coin-form-schema.ts";
 
 interface ValueFieldProps {
   value: CoinFormData["value"];
@@ -25,24 +26,24 @@ export function ValueField({
   };
 
   return (
-    <Field orientation="vertical" className="flex-2 gap-1">
-      <FieldLabel htmlFor="value" className="gap-1">
+    <Field className="flex-2 gap-1" orientation="vertical">
+      <FieldLabel className="gap-1" htmlFor="value">
         Value
         <span className="text-destructive">*</span>
       </FieldLabel>
       <FieldContent>
         <Input
-          aria-required
-          aria-invalid={!!(error && touched)}
           aria-describedby={error && touched ? "value-error" : undefined}
+          aria-invalid={!!(error && touched)}
+          aria-required
+          autoCapitalize="off"
+          autoComplete="off"
           className="[&::-webkit-inner-spin-button]:appearance-none rounded-r-none text-right"
           id="value"
-          step="0.01"
-          placeholder="e.g. 10.00"
-          autoComplete="off"
-          autoCapitalize="off"
-          value={value}
           onChange={async (e) => validateInputOnChange(e.target.value)}
+          placeholder="e.g. 10.00"
+          step="0.01"
+          value={value}
         />
       </FieldContent>
     </Field>

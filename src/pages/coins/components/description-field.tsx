@@ -1,7 +1,8 @@
-import { CoinFormData } from "@/pages/coins/components/schemas/coin-form-schema.ts";
 import { FormikProps } from "formik";
+
 import { Field, FieldContent } from "@/components/ui/field.tsx";
 import { Input } from "@/components/ui/input";
+import { CoinFormData } from "@/pages/coins/components/schemas/coin-form-schema.ts";
 
 interface DescriptionFieldProps {
   value: CoinFormData["description"];
@@ -24,18 +25,18 @@ export function DescriptionField({
   };
 
   return (
-    <Field orientation="vertical" className="gap-1">
+    <Field className="gap-1" orientation="vertical">
       <FieldContent>
         <Input
-          aria-invalid={touched && !!error}
           aria-describedby={touched && error ? "description-error" : undefined}
-          id="description"
-          placeholder="Condition, provenance, or personal remarks"
-          maxLength={100}
-          autoComplete="off"
+          aria-invalid={touched && !!error}
           autoCapitalize="off"
-          value={value}
+          autoComplete="off"
+          id="description"
+          maxLength={100}
           onChange={async (e) => validateInputOnChange(e.target.value)}
+          placeholder="Condition, provenance, or personal remarks"
+          value={value}
         />
       </FieldContent>
     </Field>

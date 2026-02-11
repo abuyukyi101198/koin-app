@@ -1,7 +1,8 @@
-import { CoinFormData } from "@/pages/coins/components/schemas/coin-form-schema.ts";
 import { FormikProps } from "formik";
+
 import { Field, FieldContent } from "@/components/ui/field.tsx";
 import { Textarea } from "@/components/ui/textarea.tsx";
+import { CoinFormData } from "@/pages/coins/components/schemas/coin-form-schema.ts";
 
 interface NotesFieldProps {
   value: CoinFormData["notes"];
@@ -24,19 +25,19 @@ export function NotesField({
   };
 
   return (
-    <Field orientation="vertical" className="h-full flex flex-col">
+    <Field className="h-full flex flex-col" orientation="vertical">
       <FieldContent className="flex-1 flex">
         <Textarea
-          aria-invalid={touched && !!error}
           aria-describedby={touched && error ? "notes-error" : undefined}
-          id="notes"
-          placeholder="Additional notes"
-          autoComplete="off"
+          aria-invalid={touched && !!error}
           autoCapitalize="off"
+          autoComplete="off"
+          className="flex-1 resize-none"
+          id="notes"
+          onChange={async (e) => validateInputOnChange(e.target.value)}
+          placeholder="Additional notes"
           spellCheck="true"
           value={value}
-          onChange={async (e) => validateInputOnChange(e.target.value)}
-          className="flex-1 resize-none"
         />
       </FieldContent>
     </Field>

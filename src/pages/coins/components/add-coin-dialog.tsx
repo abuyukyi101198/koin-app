@@ -1,5 +1,8 @@
 import { useState } from "react";
+
 import { Formik, Form } from "formik";
+
+import { Button } from "@/components/ui/button.tsx";
 import {
   Dialog,
   DialogClose,
@@ -10,7 +13,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog.tsx";
-import { Button } from "@/components/ui/button.tsx";
 import {
   FieldGroup,
   FieldSeparator,
@@ -18,24 +20,24 @@ import {
   FieldLegend,
   FieldDescription,
 } from "@/components/ui/field.tsx";
-import { useCreateCoin } from "@/query/commands/coins.ts";
-import { CreateCoinRequest } from "@/query/types";
+import { CurrencyField } from "@/pages/coins/components/currency-field.tsx";
+import { DescriptionField } from "@/pages/coins/components/description-field.tsx";
+import { ImagesField } from "@/pages/coins/components/images-field.tsx";
 import { IssuerField } from "@/pages/coins/components/issuer-field.tsx";
+import { NotesField } from "@/pages/coins/components/notes-field.tsx";
+import { QuantityField } from "@/pages/coins/components/quantity-field.tsx";
+import { SaleValueField } from "@/pages/coins/components/sale-value-field.tsx";
 import {
   CoinFormData,
   coinFormSchema,
 } from "@/pages/coins/components/schemas/coin-form-schema.ts";
 import { ValueField } from "@/pages/coins/components/value-field.tsx";
-import { CurrencyField } from "@/pages/coins/components/currency-field.tsx";
 import { YearField } from "@/pages/coins/components/year-field.tsx";
-import { ImagesField } from "@/pages/coins/components/images-field.tsx";
-import { DescriptionField } from "@/pages/coins/components/description-field.tsx";
-import { QuantityField } from "@/pages/coins/components/quantity-field.tsx";
-import { SaleValueField } from "@/pages/coins/components/sale-value-field.tsx";
-import { NotesField } from "@/pages/coins/components/notes-field.tsx";
+import { useCreateCoin } from "@/query/commands/coins.ts";
+import { CreateCoinRequest } from "@/query/types";
 
 interface AddCoinDialogForm {
-  onSuccess: () => void | Promise<void>;
+  onSuccess: () => Promise<void> | void;
 }
 
 export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
@@ -84,10 +86,12 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
       {isOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50"
-          onClick={() => setIsOpen(false)}
+          onClick={() => {
+            setIsOpen(false);
+          }}
         />
       )}
-      <Dialog open={isOpen} onOpenChange={setIsOpen} modal={false}>
+      <Dialog modal={false} onOpenChange={setIsOpen} open={isOpen}>
         <DialogTrigger asChild>
           <Button variant="outline">Add new coin</Button>
         </DialogTrigger>
@@ -102,13 +106,13 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
             </DialogDescription>
           </DialogHeader>
           <Formik<CoinFormData>
-            initialValues={initialValues}
-            validationSchema={coinFormSchema}
-            onSubmit={handleSubmit}
-            validateOnChange
-            validateOnBlur
-            validateOnMount
             enableReinitialize
+            initialValues={initialValues}
+            onSubmit={handleSubmit}
+            validateOnBlur
+            validateOnChange
+            validateOnMount
+            validationSchema={coinFormSchema}
           >
             {({
               values,
@@ -130,12 +134,12 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
                       </FieldDescription>
                       <FieldGroup className="gap-3">
                         <ImagesField
+                          setFieldTouched={setFieldTouched}
+                          setFieldValue={setFieldValue}
                           value={{
                             reverseImage: values.reverseImage,
                             obverseImage: values.obverseImage,
                           }}
-                          setFieldValue={setFieldValue}
-                          setFieldTouched={setFieldTouched}
                         />
                       </FieldGroup>
                     </FieldSet>
@@ -151,35 +155,35 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
                       <FieldGroup className="flex-row gap-4">
                         <div className="flex flex-2 gap-0">
                           <ValueField
-                            value={values.value}
-                            touched={touched.value}
                             error={errors.value}
-                            setFieldValue={setFieldValue}
                             setFieldTouched={setFieldTouched}
+                            setFieldValue={setFieldValue}
+                            touched={touched.value}
+                            value={values.value}
                           />
                           <CurrencyField
-                            value={values.currency}
-                            touched={touched.currency}
                             error={errors.currency}
-                            setFieldValue={setFieldValue}
                             setFieldTouched={setFieldTouched}
+                            setFieldValue={setFieldValue}
+                            touched={touched.currency}
+                            value={values.currency}
                           />
                         </div>
                         <YearField
-                          value={values.year}
-                          touched={touched.year}
                           error={errors.year}
-                          setFieldValue={setFieldValue}
                           setFieldTouched={setFieldTouched}
+                          setFieldValue={setFieldValue}
+                          touched={touched.year}
+                          value={values.year}
                         />
                       </FieldGroup>
                       <FieldGroup>
                         <IssuerField
-                          value={values.issuer}
-                          touched={touched.issuer}
                           error={errors.issuer}
-                          setFieldValue={setFieldValue}
                           setFieldTouched={setFieldTouched}
+                          setFieldValue={setFieldValue}
+                          touched={touched.issuer}
+                          value={values.issuer}
                         />
                       </FieldGroup>
                     </FieldSet>
@@ -193,11 +197,11 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
                       </FieldDescription>
                       <FieldGroup>
                         <DescriptionField
-                          value={values.description}
-                          touched={touched.description}
                           error={errors.description}
-                          setFieldValue={setFieldValue}
                           setFieldTouched={setFieldTouched}
+                          setFieldValue={setFieldValue}
+                          touched={touched.description}
+                          value={values.description}
                         />
                       </FieldGroup>
                     </FieldSet>
@@ -210,18 +214,18 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
                       </FieldDescription>
                       <FieldGroup className="flex-row gap-4">
                         <QuantityField
-                          value={values.quantity}
-                          touched={touched.quantity}
                           error={errors.quantity}
-                          setFieldValue={setFieldValue}
                           setFieldTouched={setFieldTouched}
+                          setFieldValue={setFieldValue}
+                          touched={touched.quantity}
+                          value={values.quantity}
                         />
                         <SaleValueField
-                          value={values.saleValue}
-                          touched={touched.saleValue}
                           error={errors.saleValue}
-                          setFieldValue={setFieldValue}
                           setFieldTouched={setFieldTouched}
+                          setFieldValue={setFieldValue}
+                          touched={touched.saleValue}
+                          value={values.saleValue}
                         />
                       </FieldGroup>
                     </FieldSet>
@@ -233,11 +237,11 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
                       </FieldDescription>
                       <FieldGroup className="flex-1 flex flex-col">
                         <NotesField
-                          value={values.notes}
-                          touched={touched.notes}
                           error={errors.notes}
-                          setFieldValue={setFieldValue}
                           setFieldTouched={setFieldTouched}
+                          setFieldValue={setFieldValue}
+                          touched={touched.notes}
+                          value={values.notes}
                         />
                       </FieldGroup>
                     </FieldSet>
@@ -249,10 +253,10 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
                     <Button variant="outline">Cancel</Button>
                   </DialogClose>
                   <Button
-                    type="submit"
                     disabled={
                       createCoinMutation.isPending || !(isValid && dirty)
                     }
+                    type="submit"
                   >
                     {createCoinMutation.isPending
                       ? "Saving..."

@@ -1,5 +1,7 @@
-import { ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
+
+import { ColumnDef } from "@tanstack/react-table";
+
 import { DataTableColumnHeader } from "@/components/composite/data-table-column-header.tsx";
 import { Coin } from "@/query/types";
 
@@ -18,9 +20,9 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
               <div className="w-12 h-12 flex items-center justify-center">
                 {reverse ? (
                   <img
-                    src={reverse}
                     alt="Coin reverse"
                     className="max-w-full max-h-full object-contain rounded"
+                    src={reverse}
                   />
                 ) : (
                   <div className="w-full h-full bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
@@ -31,9 +33,9 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
               <div className="w-12 h-12 flex items-center justify-center">
                 {obverse ? (
                   <img
-                    src={obverse}
                     alt="Coin obverse"
                     className="max-w-full max-h-full object-contain rounded"
+                    src={obverse}
                   />
                 ) : (
                   <div className="w-full h-full bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">

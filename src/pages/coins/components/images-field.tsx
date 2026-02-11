@@ -1,7 +1,8 @@
-import { CoinFormData } from "@/pages/coins/components/schemas/coin-form-schema.ts";
 import { FormikProps } from "formik";
-import { Field, FieldContent, FieldLabel } from "@/components/ui/field.tsx";
+
 import { ImageUploadField } from "@/components/composite/image-upload.tsx";
+import { Field, FieldContent, FieldLabel } from "@/components/ui/field.tsx";
+import { CoinFormData } from "@/pages/coins/components/schemas/coin-form-schema.ts";
 
 interface ImagesFieldProps {
   value: {
@@ -19,29 +20,29 @@ export function ImagesField({
 }: ImagesFieldProps) {
   return (
     <>
-      <Field orientation="vertical" className="flex-1 gap-2">
+      <Field className="flex-1 gap-2" orientation="vertical">
         <FieldLabel>Reverse Image</FieldLabel>
         <FieldContent>
           <ImageUploadField
             label="Reverse image"
-            value={value.reverseImage}
             onChange={async (url) => {
               await setFieldValue("reverseImage", url);
               await setFieldTouched("reverseImage", true, false);
             }}
+            value={value.reverseImage}
           />
         </FieldContent>
       </Field>
-      <Field orientation="vertical" className="flex-1 gap-2">
+      <Field className="flex-1 gap-2" orientation="vertical">
         <FieldLabel>Obverse Image</FieldLabel>
         <FieldContent>
           <ImageUploadField
             label="Obverse image"
-            value={value.obverseImage}
             onChange={async (url) => {
               await setFieldValue("obverseImage", url);
               await setFieldTouched("obverseImage", true, false);
             }}
+            value={value.obverseImage}
           />
         </FieldContent>
       </Field>

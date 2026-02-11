@@ -1,12 +1,13 @@
-import { Input } from "@/components/ui/input.tsx";
-import { Button } from "@/components/ui/button.tsx";
 import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
 } from "lucide-react";
+
 import { DataTableProps } from "@/components/composite/data-table.tsx";
+import { Button } from "@/components/ui/button.tsx";
+import { Input } from "@/components/ui/input.tsx";
 
 interface DataTableActionHeaderProps<TData> {
   search?: DataTableProps<TData>["search"];
@@ -23,10 +24,12 @@ export function DataTableActionHeader<TData>({
     <div className="w-full flex items-center justify-between py-3.5 gap-2.5">
       {search?.enabled && (
         <Input
+          className="max-w-full"
+          onChange={(event) => {
+            search.onChange(event.target.value);
+          }}
           placeholder={search.placeholder || "Search..."}
           value={search.value}
-          onChange={(event) => search.onChange(event.target.value)}
-          className="max-w-full"
         />
       )}
 
@@ -36,28 +39,28 @@ export function DataTableActionHeader<TData>({
         {pagination?.enabled && (
           <div className="flex items-center space-x-2">
             <Button
-              variant="outline"
-              size="icon"
               className="hidden size-8 lg:flex"
+              disabled={pagination.pageIndex === 0}
               onClick={() =>
                 pagination.onPaginationChange(0, pagination.pageSize)
               }
-              disabled={pagination.pageIndex === 0}
+              size="icon"
+              variant="outline"
             >
               <span className="sr-only">Go to first page</span>
               <ChevronsLeft />
             </Button>
             <Button
-              variant="outline"
-              size="icon"
               className="size-8"
+              disabled={pagination.pageIndex === 0}
               onClick={() =>
                 pagination.onPaginationChange(
                   pagination.pageIndex - 1,
                   pagination.pageSize
                 )
               }
-              disabled={pagination.pageIndex === 0}
+              size="icon"
+              variant="outline"
             >
               <span className="sr-only">Go to previous page</span>
               <ChevronLeft />
@@ -67,31 +70,31 @@ export function DataTableActionHeader<TData>({
               {pagination.pageCount ? pagination.pageCount : 1}
             </div>
             <Button
-              variant="outline"
-              size="icon"
               className="size-8"
+              disabled={pagination.pageIndex >= pagination.pageCount - 1}
               onClick={() =>
                 pagination.onPaginationChange(
                   pagination.pageIndex + 1,
                   pagination.pageSize
                 )
               }
-              disabled={pagination.pageIndex >= pagination.pageCount - 1}
+              size="icon"
+              variant="outline"
             >
               <span className="sr-only">Go to next page</span>
               <ChevronRight />
             </Button>
             <Button
-              variant="outline"
-              size="icon"
               className="hidden size-8 lg:flex"
+              disabled={pagination.pageIndex >= pagination.pageCount - 1}
               onClick={() =>
                 pagination.onPaginationChange(
                   pagination.pageCount - 1,
                   pagination.pageSize
                 )
               }
-              disabled={pagination.pageIndex >= pagination.pageCount - 1}
+              size="icon"
+              variant="outline"
             >
               <span className="sr-only">Go to last page</span>
               <ChevronsRight />

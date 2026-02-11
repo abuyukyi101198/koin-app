@@ -1,4 +1,3 @@
-import { invoke } from "@tauri-apps/api/core";
 import {
   useMutation,
   useQuery,
@@ -6,6 +5,8 @@ import {
   UseQueryResult,
   UseMutationResult,
 } from "@tanstack/react-query";
+import { invoke } from "@tauri-apps/api/core";
+
 import {
   Coin,
   CreateCoinRequest,
@@ -20,7 +21,7 @@ const COINS_QUERY_KEY = "coins";
 
 export function useListCoins(
   options?: ListCoinsRequest
-): UseQueryResult<PaginatedCoins, Error> {
+): UseQueryResult<PaginatedCoins> {
   const offset =
     options && options.page && options.pageSize
       ? options.page * options.pageSize
@@ -47,9 +48,7 @@ export function useListCoins(
   });
 }
 
-export function useGetCoin(
-  options: GetCoinRequest
-): UseQueryResult<Coin, Error> {
+export function useGetCoin(options: GetCoinRequest): UseQueryResult<Coin> {
   return useQuery({
     queryKey: [COINS_QUERY_KEY, "get", options.id],
     queryFn: async () => {
@@ -101,7 +100,7 @@ export function useDeleteCoin(): UseMutationResult<
 
   return useMutation({
     mutationFn: async (data: DeleteCoinRequest) => {
-      return await invoke<void>("delete_coin", { id: data.id });
+      await invoke<void>("delete_coin", { id: data.id });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [COINS_QUERY_KEY] });

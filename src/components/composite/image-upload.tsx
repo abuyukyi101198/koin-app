@@ -1,4 +1,8 @@
 import { useState, useRef, ChangeEvent, HTMLAttributes } from "react";
+
+import { Upload, Link as LinkIcon, XIcon } from "lucide-react";
+
+import { Button } from "@/components/ui/button.tsx";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -14,10 +18,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog.tsx";
-import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { cn } from "@/lib/utils.ts";
-import { Upload, Link as LinkIcon, XIcon } from "lucide-react";
 
 interface ImageUploadFieldProps extends Omit<
   HTMLAttributes<HTMLDivElement>,
@@ -131,9 +133,9 @@ export function ImageUploadField({
           >
             {value ? (
               <img
-                src={value}
                 alt={label || "Uploaded image"}
                 className="max-h-full w-full rounded-[6px] object-contain object-center p-0.5"
+                src={value}
               />
             ) : (
               <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
@@ -146,18 +148,18 @@ export function ImageUploadField({
         </ContextMenuTrigger>
         <ContextMenuContent>
           <ContextMenuItem
+            className="flex gap-2"
             onClick={() => {
               setShowUrlDialog(true);
               setUrlError(null);
             }}
-            className="flex gap-2"
           >
             <LinkIcon className="h-4 w-4" />
             Embed image URL
           </ContextMenuItem>
           <ContextMenuItem
-            onClick={() => fileInputRef.current?.click()}
             className="flex gap-2"
+            onClick={() => fileInputRef.current?.click()}
           >
             <Upload className="h-4 w-4" />
             Upload image
@@ -166,12 +168,12 @@ export function ImageUploadField({
             <>
               <div className="my-1" data-slot="separator" />
               <ContextMenuItem
+                className="text-destructive focus:text-destructive"
                 onClick={() => {
                   onChange?.("");
                   setUploadError(null);
                   setUrlError(null);
                 }}
-                className="text-destructive focus:text-destructive"
               >
                 <XIcon className="h-4 w-4 text-destructive focus:text-destructive" />
                 Remove image
@@ -181,21 +183,21 @@ export function ImageUploadField({
         </ContextMenuContent>
       </ContextMenu>
       <input
+        accept="image/*"
+        alt={label || "Upload image"}
+        className="hidden"
+        onChange={handleFileUpload}
         ref={fileInputRef}
         type="file"
-        accept="image/*"
-        onChange={handleFileUpload}
-        className="hidden"
-        alt={label || "Upload image"}
       />
       <Dialog
-        open={showUrlDialog}
         onOpenChange={(open) => {
           setShowUrlDialog(open);
           if (!open) {
             setUrlError(null);
           }
         }}
+        open={showUrlDialog}
       >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
@@ -206,14 +208,16 @@ export function ImageUploadField({
           </DialogHeader>
           <div className="flex flex-col gap-4">
             <Input
-              placeholder="https://example.com/image.jpg"
-              value={urlInput}
-              onChange={(e) => setUrlInput(e.target.value)}
+              onChange={(e) => {
+                setUrlInput(e.target.value);
+              }}
               onKeyDown={async (e) => {
                 if (e.key === "Enter") {
                   await handleUrlSubmit();
                 }
               }}
+              placeholder="https://example.com/image.jpg"
+              value={urlInput}
             />
             {urlError && (
               <p className="text-sm text-destructive italic">{urlError}</p>

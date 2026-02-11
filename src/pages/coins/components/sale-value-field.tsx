@@ -1,5 +1,5 @@
-import { CoinFormData } from "@/pages/coins/components/schemas/coin-form-schema.ts";
 import { FormikProps } from "formik";
+
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field.tsx";
 import {
   InputGroup,
@@ -7,6 +7,7 @@ import {
   InputGroupInput,
   InputGroupText,
 } from "@/components/ui/input-group.tsx";
+import { CoinFormData } from "@/pages/coins/components/schemas/coin-form-schema.ts";
 
 interface SaleValueFieldProps {
   value: CoinFormData["saleValue"];
@@ -30,8 +31,8 @@ export function SaleValueField({
   };
 
   return (
-    <Field orientation="vertical" className="flex-1 gap-1">
-      <FieldLabel htmlFor="saleValue" className="justify-end">
+    <Field className="flex-1 gap-1" orientation="vertical">
+      <FieldLabel className="justify-end" htmlFor="saleValue">
         Est. sale value
       </FieldLabel>
       <FieldContent>
@@ -40,16 +41,16 @@ export function SaleValueField({
             <InputGroupText>$</InputGroupText>
           </InputGroupAddon>
           <InputGroupInput
-            aria-invalid={touched && !!error}
             aria-describedby={touched && error ? "saleValue-error" : undefined}
+            aria-invalid={touched && !!error}
+            autoCapitalize="off"
+            autoComplete="off"
             className="[&::-webkit-inner-spin-button]:appearance-none text-right"
             id="saleValue"
-            step="0.01"
-            placeholder="0.00"
-            autoComplete="off"
-            autoCapitalize="off"
-            value={value}
             onChange={async (e) => validateInputOnChange(e.target.value)}
+            placeholder="0.00"
+            step="0.01"
+            value={value}
           />
           <InputGroupAddon align="inline-end">
             <InputGroupText>USD</InputGroupText>

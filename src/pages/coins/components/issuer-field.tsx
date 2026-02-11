@@ -1,3 +1,9 @@
+import { useMemo, useState } from "react";
+
+import { FormikProps } from "formik";
+import { SearchIcon } from "lucide-react";
+
+import { Button } from "@/components/ui/button.tsx";
 import {
   Combobox,
   ComboboxContent,
@@ -9,14 +15,10 @@ import {
   ComboboxTrigger,
   ComboboxValue,
 } from "@/components/ui/combobox.tsx";
-import { useListIssuers } from "@/query/commands";
-import { useMemo, useState } from "react";
-import { Button } from "@/components/ui/button.tsx";
-import { Issuer } from "@/query/types";
-import { SearchIcon } from "lucide-react";
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field.tsx";
 import { CoinFormData } from "@/pages/coins/components/schemas/coin-form-schema.ts";
-import { FormikProps } from "formik";
+import { useListIssuers } from "@/query/commands";
+import { Issuer } from "@/query/types";
 
 interface IssuerFieldProps {
   value: CoinFormData["issuer"];
@@ -35,10 +37,10 @@ const IssuerItemContent = ({
     <div className="flex items-start gap-2">
       <span className="pt-0.5">
         <img
-          src={issuer.flag?.length ? issuer.flag : undefined}
-          className="h-4 w-6"
           alt={`${issuer.name} flag`}
+          className="h-4 w-6"
           loading="lazy"
+          src={issuer.flag?.length ? issuer.flag : undefined}
         />
       </span>
       <span>{issuer.name}</span>
@@ -91,28 +93,30 @@ export function IssuerField({
   };
 
   return (
-    <Field orientation="vertical" className="gap-1">
-      <FieldLabel htmlFor="issuer" className="gap-1">
+    <Field className="gap-1" orientation="vertical">
+      <FieldLabel className="gap-1" htmlFor="issuer">
         Issuer
         <span className="text-destructive">*</span>
       </FieldLabel>
       <FieldContent>
         <Combobox<Issuer>
-          aria-required
-          aria-invalid={!!(error && touched)}
           aria-describedby={error && touched ? "value-error" : undefined}
+          aria-invalid={!!(error && touched)}
+          aria-required
           items={itemsWithSelectedValue}
-          value={value}
+          onInputValueChange={(inputValue) => {
+            setSearch(inputValue);
+          }}
           onValueChange={(value) => validateInputOnChange(value)}
-          onInputValueChange={(inputValue) => setSearch(inputValue)}
           required
+          value={value}
         >
           <ComboboxTrigger
             render={
               <Button
-                variant="outline"
-                className="w-full justify-between font-normal px-3"
                 aria-invalid={!!(error && touched)}
+                className="w-full justify-between font-normal px-3"
+                variant="outline"
               >
                 <ComboboxValue>
                   {(item: Issuer) =>
@@ -130,15 +134,15 @@ export function IssuerField({
             }
           />
           <ComboboxContent>
-            <ComboboxInput showTrigger={false} placeholder="Search issuer..." />
+            <ComboboxInput placeholder="Search issuer..." showTrigger={false} />
             <ComboboxList>
               {issuers.map((baseIssuer) => (
-                <ComboboxGroup key={baseIssuer.id} className="overflow-hidden">
-                  <ComboboxItem value={baseIssuer} className="pl-4">
+                <ComboboxGroup className="overflow-hidden" key={baseIssuer.id}>
+                  <ComboboxItem className="pl-4" value={baseIssuer}>
                     <IssuerItemContent issuer={baseIssuer} />
                   </ComboboxItem>
                   {baseIssuer.predecessors?.map((pred) => (
-                    <ComboboxItem key={pred.id} value={pred} className="pl-6">
+                    <ComboboxItem className="pl-6" key={pred.id} value={pred}>
                       <IssuerItemContent issuer={pred} />
                     </ComboboxItem>
                   ))}

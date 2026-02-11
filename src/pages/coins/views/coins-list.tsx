@@ -1,13 +1,15 @@
-import { DataTable } from "@/components/composite/data-table.tsx";
-import { useListCoins } from "@/query/commands/coins.ts";
-import { useCoinsTableColumns } from "@/pages/coins/hooks/use-coins-table-columns.tsx";
-import { AddCoinDialog } from "@/pages/coins/components/add-coin-dialog.tsx";
 import { useState } from "react";
+
 import { SortingState } from "@tanstack/react-table";
+
+import { DataTable } from "@/components/composite/data-table.tsx";
 import { useDebounce } from "@/hooks/use-debounce.ts";
-import { EmptyCoins } from "@/pages/coins/components/empty-coins.tsx";
-import { ListCoinsRequest } from "@/query/types";
 import usePagination from "@/hooks/use-pagination.ts";
+import { AddCoinDialog } from "@/pages/coins/components/add-coin-dialog.tsx";
+import { EmptyCoins } from "@/pages/coins/components/empty-coins.tsx";
+import { useCoinsTableColumns } from "@/pages/coins/hooks/use-coins-table-columns.tsx";
+import { useListCoins } from "@/query/commands/coins.ts";
+import { ListCoinsRequest } from "@/query/types";
 
 export function CoinsList() {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -38,9 +40,23 @@ export function CoinsList() {
   return (
     <div className="h-full w-full flex justify-center items-start">
       <DataTable
-        data={data?.items ?? []}
+        actions={<AddCoinDialog onSuccess={handleRefresh} />}
         columns={columns}
+        data={data?.items ?? []}
+        empty={
+          <EmptyCoins
+            refresh={handleRefresh}
+            type={searchQuery.length ? "no match" : "no data"}
+          />
+        }
         loading={isLoading}
+        pagination={{
+          enabled: true,
+          pageIndex: page,
+          pageSize: size,
+          pageCount: Math.ceil(data?.total ?? 0 / size),
+          onPaginationChange: handlePaginationChange,
+        }}
         search={{
           enabled: true,
           value: searchQuery,
@@ -52,20 +68,6 @@ export function CoinsList() {
           sorting,
           onSortingChange: setSorting,
         }}
-        pagination={{
-          enabled: true,
-          pageIndex: page,
-          pageSize: size,
-          pageCount: Math.ceil(data?.total ?? 0 / size),
-          onPaginationChange: handlePaginationChange,
-        }}
-        actions={<AddCoinDialog onSuccess={handleRefresh} />}
-        empty={
-          <EmptyCoins
-            type={searchQuery.length ? "no match" : "no data"}
-            refresh={handleRefresh}
-          />
-        }
       />
     </div>
   );

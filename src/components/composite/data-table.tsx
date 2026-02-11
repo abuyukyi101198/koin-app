@@ -1,5 +1,7 @@
 "use client";
 
+import { ComponentProps, useState, ReactNode } from "react";
+
 import {
   SortingState,
   VisibilityState,
@@ -10,7 +12,9 @@ import {
   ColumnDef,
   Updater,
 } from "@tanstack/react-table";
+import { LoaderIcon } from "lucide-react";
 
+import { DataTableActionHeader } from "@/components/composite/data-table-action-header.tsx";
 import {
   Table,
   TableBody,
@@ -19,9 +23,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table.tsx";
-import { ComponentProps, useState, ReactNode } from "react";
-import { LoaderIcon } from "lucide-react";
-import { DataTableActionHeader } from "@/components/composite/data-table-action-header.tsx";
 
 export interface DataTableProps<TData> extends ComponentProps<"table"> {
   data: TData[];
@@ -85,9 +86,9 @@ export function DataTable<TData>({
     <div className="w-full p-4">
       {(search?.enabled || actions || pagination?.enabled) && (
         <DataTableActionHeader
-          search={search}
-          pagination={pagination}
           actions={actions}
+          pagination={pagination}
+          search={search}
         />
       )}
       <div className="overflow-hidden rounded-md border">
@@ -114,8 +115,8 @@ export function DataTable<TData>({
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
-                  key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  key={row.id}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -129,12 +130,12 @@ export function DataTable<TData>({
               ))
             ) : loading ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24">
+                <TableCell className="h-24" colSpan={columns.length}>
                   <div className="flex items-center justify-center h-full">
                     <LoaderIcon
-                      role="status"
                       aria-label="Loading"
                       className="size-4 animate-spin"
+                      role="status"
                     />
                   </div>
                 </TableCell>
@@ -142,8 +143,8 @@ export function DataTable<TData>({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
                   className="h-24 text-center"
+                  colSpan={columns.length}
                 >
                   {empty ? empty : "No results."}
                 </TableCell>
