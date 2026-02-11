@@ -40,9 +40,9 @@ export function DataTableActionHeader<TData>({
           <div className="flex items-center space-x-2">
             <Button
               className="hidden size-8 lg:flex"
-              disabled={pagination.pageIndex === 0}
+              disabled={pagination.pageIndex === 1}
               onClick={() =>
-                pagination.onPaginationChange(0, pagination.pageSize)
+                pagination.onPaginationChange(1, pagination.pageSize)
               }
               size="icon"
               variant="outline"
@@ -52,7 +52,7 @@ export function DataTableActionHeader<TData>({
             </Button>
             <Button
               className="size-8"
-              disabled={pagination.pageIndex === 0}
+              disabled={pagination.pageIndex === 1}
               onClick={() =>
                 pagination.onPaginationChange(
                   pagination.pageIndex - 1,
@@ -66,7 +66,7 @@ export function DataTableActionHeader<TData>({
               <ChevronLeft />
             </Button>
             <div className="flex w-25 items-center justify-center text-sm font-medium">
-              Page {pagination.pageIndex + 1} of{" "}
+              Page {pagination.pageIndex} of{" "}
               {pagination.pageCount ? pagination.pageCount : 1}
             </div>
             <Button

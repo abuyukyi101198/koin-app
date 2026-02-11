@@ -54,7 +54,7 @@ export function CoinsList() {
           enabled: true,
           pageIndex: page,
           pageSize: size,
-          pageCount: Math.ceil(data?.total ?? 0 / size),
+          pageCount: Math.ceil((data?.total ?? 0) / size),
           onPaginationChange: handlePaginationChange,
         }}
         search={{
