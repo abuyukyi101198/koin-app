@@ -1,7 +1,7 @@
 import { FormikProps } from "formik";
 
 import { Field, FieldContent } from "@/components/ui/field.tsx";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input.tsx";
 import { CoinFormData } from "@/pages/coins/components/schemas/coin-form-schema.ts";
 
 interface DescriptionFieldProps {

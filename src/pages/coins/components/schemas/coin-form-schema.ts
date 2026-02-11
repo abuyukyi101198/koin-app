@@ -25,7 +25,7 @@ export const coinFormSchema = yup.object().shape({
 
   year: yup
     .string()
-    .test("year-format", "Year must be a valid number", (value) => {
+    .test("year-format", "Year must be a valid number.", (value) => {
       if (value === "" || value === undefined) return false;
       const num = parseInt(value, 10);
       return !isNaN(num) && Number.isInteger(num);

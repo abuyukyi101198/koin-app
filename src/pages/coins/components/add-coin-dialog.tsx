@@ -1,7 +1,6 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 import { Formik, Form, FormikProps } from "formik";
-import { CircleAlertIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button.tsx";
@@ -22,19 +21,20 @@ import {
   FieldLegend,
   FieldDescription,
 } from "@/components/ui/field.tsx";
-import { CurrencyField } from "@/pages/coins/components/currency-field.tsx";
-import { DescriptionField } from "@/pages/coins/components/description-field.tsx";
-import { ImagesField } from "@/pages/coins/components/images-field.tsx";
-import { IssuerField } from "@/pages/coins/components/issuer-field.tsx";
-import { NotesField } from "@/pages/coins/components/notes-field.tsx";
-import { QuantityField } from "@/pages/coins/components/quantity-field.tsx";
-import { SaleValueField } from "@/pages/coins/components/sale-value-field.tsx";
+import { useToastFormErrors } from "@/hooks/use-toast-form-errors.tsx";
+import { CurrencyField } from "@/pages/coins/components/fields/currency-field.tsx";
+import { DescriptionField } from "@/pages/coins/components/fields/description-field.tsx";
+import { ImagesField } from "@/pages/coins/components/fields/images-field.tsx";
+import { IssuerField } from "@/pages/coins/components/fields/issuer-field.tsx";
+import { NotesField } from "@/pages/coins/components/fields/notes-field.tsx";
+import { QuantityField } from "@/pages/coins/components/fields/quantity-field.tsx";
+import { SaleValueField } from "@/pages/coins/components/fields/sale-value-field.tsx";
+import { ValueField } from "@/pages/coins/components/fields/value-field.tsx";
+import { YearField } from "@/pages/coins/components/fields/year-field.tsx";
 import {
   CoinFormData,
   coinFormSchema,
 } from "@/pages/coins/components/schemas/coin-form-schema.ts";
-import { ValueField } from "@/pages/coins/components/value-field.tsx";
-import { YearField } from "@/pages/coins/components/year-field.tsx";
 import { useCreateCoin } from "@/query/commands/coins.ts";
 import { CreateCoinRequest } from "@/query/types";
 
@@ -44,9 +44,9 @@ interface AddCoinDialogForm {
 
 export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
   const [isOpen, setIsOpen] = useState(false);
-  const activeErrorToastsRef = useRef<
-    Map<string, { resolve: () => void; toastId: number | string }>
-  >(new Map()); // Map<fieldName, {toastId, resolve}>
+
+  const renderErrors = useToastFormErrors<CoinFormData>();
+
   const createCoinMutation = useCreateCoin();
 
   const initialValues = {
@@ -136,62 +136,7 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
               setFieldTouched,
               isValid,
             }: FormikProps<CoinFormData>) => {
-              if (isOpen) {
-                // Handle error toasts with promises that resolve when errors clear
-                Object.entries(errors).forEach(([key, errorMessage]) => {
-                  if (
-                    typeof errorMessage === "string" &&
-                    touched[key as keyof typeof touched]
-                  ) {
-                    const existingToast = activeErrorToastsRef.current.get(key);
-
-                    // If we don't have a toast for this field, create one
-                    if (!existingToast) {
-                      let resolveToast: (() => void) | null = null;
-
-                      const promise = new Promise<void>((resolve) => {
-                        resolveToast = resolve;
-                      });
-
-                      const toastId = toast.promise(promise, {
-                        loading: errorMessage,
-                        position: "top-center",
-                        icon: (
-                          <CircleAlertIcon className="size-4 text-destructive" />
-                        ),
-                        className:
-                          "border-destructive! bg-red-100! dark:bg-red-900! text-destructive! text-xs!",
-                      }) as number | string;
-
-                      if (resolveToast) {
-                        activeErrorToastsRef.current.set(key, {
-                          toastId,
-                          resolve: resolveToast,
-                        });
-                      }
-                    }
-                  }
-                });
-
-                // Resolve promises for fields that no longer have errors
-                activeErrorToastsRef.current.forEach((toastData, key) => {
-                  const error = errors[key as keyof typeof errors];
-                  if (!error || typeof error !== "string") {
-                    if (toastData.resolve) {
-                      toastData.resolve();
-                    }
-                    activeErrorToastsRef.current.delete(key);
-                  }
-                });
-              } else {
-                activeErrorToastsRef.current.forEach((toastData) => {
-                  if (toastData.resolve) {
-                    toastData.resolve();
-                  }
-                });
-                activeErrorToastsRef.current.clear();
-              }
-
+              renderErrors({ errors, touched, isOpen });
               return (
                 <Form className="space-y-4 flex flex-col" noValidate>
                   <div className="grid grid-cols-3 gap-12 flex-1">
