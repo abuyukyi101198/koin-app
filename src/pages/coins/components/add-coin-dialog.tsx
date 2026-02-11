@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
-import { Formik, Form } from "formik";
+import { Formik, Form, FormikProps } from "formik";
+import { CircleAlertIcon } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button.tsx";
 import {
@@ -42,6 +44,9 @@ interface AddCoinDialogForm {
 
 export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
   const [isOpen, setIsOpen] = useState(false);
+  const activeErrorToastsRef = useRef<
+    Map<string, { resolve: () => void; toastId: number | string }>
+  >(new Map()); // Map<fieldName, {toastId, resolve}>
   const createCoinMutation = useCreateCoin();
 
   const initialValues = {
@@ -71,9 +76,21 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
       notes: (values.notes ?? "").trim() || undefined,
     };
 
-    createCoinMutation.mutate(coinData);
-    setIsOpen(false);
-    await onSuccess();
+    createCoinMutation.mutate(coinData, {
+      onSuccess: (coin) => {
+        toast.success(`${coin.title} added successfully!`, {
+          position: "bottom-right",
+        });
+        setIsOpen(false);
+        onSuccess();
+      },
+      onError: (error) => {
+        const errorMessage = error?.message || "Failed to add coin";
+        toast.error(errorMessage, {
+          position: "bottom-right",
+        });
+      },
+    });
   };
 
   return (
@@ -118,149 +135,207 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
               setFieldValue,
               setFieldTouched,
               isValid,
-            }) => (
-              <Form className="space-y-4 flex flex-col" noValidate>
-                <div className="grid grid-cols-3 gap-12 flex-1">
-                  {/* Left Column */}
-                  <div className="space-y-4">
-                    <FieldSet className="gap-2">
-                      <FieldLegend>Images</FieldLegend>
-                      <FieldDescription>
-                        Photographs or scans of your coin.
-                      </FieldDescription>
-                      <FieldGroup className="gap-3">
-                        <ImagesField
-                          setFieldTouched={setFieldTouched}
-                          setFieldValue={setFieldValue}
-                          value={{
-                            reverseImage: values.reverseImage,
-                            obverseImage: values.obverseImage,
-                          }}
-                        />
-                      </FieldGroup>
-                    </FieldSet>
-                  </div>
-                  {/* Right Column */}
-                  <div className="flex flex-col col-span-2 space-y-4">
-                    <FieldSet className="gap-2">
-                      <FieldLegend>Identification</FieldLegend>
-                      <FieldDescription>
-                        Identifying information of your coin like its face
-                        value, mint year, and issuing authority.
-                      </FieldDescription>
-                      <FieldGroup className="flex-row gap-4">
-                        <div className="flex flex-2 gap-0">
-                          <ValueField
-                            error={errors.value}
-                            setFieldTouched={setFieldTouched}
-                            setFieldValue={setFieldValue}
-                            touched={touched.value}
-                            value={values.value}
-                          />
-                          <CurrencyField
-                            error={errors.currency}
-                            setFieldTouched={setFieldTouched}
-                            setFieldValue={setFieldValue}
-                            touched={touched.currency}
-                            value={values.currency}
-                          />
-                        </div>
-                        <YearField
-                          error={errors.year}
-                          setFieldTouched={setFieldTouched}
-                          setFieldValue={setFieldValue}
-                          touched={touched.year}
-                          value={values.year}
-                        />
-                      </FieldGroup>
-                      <FieldGroup>
-                        <IssuerField
-                          error={errors.issuer}
-                          setFieldTouched={setFieldTouched}
-                          setFieldValue={setFieldValue}
-                          touched={touched.issuer}
-                          value={values.issuer}
-                        />
-                      </FieldGroup>
-                    </FieldSet>
+            }: FormikProps<CoinFormData>) => {
+              if (isOpen) {
+                // Handle error toasts with promises that resolve when errors clear
+                Object.entries(errors).forEach(([key, errorMessage]) => {
+                  if (
+                    typeof errorMessage === "string" &&
+                    touched[key as keyof typeof touched]
+                  ) {
+                    const existingToast = activeErrorToastsRef.current.get(key);
 
-                    <FieldSet className="gap-2">
-                      <FieldLegend>Description</FieldLegend>
-                      <FieldDescription>
-                        Additional description in case you want distinguish your
-                        coin from others of its mintage such as condition or
-                        even personal history.
-                      </FieldDescription>
-                      <FieldGroup>
-                        <DescriptionField
-                          error={errors.description}
-                          setFieldTouched={setFieldTouched}
-                          setFieldValue={setFieldValue}
-                          touched={touched.description}
-                          value={values.description}
-                        />
-                      </FieldGroup>
-                    </FieldSet>
+                    // If we don't have a toast for this field, create one
+                    if (!existingToast) {
+                      let resolveToast: (() => void) | null = null;
 
-                    <FieldSet className="gap-2">
-                      <FieldLegend>Inventory</FieldLegend>
-                      <FieldDescription>
-                        Number of coins you own of this mintage, and the
-                        estimated sale value of one.
-                      </FieldDescription>
-                      <FieldGroup className="flex-row gap-4">
-                        <QuantityField
-                          error={errors.quantity}
-                          setFieldTouched={setFieldTouched}
-                          setFieldValue={setFieldValue}
-                          touched={touched.quantity}
-                          value={values.quantity}
-                        />
-                        <SaleValueField
-                          error={errors.saleValue}
-                          setFieldTouched={setFieldTouched}
-                          setFieldValue={setFieldValue}
-                          touched={touched.saleValue}
-                          value={values.saleValue}
-                        />
-                      </FieldGroup>
-                    </FieldSet>
+                      const promise = new Promise<void>((resolve) => {
+                        resolveToast = resolve;
+                      });
 
-                    <FieldSet className="gap-2 flex flex-col flex-1">
-                      <FieldLegend>Notes</FieldLegend>
-                      <FieldDescription>
-                        Additional notes you want to add to your coin.
-                      </FieldDescription>
-                      <FieldGroup className="flex-1 flex flex-col">
-                        <NotesField
-                          error={errors.notes}
-                          setFieldTouched={setFieldTouched}
-                          setFieldValue={setFieldValue}
-                          touched={touched.notes}
-                          value={values.notes}
-                        />
-                      </FieldGroup>
-                    </FieldSet>
-                  </div>
-                </div>
-                <FieldSeparator />
-                <DialogFooter className="pt-2.5">
-                  <DialogClose asChild>
-                    <Button variant="outline">Cancel</Button>
-                  </DialogClose>
-                  <Button
-                    disabled={
-                      createCoinMutation.isPending || !(isValid && dirty)
+                      const toastId = toast.promise(promise, {
+                        loading: errorMessage,
+                        position: "top-center",
+                        icon: (
+                          <CircleAlertIcon className="size-4 text-destructive" />
+                        ),
+                        className:
+                          "border-destructive! bg-red-100! dark:bg-red-900! text-destructive! text-xs!",
+                      }) as number | string;
+
+                      if (resolveToast) {
+                        activeErrorToastsRef.current.set(key, {
+                          toastId,
+                          resolve: resolveToast,
+                        });
+                      }
                     }
-                    type="submit"
-                  >
-                    {createCoinMutation.isPending
-                      ? "Saving..."
-                      : "Save to catalogue"}
-                  </Button>
-                </DialogFooter>
-              </Form>
-            )}
+                  }
+                });
+
+                // Resolve promises for fields that no longer have errors
+                activeErrorToastsRef.current.forEach((toastData, key) => {
+                  const error = errors[key as keyof typeof errors];
+                  if (!error || typeof error !== "string") {
+                    if (toastData.resolve) {
+                      toastData.resolve();
+                    }
+                    activeErrorToastsRef.current.delete(key);
+                  }
+                });
+              } else {
+                activeErrorToastsRef.current.forEach((toastData) => {
+                  if (toastData.resolve) {
+                    toastData.resolve();
+                  }
+                });
+                activeErrorToastsRef.current.clear();
+              }
+
+              return (
+                <Form className="space-y-4 flex flex-col" noValidate>
+                  <div className="grid grid-cols-3 gap-12 flex-1">
+                    {/* Left Column */}
+                    <div className="space-y-4">
+                      <FieldSet className="gap-2">
+                        <FieldLegend>Images</FieldLegend>
+                        <FieldDescription>
+                          Photographs or scans of your coin.
+                        </FieldDescription>
+                        <FieldGroup className="gap-3">
+                          <ImagesField
+                            setFieldTouched={setFieldTouched}
+                            setFieldValue={setFieldValue}
+                            value={{
+                              reverseImage: values.reverseImage,
+                              obverseImage: values.obverseImage,
+                            }}
+                          />
+                        </FieldGroup>
+                      </FieldSet>
+                    </div>
+                    {/* Right Column */}
+                    <div className="flex flex-col col-span-2 space-y-4">
+                      <FieldSet className="gap-2">
+                        <FieldLegend>Identification</FieldLegend>
+                        <FieldDescription>
+                          Identifying information of your coin like its face
+                          value, mint year, and issuing authority.
+                        </FieldDescription>
+                        <FieldGroup className="flex-row gap-4">
+                          <div className="flex flex-2 gap-0">
+                            <ValueField
+                              error={errors.value}
+                              setFieldTouched={setFieldTouched}
+                              setFieldValue={setFieldValue}
+                              touched={touched.value}
+                              value={values.value}
+                            />
+                            <CurrencyField
+                              error={errors.currency}
+                              setFieldTouched={setFieldTouched}
+                              setFieldValue={setFieldValue}
+                              touched={touched.currency}
+                              value={values.currency}
+                            />
+                          </div>
+                          <YearField
+                            error={errors.year}
+                            setFieldTouched={setFieldTouched}
+                            setFieldValue={setFieldValue}
+                            touched={touched.year}
+                            value={values.year}
+                          />
+                        </FieldGroup>
+                        <FieldGroup>
+                          <IssuerField
+                            error={errors.issuer}
+                            setFieldTouched={setFieldTouched}
+                            setFieldValue={setFieldValue}
+                            touched={touched.issuer}
+                            value={values.issuer}
+                          />
+                        </FieldGroup>
+                      </FieldSet>
+
+                      <FieldSet className="gap-2">
+                        <FieldLegend>Description</FieldLegend>
+                        <FieldDescription>
+                          Additional description in case you want distinguish
+                          your coin from others of its mintage such as condition
+                          or even personal history.
+                        </FieldDescription>
+                        <FieldGroup>
+                          <DescriptionField
+                            error={errors.description}
+                            setFieldTouched={setFieldTouched}
+                            setFieldValue={setFieldValue}
+                            touched={touched.description}
+                            value={values.description}
+                          />
+                        </FieldGroup>
+                      </FieldSet>
+
+                      <FieldSet className="gap-2">
+                        <FieldLegend>Inventory</FieldLegend>
+                        <FieldDescription>
+                          Number of coins you own of this mintage, and the
+                          estimated sale value of one.
+                        </FieldDescription>
+                        <FieldGroup className="flex-row gap-4">
+                          <QuantityField
+                            error={errors.quantity}
+                            setFieldTouched={setFieldTouched}
+                            setFieldValue={setFieldValue}
+                            touched={touched.quantity}
+                            value={values.quantity}
+                          />
+                          <SaleValueField
+                            error={errors.saleValue}
+                            setFieldTouched={setFieldTouched}
+                            setFieldValue={setFieldValue}
+                            touched={touched.saleValue}
+                            value={values.saleValue}
+                          />
+                        </FieldGroup>
+                      </FieldSet>
+
+                      <FieldSet className="gap-2 flex flex-col flex-1">
+                        <FieldLegend>Notes</FieldLegend>
+                        <FieldDescription>
+                          Additional notes you want to add to your coin.
+                        </FieldDescription>
+                        <FieldGroup className="flex-1 flex flex-col">
+                          <NotesField
+                            error={errors.notes}
+                            setFieldTouched={setFieldTouched}
+                            setFieldValue={setFieldValue}
+                            touched={touched.notes}
+                            value={values.notes}
+                          />
+                        </FieldGroup>
+                      </FieldSet>
+                    </div>
+                  </div>
+                  <FieldSeparator />
+                  <DialogFooter className="pt-2.5">
+                    <DialogClose asChild>
+                      <Button variant="outline">Cancel</Button>
+                    </DialogClose>
+                    <Button
+                      disabled={
+                        createCoinMutation.isPending || !(isValid && dirty)
+                      }
+                      type="submit"
+                    >
+                      {createCoinMutation.isPending
+                        ? "Saving..."
+                        : "Save to catalogue"}
+                    </Button>
+                  </DialogFooter>
+                </Form>
+              );
+            }}
           </Formik>
         </DialogContent>
       </Dialog>

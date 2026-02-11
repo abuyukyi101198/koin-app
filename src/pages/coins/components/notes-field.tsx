@@ -34,6 +34,7 @@ export function NotesField({
           autoComplete="off"
           className="flex-1 resize-none"
           id="notes"
+          maxLength={1000}
           onChange={async (e) => validateInputOnChange(e.target.value)}
           placeholder="Additional notes"
           spellCheck="true"
