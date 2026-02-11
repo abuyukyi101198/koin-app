@@ -51,33 +51,29 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
     value: "",
     currency: "",
     year: "",
-    issuer: null as any,
+    issuer: null as never,
     quantity: "1",
     saleValue: "",
     notes: "",
   };
 
   const handleSubmit = async (values: CoinFormData) => {
-    try {
-      const coinData: CreateCoinRequest = {
-        value: parseFloat(values.value ?? "0"),
-        currency: (values.currency ?? "").trim(),
-        year: parseInt(values.year ?? "0", 10),
-        issuer_id: values.issuer!.id,
-        description: (values.description ?? "").trim() || undefined,
-        obverse_image: values.obverseImage || undefined,
-        reverse_image: values.reverseImage || undefined,
-        quantity: parseInt(values.quantity ?? "0", 10),
-        sale_value: values.saleValue ? parseFloat(values.saleValue) : undefined,
-        notes: (values.notes ?? "").trim() || undefined,
-      };
+    const coinData: CreateCoinRequest = {
+      value: parseFloat(values.value ?? "0"),
+      currency: (values.currency ?? "").trim(),
+      year: parseInt(values.year ?? "0", 10),
+      issuer_id: values.issuer!.id,
+      description: (values.description ?? "").trim() || undefined,
+      obverse_image: values.obverseImage || undefined,
+      reverse_image: values.reverseImage || undefined,
+      quantity: parseInt(values.quantity ?? "0", 10),
+      sale_value: values.saleValue ? parseFloat(values.saleValue) : undefined,
+      notes: (values.notes ?? "").trim() || undefined,
+    };
 
-      createCoinMutation.mutate(coinData);
-      setIsOpen(false);
-      await onSuccess();
-    } catch (error) {
-      console.error("Validation or submission error:", error);
-    }
+    createCoinMutation.mutate(coinData);
+    setIsOpen(false);
+    await onSuccess();
   };
 
   return (

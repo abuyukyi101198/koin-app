@@ -61,19 +61,18 @@ export function IssuerField({
   const [search, setSearch] = useState<string | null>(null);
   const { data } = useListIssuers({ search });
 
-  const issuers = data?.items ?? [];
   // Flatten issuers: include both base issuers and their predecessors
   // This allows all items to be properly selectable and managed in state
   const flattenedIssuers = useMemo(() => {
     const flattened: (Issuer | Omit<Issuer, "predecessors">)[] = [];
-    issuers.forEach((baseIssuer) => {
+    data?.items.forEach((baseIssuer) => {
       flattened.push(baseIssuer);
       if (baseIssuer.predecessors) {
         flattened.push(...baseIssuer.predecessors);
       }
     });
     return flattened;
-  }, [issuers]);
+  }, [data?.items]);
 
   // Ensure selected value persists in the items list
   // If value is selected but not in current search results, add it
@@ -136,7 +135,7 @@ export function IssuerField({
           <ComboboxContent>
             <ComboboxInput placeholder="Search issuer..." showTrigger={false} />
             <ComboboxList>
-              {issuers.map((baseIssuer) => (
+              {data?.items.map((baseIssuer) => (
                 <ComboboxGroup className="overflow-hidden" key={baseIssuer.id}>
                   <ComboboxItem className="pl-4" value={baseIssuer}>
                     <IssuerItemContent issuer={baseIssuer} />

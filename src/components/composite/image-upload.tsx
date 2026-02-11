@@ -111,7 +111,7 @@ export function ImageUploadField({
       setUrlError(null);
       setUrlInput("");
       setShowUrlDialog(false);
-    } catch (err) {
+    } catch (e) {
       setUrlError("Invalid URL.");
     }
   };

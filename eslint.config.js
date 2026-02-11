@@ -90,6 +90,7 @@ const commonRules = {
       args: "after-used",
       argsIgnorePattern: "^_",
       ignoreRestSiblings: true,
+      caughtErrors: "none",
     },
   ],
 
