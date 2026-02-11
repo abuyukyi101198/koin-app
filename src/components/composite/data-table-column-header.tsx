@@ -1,15 +1,9 @@
 import { HTMLAttributes } from "react";
 
 import type { Column } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
+import { ChevronDown, ChevronsUpDown, ChevronUp } from "lucide-react";
 
 import { Button } from "@/components/ui/button.tsx";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu.tsx";
 import { cn } from "@/lib/utils.ts";
 
 interface DataTableColumnHeaderProps<
@@ -31,42 +25,23 @@ export function DataTableColumnHeader<TData, TValue>({
 
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            className="data-[state=open]:bg-accent -ml-3 h-8"
-            size="sm"
-            variant="ghost"
-          >
-            <span>{title}</span>
-            {column.getIsSorted() === "desc" ? (
-              <ArrowDown />
-            ) : column.getIsSorted() === "asc" ? (
-              <ArrowUp />
-            ) : (
-              <ChevronsUpDown />
-            )}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          <DropdownMenuItem
-            onClick={() => {
-              column.toggleSorting(false);
-            }}
-          >
-            <ArrowUp />
-            Asc
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => {
-              column.toggleSorting(true);
-            }}
-          >
-            <ArrowDown />
-            Desc
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <Button
+        className="data-[state=open]:bg-accent -ml-3 h-8"
+        onClick={() => {
+          column.toggleSorting(column.getIsSorted() === "asc");
+        }}
+        size="sm"
+        variant="ghost"
+      >
+        <span>{title}</span>
+        {column.getIsSorted() === "desc" ? (
+          <ChevronUp />
+        ) : column.getIsSorted() === "asc" ? (
+          <ChevronDown />
+        ) : (
+          <ChevronsUpDown className="text-muted-foreground" />
+        )}
+      </Button>
     </div>
   );
 }

@@ -54,7 +54,7 @@ pub fn list_coins(
         "value",
         "currency",
         "year",
-        "issuer_id",
+        "issuer",
         "quantity",
         "sale_value",
         "created_at",
@@ -76,6 +76,12 @@ pub fn list_coins(
         String::new()
     };
 
+    let order_by_field = if sort_field == "issuer" {
+        "i.name".to_string()
+    } else {
+        format!("c.{}", sort_field)
+    };
+
     // Get total count
     let count_query = format!(
         "SELECT COUNT(*) FROM coins c LEFT JOIN issuers i ON c.issuer_id = i.id {}",
@@ -91,8 +97,8 @@ pub fn list_coins(
         "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.flag, c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at
          FROM coins c
          LEFT JOIN issuers i ON c.issuer_id = i.id
-         {} ORDER BY c.{} {} LIMIT ?1 OFFSET ?2",
-        where_clause, sort_field, sort_direction
+         {} ORDER BY {} {} LIMIT ?1 OFFSET ?2",
+        where_clause, order_by_field, sort_direction
     );
 
     let mut stmt = conn
@@ -171,7 +177,8 @@ pub fn update_coin(
     let mut params: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
 
     // Check if any of value, currency, year are being updated to regenerate title
-    let should_update_title = request.value.is_some() || request.currency.is_some() || request.year.is_some();
+    let should_update_title =
+        request.value.is_some() || request.currency.is_some() || request.year.is_some();
 
     if should_update_title {
         // Fetch current coin to get missing fields

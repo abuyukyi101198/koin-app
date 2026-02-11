@@ -80,6 +80,7 @@ export function DataTable<TData>({
       columnVisibility,
       rowSelection,
     },
+    manualSorting: true,
   });
 
   return (
