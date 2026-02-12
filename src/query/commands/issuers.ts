@@ -17,5 +17,6 @@ export function useListIssuers(
         search: options?.search || null,
       });
     },
+    staleTime: () => (options?.search === null ? Infinity : 0),
   });
 }

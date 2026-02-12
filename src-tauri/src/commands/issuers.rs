@@ -126,7 +126,7 @@ pub fn list_issuers(
                     end_year: row.get(4)?,
                     flag: row.get(5)?,
                     created_at: row.get(6)?,
-                    predecessors: None,
+                    predecessors: Some(Vec::new()),
                 })
             })
             .map_err(|e| format!("Failed to query batch base issuers: {}", e))?;

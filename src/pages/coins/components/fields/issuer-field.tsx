@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import { FormikProps } from "formik";
 import { SearchIcon } from "lucide-react";
@@ -8,7 +8,6 @@ import {
   Combobox,
   ComboboxContent,
   ComboboxEmpty,
-  ComboboxGroup,
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
@@ -16,6 +15,7 @@ import {
   ComboboxValue,
 } from "@/components/ui/combobox.tsx";
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field.tsx";
+import { cn } from "@/lib/utils.ts";
 import { CoinFormData } from "@/pages/coins/components/schemas/coin-form-schema.ts";
 import { useListIssuers } from "@/query/commands";
 import { Issuer } from "@/query/types";
@@ -45,9 +45,11 @@ const IssuerItemContent = ({
       </span>
       <span>{issuer.name}</span>
     </div>
-    <span className="text-xs italic text-muted-foreground leading-5">
-      ({issuer.start_year}-{issuer.end_year ?? "pres."})
-    </span>
+    {issuer.name !== "Other" && (
+      <span className="text-xs italic text-muted-foreground leading-5">
+        ({issuer.start_year}-{issuer.end_year ?? "pres."})
+      </span>
+    )}
   </div>
 );
 
@@ -58,11 +60,8 @@ export function IssuerField({
   setFieldValue,
   setFieldTouched,
 }: IssuerFieldProps) {
-  const [search, setSearch] = useState<string | null>(null);
-  const { data } = useListIssuers({ search });
+  const { data } = useListIssuers();
 
-  // Flatten issuers: include both base issuers and their predecessors
-  // This allows all items to be properly selectable and managed in state
   const flattenedIssuers = useMemo(() => {
     const flattened: (Issuer | Omit<Issuer, "predecessors">)[] = [];
     data?.items.forEach((baseIssuer) => {
@@ -74,17 +73,19 @@ export function IssuerField({
     return flattened;
   }, [data?.items]);
 
-  // Ensure selected value persists in the items list
-  // If value is selected but not in current search results, add it
-  const itemsWithSelectedValue = useMemo(() => {
-    if (!value) return flattenedIssuers;
-
-    const valueExists = flattenedIssuers.some((item) => item.id === value.id);
-    if (valueExists) return flattenedIssuers;
-
-    // Value exists but not in current search results - add it to preserve selection
-    return [...flattenedIssuers, value];
-  }, [flattenedIssuers, value]);
+  const filterIssuers = (itemValue: Issuer, query: string) => {
+    return (
+      itemValue.name.toLowerCase().includes(query.toLowerCase()) ||
+      (value && itemValue.id === value.id) ||
+      ("predecessors" in itemValue &&
+        itemValue.predecessors &&
+        itemValue.predecessors.some(
+          (pred) =>
+            pred.name.toLowerCase().includes(query.toLowerCase()) ||
+            (value && pred.id === value.id)
+        ))
+    );
+  };
 
   const validateInputOnChange = async (value: Issuer | null) => {
     await setFieldValue("issuer", value, true);
@@ -102,10 +103,8 @@ export function IssuerField({
           aria-describedby={error && touched ? "value-error" : undefined}
           aria-invalid={!!(error && touched)}
           aria-required
-          items={itemsWithSelectedValue}
-          onInputValueChange={(inputValue) => {
-            setSearch(inputValue);
-          }}
+          filter={filterIssuers}
+          items={flattenedIssuers}
           onValueChange={(value) => validateInputOnChange(value)}
           required
           value={value}
@@ -135,18 +134,20 @@ export function IssuerField({
           <ComboboxContent>
             <ComboboxInput placeholder="Search issuer..." showTrigger={false} />
             <ComboboxList>
-              {data?.items.map((baseIssuer) => (
-                <ComboboxGroup className="overflow-hidden" key={baseIssuer.id}>
-                  <ComboboxItem className="pl-4" value={baseIssuer}>
-                    <IssuerItemContent issuer={baseIssuer} />
-                  </ComboboxItem>
-                  {baseIssuer.predecessors?.map((pred) => (
-                    <ComboboxItem className="pl-6" key={pred.id} value={pred}>
-                      <IssuerItemContent issuer={pred} />
-                    </ComboboxItem>
-                  ))}
-                </ComboboxGroup>
-              ))}
+              {(item) => (
+                <ComboboxItem
+                  className={cn("cursor-pointer", {
+                    "pl-4":
+                      "predecessors" in item && item.predecessors !== null,
+                    "pl-6":
+                      "predecessors" in item && item.predecessors === null,
+                  })}
+                  key={item.id}
+                  value={item}
+                >
+                  <IssuerItemContent issuer={item} />
+                </ComboboxItem>
+              )}
             </ComboboxList>
             <ComboboxEmpty>No issuers found.</ComboboxEmpty>
           </ComboboxContent>
