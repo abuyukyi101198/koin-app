@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { ChevronRightIcon } from "lucide-react";
 
@@ -30,7 +30,11 @@ function IssuerContent({
             src={issuer.flag?.length ? issuer.flag : undefined}
           />
         </span>
-        <span className="truncate">{issuer.name}</span>
+        <span>
+          {issuer.name.length > 30
+            ? `${issuer.name.substring(0, 30)}...`
+            : issuer.name}
+        </span>
       </div>
       {issuer.name !== "Other" && (
         <span className="text-xs italic text-muted-foreground text-right leading-5 grow">
@@ -44,6 +48,18 @@ function IssuerContent({
 export function IssuersList() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const { data } = useListIssuers();
+
+  const issuers = useMemo(() => {
+    return data?.items.filter(
+      (issuer) =>
+        issuer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        ("predecessors" in issuer &&
+          issuer.predecessors &&
+          issuer.predecessors.some((pred) =>
+            pred.name.toLowerCase().includes(searchQuery.toLowerCase())
+          ))
+    );
+  }, [data?.items, searchQuery]);
 
   const renderItem = (issuer: Issuer | Omit<Issuer, "predecessors">) => {
     const content = <IssuerContent issuer={issuer} />;
@@ -103,7 +119,7 @@ export function IssuersList() {
       </div>
       <ScrollArea className="w-full overflow-hidden">
         <div className="mr-6 mb-6 flex flex-col gap-2">
-          {data?.items.map((item) => renderItem(item))}
+          {issuers?.map((item) => renderItem(item))}
         </div>
       </ScrollArea>
     </div>
