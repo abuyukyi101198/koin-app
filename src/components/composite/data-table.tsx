@@ -94,7 +94,7 @@ export function DataTable<TData extends { id: number | string }>({
           search={search}
         />
       )}
-      <div className="overflow-hidden rounded-md border">
+      <div className="overflow-hidden">
         <Table {...props}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

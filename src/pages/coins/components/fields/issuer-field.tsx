@@ -34,8 +34,8 @@ const IssuerItemContent = ({
   issuer: Issuer | Omit<Issuer, "predecessors">;
 }) => (
   <div className="w-full flex justify-between">
-    <div className="flex items-start gap-2">
-      <span className="pt-0.5">
+    <div className="flex items-start gap-2 pt-0.5">
+      <span>
         <img
           alt={`${issuer.name} flag`}
           className="h-4 w-6"
@@ -43,7 +43,7 @@ const IssuerItemContent = ({
           src={issuer.flag?.length ? issuer.flag : undefined}
         />
       </span>
-      <span>{issuer.name}</span>
+      <span className="truncate">{issuer.name}</span>
     </div>
     {issuer.name !== "Other" && (
       <span className="text-xs italic text-muted-foreground leading-5">
