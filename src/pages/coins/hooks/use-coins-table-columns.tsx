@@ -23,7 +23,7 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
                 {reverse_image ? (
                   <img
                     alt="Coin reverse"
-                    className="max-w-full max-h-full object-contain rounded"
+                    className="max-w-full max-h-full object-contain rounded-full"
                     src={reverse_image}
                   />
                 ) : (
@@ -36,7 +36,7 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
                 {obverse_image ? (
                   <img
                     alt="Coin obverse"
-                    className="max-w-full max-h-full object-contain rounded"
+                    className="max-w-full max-h-full object-contain rounded-full"
                     src={obverse_image}
                   />
                 ) : (

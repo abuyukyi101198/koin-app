@@ -14,7 +14,7 @@ export function CoinInfo({ coinId }: CoinInfoProps) {
           {data?.reverse_image ? (
             <img
               alt="Coin reverse"
-              className="max-w-full max-h-full object-contain rounded"
+              className="max-w-full max-h-full object-contain rounded-full"
               src={data.reverse_image}
             />
           ) : (
@@ -27,7 +27,7 @@ export function CoinInfo({ coinId }: CoinInfoProps) {
           {data?.obverse_image ? (
             <img
               alt="Coin obverse"
-              className="max-w-full max-h-full object-contain rounded"
+              className="max-w-full max-h-full object-contain rounded-full"
               src={data.obverse_image}
             />
           ) : (
