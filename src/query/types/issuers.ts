@@ -21,5 +21,7 @@ export interface PaginatedIssuers {
 }
 
 export interface ListIssuersRequest {
+  page?: number;
+  pageSize?: number;
   search?: string | null;
 }

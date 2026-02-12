@@ -13,15 +13,16 @@ pub fn list_issuers(
     let conn = get_db_connection(&app_handle)?;
 
     let offset = offset.unwrap_or(0);
-    let limit = limit.unwrap_or(50);
     let search_pattern = search.map(|s| format!("%{}%", s));
 
     // Validate pagination parameters
     if offset < 0 {
         return Err("offset must be non-negative".to_string());
     }
-    if limit <= 0 {
-        return Err("limit must be positive".to_string());
+    if let Some(l) = limit {
+        if l <= 0 {
+            return Err("limit must be positive".to_string());
+        }
     }
 
     // Step 1: Identify base-level issuers that match the search criteria
@@ -72,12 +73,20 @@ pub fn list_issuers(
     let total: i64 = matching_base_ids.len() as i64;
 
     // Step 2: Apply pagination to the matching base-level issuers
-    let paginated_base_ids: Vec<i32> = matching_base_ids
-        .iter()
-        .skip(offset as usize)
-        .take(limit as usize)
-        .copied()
-        .collect();
+    let paginated_base_ids: Vec<i32> = if let Some(l) = limit {
+        matching_base_ids
+            .iter()
+            .skip(offset as usize)
+            .take(l as usize)
+            .copied()
+            .collect()
+    } else {
+        matching_base_ids
+            .iter()
+            .skip(offset as usize)
+            .copied()
+            .collect()
+    };
 
     let mut items: Vec<Issuer> = Vec::new();
 
