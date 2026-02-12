@@ -10,46 +10,60 @@ import {
 } from "@/components/ui/collapsible.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
+import { cn } from "@/lib/utils.ts";
 import { useListIssuers } from "@/query/commands";
 import { Issuer } from "@/query/types";
+
+function IssuerContent({
+  issuer,
+}: {
+  issuer: Issuer | Omit<Issuer, "predecessors">;
+}) {
+  return (
+    <div className="w-full flex justify-between">
+      <div className="flex items-start gap-2 pt-0.5">
+        <span>
+          <img
+            alt={`${issuer.name} flag`}
+            className="h-4 w-6"
+            loading="lazy"
+            src={issuer.flag?.length ? issuer.flag : undefined}
+          />
+        </span>
+        <span className="truncate">{issuer.name}</span>
+      </div>
+      {issuer.name !== "Other" && (
+        <span className="text-xs italic text-muted-foreground text-right leading-5 grow">
+          ({issuer.start_year}-{issuer.end_year ?? "pres."})
+        </span>
+      )}
+    </div>
+  );
+}
 
 export function IssuersList() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const { data } = useListIssuers();
 
   const renderItem = (issuer: Issuer | Omit<Issuer, "predecessors">) => {
-    if (
-      "predecessors" in issuer &&
-      issuer.predecessors &&
-      issuer.predecessors.length
-    ) {
+    const content = <IssuerContent issuer={issuer} />;
+    const buttonProps = {
+      className:
+        "text-foreground font-normal w-full justify-start gap-2 max-w-full",
+      size: "xs" as const,
+      variant: "ghost" as const,
+    };
+
+    if ("predecessors" in issuer && issuer.predecessors?.length) {
       return (
         <Collapsible key={issuer.id}>
           <CollapsibleTrigger asChild>
             <Button
-              className="text-foreground font-normal w-full justify-start gap-2 pl-5.5 max-w-full cursor-pointer"
-              size="xs"
-              variant="ghost"
+              {...buttonProps}
+              className={cn(buttonProps.className, "group cursor-pointer")}
             >
               <ChevronRightIcon className="transition-transform group-data-[state=open]:rotate-90" />
-              <div className="w-full flex justify-between">
-                <div className="flex items-start gap-2 pt-0.5">
-                  <span>
-                    <img
-                      alt={`${issuer.name} flag`}
-                      className="h-4 w-6"
-                      loading="lazy"
-                      src={issuer.flag?.length ? issuer.flag : undefined}
-                    />
-                  </span>
-                  <span className="truncate">{issuer.name}</span>
-                </div>
-                {issuer.name !== "Other" && (
-                  <span className="text-xs italic text-muted-foreground text-right leading-5 grow">
-                    ({issuer.start_year}-{issuer.end_year ?? "pres."})
-                  </span>
-                )}
-              </div>
+              {content}
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="style-lyra:ml-4 mt-1 ml-5">
@@ -60,31 +74,17 @@ export function IssuersList() {
         </Collapsible>
       );
     }
+
     return (
       <Button
-        className="text-foreground font-normal w-full justify-start gap-2 pl-5.5 max-w-full"
         key={issuer.id}
-        size="xs"
-        variant="ghost"
+        {...buttonProps}
+        className={cn(buttonProps.className, {
+          "pl-4.5": "predecessors" in issuer && issuer.predecessors === null,
+          "pl-6.5": "predecessors" in issuer && issuer.predecessors !== null,
+        })}
       >
-        <div className="w-full flex justify-between">
-          <div className="flex items-start gap-2 pt-0.5">
-            <span>
-              <img
-                alt={`${issuer.name} flag`}
-                className="h-4 w-6"
-                loading="lazy"
-                src={issuer.flag?.length ? issuer.flag : undefined}
-              />
-            </span>
-            <span className="truncate">{issuer.name}</span>
-          </div>
-          {issuer.name !== "Other" && (
-            <span className="text-xs italic text-muted-foreground leading-5">
-              ({issuer.start_year}-{issuer.end_year ?? "pres."})
-            </span>
-          )}
-        </div>
+        {content}
       </Button>
     );
   };
@@ -94,10 +94,10 @@ export function IssuersList() {
       <div className="max-w-full flex items-center pb-3.5 pr-6 gap-2.5">
         <Input
           className="max-w-full"
-          onChange={(event) => {
-            setSearchQuery(event.target.value);
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
           }}
-          placeholder="Search..."
+          placeholder="Search issuers..."
           value={searchQuery}
         />
       </div>
