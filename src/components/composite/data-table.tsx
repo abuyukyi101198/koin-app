@@ -11,6 +11,7 @@ import {
   useReactTable,
   ColumnDef,
   Updater,
+  RowSelectionState,
 } from "@tanstack/react-table";
 import { LoaderIcon } from "lucide-react";
 
@@ -24,26 +25,26 @@ import {
   TableRow,
 } from "@/components/ui/table.tsx";
 
-export interface DataTableProps<TData> extends ComponentProps<"table"> {
+export interface DataTableProps<
+  TData extends { id: number | string },
+> extends ComponentProps<"table"> {
   data: TData[];
   columns: ColumnDef<TData>[];
   loading: boolean;
-  // Search state - controlled from parent
   search?: {
-    enabled: boolean;
     value: string;
     onChange: (value: string) => void;
     placeholder?: string;
   };
-  // Sort configuration
+  selection?: {
+    rowSelection: RowSelectionState;
+    onRowSelectionChange: (updaterOrValue: Updater<RowSelectionState>) => void;
+  };
   sort?: {
-    enabled: boolean;
     sorting: SortingState;
     onSortingChange: (updaterOrValue: Updater<SortingState>) => void;
   };
-  // Pagination configuration matching React Table
   pagination?: {
-    enabled: boolean;
     pageIndex: number;
     pageSize: number;
     pageCount: number;
@@ -53,18 +54,18 @@ export interface DataTableProps<TData> extends ComponentProps<"table"> {
   empty?: ReactNode;
 }
 
-export function DataTable<TData>({
+export function DataTable<TData extends { id: number | string }>({
   data,
   columns,
   loading,
   search,
+  selection,
   sort,
   pagination,
   actions,
   empty,
   ...props
 }: DataTableProps<TData>) {
-  const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const table = useReactTable({
@@ -72,20 +73,21 @@ export function DataTable<TData>({
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: sort?.onSortingChange,
-    getSortedRowModel: sort?.enabled ? getSortedRowModel() : undefined,
-    onRowSelectionChange: setRowSelection,
+    getSortedRowModel: sort ? getSortedRowModel() : undefined,
+    getRowId: (originalRow) => originalRow.id.toString(),
+    onRowSelectionChange: selection?.onRowSelectionChange,
     onColumnVisibilityChange: setColumnVisibility,
     state: {
       sorting: sort?.sorting || [],
       columnVisibility,
-      rowSelection,
+      rowSelection: selection?.rowSelection,
     },
     manualSorting: true,
   });
 
   return (
-    <div className="w-full p-4">
-      {(search?.enabled || actions || pagination?.enabled) && (
+    <div className="w-full">
+      {(search || actions || pagination) && (
         <DataTableActionHeader
           actions={actions}
           pagination={pagination}
@@ -116,8 +118,13 @@ export function DataTable<TData>({
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
-                  data-state={row.getIsSelected() && "selected"}
+                  className="cursor-pointer"
                   key={row.id}
+                  onClick={() => {
+                    table.setRowSelection({
+                      [row.id]: !row.getIsSelected(),
+                    });
+                  }}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell className="px-6" key={cell.id}>

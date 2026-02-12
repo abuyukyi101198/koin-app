@@ -1,17 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { SortingState } from "@tanstack/react-table";
 
-import { DataTable } from "@/components/composite/data-table.tsx";
+import {
+  DataTable,
+  DataTableProps,
+} from "@/components/composite/data-table.tsx";
 import { useDebounce } from "@/hooks/use-debounce.ts";
 import usePagination from "@/hooks/use-pagination.ts";
 import { AddCoinDialog } from "@/pages/coins/components/add-coin-dialog.tsx";
 import { EmptyCoins } from "@/pages/coins/components/empty-coins.tsx";
 import { useCoinsTableColumns } from "@/pages/coins/hooks/use-coins-table-columns.tsx";
 import { useListCoins } from "@/query/commands/coins.ts";
-import { ListCoinsRequest } from "@/query/types";
+import { Coin, ListCoinsRequest } from "@/query/types";
 
-export function CoinsList() {
+interface CoinsListProps {
+  selection: DataTableProps<Coin>["selection"];
+}
+
+export function CoinsList({ selection }: CoinsListProps) {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sorting, setSorting] = useState<SortingState>([
     { id: "issuer", desc: false },
@@ -37,9 +44,18 @@ export function CoinsList() {
     await refetch();
   };
 
+  useEffect(() => {
+    if (
+      data?.items &&
+      Object.keys(selection?.rowSelection ?? {}).length === 0
+    ) {
+      selection?.onRowSelectionChange({ [data.items[0].id]: true });
+    }
+  }, [data?.items, selection]);
+
   return (
-    <div className="h-full w-full flex justify-center items-start">
-      <DataTable
+    <div className="h-full w-full flex justify-center items-start p-6">
+      <DataTable<Coin>
         actions={<AddCoinDialog onSuccess={handleRefresh} />}
         columns={columns}
         data={data?.items ?? []}
@@ -51,20 +67,18 @@ export function CoinsList() {
         }
         loading={isLoading}
         pagination={{
-          enabled: true,
           pageIndex: page,
           pageSize: size,
           pageCount: Math.ceil((data?.total ?? 0) / size),
           onPaginationChange: handlePaginationChange,
         }}
         search={{
-          enabled: true,
           value: searchQuery,
           onChange: setSearchQuery,
           placeholder: "Search your catalogue...",
         }}
+        selection={selection}
         sort={{
-          enabled: true,
           sorting,
           onSortingChange: setSorting,
         }}

@@ -9,20 +9,20 @@ import { DataTableProps } from "@/components/composite/data-table.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 
-interface DataTableActionHeaderProps<TData> {
+interface DataTableActionHeaderProps<TData extends { id: number | string }> {
   search?: DataTableProps<TData>["search"];
   pagination?: DataTableProps<TData>["pagination"];
   actions?: DataTableProps<TData>["actions"];
 }
 
-export function DataTableActionHeader<TData>({
+export function DataTableActionHeader<TData extends { id: number | string }>({
   search,
   pagination,
   actions,
 }: DataTableActionHeaderProps<TData>) {
   return (
-    <div className="w-full flex items-center justify-between py-3.5 gap-2.5">
-      {search?.enabled && (
+    <div className="w-full flex items-center justify-between pb-3.5 gap-2.5">
+      {search && (
         <Input
           className="max-w-full"
           onChange={(event) => {
@@ -36,7 +36,7 @@ export function DataTableActionHeader<TData>({
       <div className="flex items-center gap-2.5 ml-auto">
         {actions && <div>{actions}</div>}
 
-        {pagination?.enabled && (
+        {pagination && (
           <div className="flex items-center space-x-2">
             <Button
               className="hidden size-8 lg:flex"
