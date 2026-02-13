@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils.ts";
 import { useListIssuers } from "@/query/commands";
 import { Issuer } from "@/query/types";
 
-function IssuerContent({
+function IssuerItem({
   issuer,
 }: {
   issuer: Issuer | Omit<Issuer, "predecessors">;
@@ -47,22 +47,53 @@ function IssuerContent({
 
 export function IssuersList() {
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [openCollapsibles, setOpenCollapsibles] = useState<Set<number>>(
+    new Set()
+  );
   const { data } = useListIssuers();
 
+  // Helper function to check if an issuer or its predecessors match the search
+
   const issuers = useMemo(() => {
-    return data?.items.filter(
-      (issuer) =>
+    const matchesSearch = (
+      issuer: Issuer | Omit<Issuer, "predecessors">
+    ): boolean => {
+      return (
         issuer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         ("predecessors" in issuer &&
           issuer.predecessors &&
           issuer.predecessors.some((pred) =>
             pred.name.toLowerCase().includes(searchQuery.toLowerCase())
           ))
-    );
+      );
+    };
+    return data?.items.filter(matchesSearch);
   }, [data?.items, searchQuery]);
 
+  // Auto-open collapsibles when search query exists and has matching predecessors
+  useMemo(() => {
+    if (searchQuery.trim() === "") {
+      // Clear auto-opened collapsibles when search is cleared
+      setOpenCollapsibles(new Set());
+    } else {
+      // Auto-open collapsibles with matching predecessors
+      const toOpen = new Set<number>();
+      data?.items.forEach((issuer) => {
+        if (
+          "predecessors" in issuer &&
+          issuer.predecessors &&
+          issuer.predecessors.some((pred) =>
+            pred.name.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        ) {
+          toOpen.add(issuer.id);
+        }
+      });
+      setOpenCollapsibles(toOpen);
+    }
+  }, [searchQuery, data?.items]);
+
   const renderItem = (issuer: Issuer | Omit<Issuer, "predecessors">) => {
-    const content = <IssuerContent issuer={issuer} />;
     const buttonProps = {
       className:
         "text-foreground font-normal w-full justify-start gap-2 max-w-full",
@@ -70,21 +101,43 @@ export function IssuersList() {
       variant: "ghost" as const,
     };
 
-    if ("predecessors" in issuer && issuer.predecessors?.length) {
+    // Filter predecessors based on search query
+    const filteredPredecessors =
+      "predecessors" in issuer && issuer.predecessors
+        ? issuer.predecessors.filter((pred) =>
+            pred.name.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        : null;
+
+    if ("predecessors" in issuer && filteredPredecessors?.length) {
+      const isOpen = openCollapsibles.has(issuer.id);
+
       return (
-        <Collapsible key={issuer.id}>
+        <Collapsible
+          key={issuer.id}
+          onOpenChange={(open) => {
+            const newOpen = new Set(openCollapsibles);
+            if (open) {
+              newOpen.add(issuer.id);
+            } else {
+              newOpen.delete(issuer.id);
+            }
+            setOpenCollapsibles(newOpen);
+          }}
+          open={isOpen}
+        >
           <CollapsibleTrigger asChild>
             <Button
               {...buttonProps}
               className={cn(buttonProps.className, "group cursor-pointer")}
             >
               <ChevronRightIcon className="transition-transform group-data-[state=open]:rotate-90" />
-              {content}
+              <IssuerItem issuer={issuer} />
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="style-lyra:ml-4 mt-1 ml-5">
             <div className="flex flex-col gap-1">
-              {issuer.predecessors?.map((child) => renderItem(child))}
+              {filteredPredecessors?.map((child) => renderItem(child))}
             </div>
           </CollapsibleContent>
         </Collapsible>
@@ -100,7 +153,7 @@ export function IssuersList() {
           "pl-6.5": "predecessors" in issuer && issuer.predecessors !== null,
         })}
       >
-        {content}
+        <IssuerItem issuer={issuer} />
       </Button>
     );
   };
