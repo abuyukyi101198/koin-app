@@ -33,6 +33,11 @@ export interface GetCoinRequest {
   id: number;
 }
 
+export interface GetSimilarCoinsRequest {
+  id: number;
+  pageSize?: number;
+}
+
 export interface CreateCoinRequest {
   value: number;
   currency: string;

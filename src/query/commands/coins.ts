@@ -12,6 +12,7 @@ import {
   CreateCoinRequest,
   DeleteCoinRequest,
   GetCoinRequest,
+  GetSimilarCoinsRequest,
   ListCoinsRequest,
   PaginatedCoins,
   UpdateCoinRequest,
@@ -53,6 +54,20 @@ export function useGetCoin(options: GetCoinRequest): UseQueryResult<Coin> {
     queryKey: [COINS_QUERY_KEY, "get", options.id],
     queryFn: async () => {
       return await invoke<Coin>("get_coin", { id: options.id });
+    },
+  });
+}
+
+export function useGetSimilarCoins(
+  options?: GetSimilarCoinsRequest
+): UseQueryResult<PaginatedCoins> {
+  return useQuery({
+    queryKey: [COINS_QUERY_KEY, "get_similar", options?.pageSize],
+    queryFn: async () => {
+      return await invoke<PaginatedCoins>("list_coins", {
+        id: options?.id,
+        limit: options?.pageSize,
+      });
     },
   });
 }

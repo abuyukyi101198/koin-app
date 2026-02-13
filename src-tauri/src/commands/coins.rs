@@ -256,3 +256,73 @@ pub fn delete_coin(app_handle: tauri::AppHandle, id: i32) -> Result<(), String> 
 
     Ok(())
 }
+
+#[tauri::command]
+pub fn get_similar_coins(
+    app_handle: tauri::AppHandle,
+    id: i32,
+    limit: Option<i64>,
+) -> Result<PaginatedCoinsResponse, String> {
+    let conn = get_db_connection(&app_handle)?;
+    let limit = limit.unwrap_or(5);
+
+    // Fetch the target coin to compare against
+    let target_coin = get_coin(app_handle.clone(), id)?;
+
+    // Query all coins except the target
+    let query = "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.flag, c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at
+                 FROM coins c
+                 LEFT JOIN issuers i ON c.issuer_id = i.id
+                 WHERE c.id != ?1";
+
+    let mut stmt = conn
+        .prepare(query)
+        .map_err(|e| format!("Failed to prepare statement: {}", e))?;
+
+    let coins_iter = stmt
+        .query_map([id], |row| build_coin_from_row(row))
+        .map_err(|e| format!("Failed to query coins: {}", e))?;
+
+    // Score and collect coins
+    let mut scored_coins: Vec<(Coin, i32)> = coins_iter
+        .filter_map(|result| {
+            if let Ok(coin) = result {
+                let mut score = 0;
+
+                // Issuer proximity scoring - closer issuer_ids are more similar
+                let issuer_distance = (coin.issuer.id - target_coin.issuer.id).abs();
+                let issuer_score = (30 - issuer_distance.min(30)) as i32;
+                score += issuer_score;
+
+                // Currency exact match
+                if coin.currency == target_coin.currency {
+                    score += 25;
+                }
+
+                // Year proximity scoring - closer years are more similar
+                let year_distance = (coin.year - target_coin.year).abs();
+                let year_score = (45 - year_distance.min(45)) as i32;
+                score += year_score;
+
+                Some((coin, score))
+            } else {
+                None
+            }
+        })
+        .collect();
+
+    // Sort by score descending, then by created_at descending
+    scored_coins.sort_by(|a, b| {
+        b.1.cmp(&a.1)
+            .then_with(|| b.0.created_at.cmp(&a.0.created_at))
+    });
+
+    // Extract coins and limit results
+    let items: Vec<Coin> = scored_coins
+        .into_iter()
+        .take(limit as usize)
+        .map(|(coin, _)| coin)
+        .collect();
+
+    Ok(PaginatedCoinsResponse { items, total: limit })
+}

@@ -1,7 +1,7 @@
 mod commands;
 mod db;
 mod types;
-use crate::commands::coins::{create_coin, delete_coin, get_coin, list_coins, update_coin};
+use crate::commands::coins::{create_coin, delete_coin, get_coin, get_similar_coins, list_coins, update_coin};
 use crate::commands::issuers::list_issuers;
 use tauri::Manager;
 
@@ -13,6 +13,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             list_coins,
             get_coin,
+            get_similar_coins,
             create_coin,
             update_coin,
             delete_coin,
