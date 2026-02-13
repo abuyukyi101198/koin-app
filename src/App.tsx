@@ -9,6 +9,7 @@ import { Toaster } from "@/components/ui/sonner.tsx";
 import { ThemeProvider } from "@/components/ui/theme-provider.tsx";
 import { TooltipProvider } from "@/components/ui/tooltip.tsx";
 import { CoinInfo } from "@/pages/coins/views/coin-info.tsx";
+import { CoinPreview } from "@/pages/coins/views/coin-preview.tsx";
 import { CoinsList } from "@/pages/coins/views/coins-list.tsx";
 import { IssuersList } from "@/pages/coins/views/issuers-list.tsx";
 
@@ -20,12 +21,19 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <TooltipProvider>
           <main className="h-screen w-screen">
             <div className="h-full w-full flex flex-col border-collapse">
               <div className="flex flex-1 max-h-1/2">
-                <div className="w-3/4 border-r border-b">
+                <div className="w-1/6 border-r border-b">
+                  <div className="flex h-full items-center justify-center p-6">
+                    {coinSelectionIds.length ? (
+                      <CoinPreview coinId={coinSelectionIds[0]} />
+                    ) : null}
+                  </div>
+                </div>
+                <div className="w-7/12 border-r border-b">
                   <div className="flex h-full items-center justify-center">
                     {coinSelectionIds.length ? (
                       <CoinInfo coinId={coinSelectionIds[0]} />
@@ -34,7 +42,7 @@ function App() {
                 </div>
                 <div className="w-1/4 border-b">
                   <div className="flex h-full items-center justify-center p-6">
-                    <span className="font-semibold">Details</span>
+                    <span className="font-semibold">Similar</span>
                   </div>
                 </div>
               </div>
