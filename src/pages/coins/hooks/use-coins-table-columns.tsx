@@ -19,7 +19,7 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
         }) => {
           return (
             <div className="flex gap-2">
-              <div className="h-14 aspect-square flex items-center justify-center">
+              <div className="h-12 aspect-square flex items-center justify-center">
                 {reverse_image ? (
                   <img
                     alt="Coin reverse"
@@ -32,7 +32,7 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
                   </div>
                 )}
               </div>
-              <div className="h-14 aspect-square flex items-center justify-center">
+              <div className="h-12 aspect-square flex items-center justify-center">
                 {obverse_image ? (
                   <img
                     alt="Coin obverse"
@@ -62,7 +62,7 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
         }) => {
           return (
             <div className="flex flex-col">
-              <span>{title}</span>
+              <span className="text-xs font-medium">{title}</span>
               <span className="text-muted-foreground text-xs italic">
                 {description?.length ? description : "—"}
               </span>
@@ -87,12 +87,12 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
                 <span className="pt-0.5">
                   <img
                     alt={`${issuer.name} flag`}
-                    className="h-4 w-6"
+                    className="h-3 w-4.5"
                     loading="lazy"
                     src={issuer.flag?.length ? issuer.flag : undefined}
                   />
                 </span>
-                <span>{issuer.name}</span>
+                <span className="text-xs">{issuer.name}</span>
               </div>
             </div>
           );
@@ -106,7 +106,9 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
         ),
         cell: ({ row }) => {
           return (
-            <div className="text-right">{row.getValue("year") as number}</div>
+            <div className="text-xs text-right">
+              {row.getValue("year") as number}
+            </div>
           );
         },
       },
@@ -121,7 +123,7 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
             original: { quantity },
           },
         }) => {
-          return <div className="text-right">{quantity}</div>;
+          return <div className="text-xs text-right">{quantity}</div>;
         },
       },
       {
@@ -136,7 +138,7 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
           },
         }) => {
           return (
-            <div className="text-right">
+            <div className="text-xs text-right">
               {sale_value
                 ? new Intl.NumberFormat("en-US", {
                     style: "currency",
