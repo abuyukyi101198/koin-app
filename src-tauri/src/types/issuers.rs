@@ -17,6 +17,8 @@ pub struct Issuer {
 pub struct IssuerDisplay {
     pub id: i32,
     pub name: String,
+    pub start_year: Option<i32>,
+    pub end_year: Option<i32>,
     pub flag: Option<String>,
 }
 

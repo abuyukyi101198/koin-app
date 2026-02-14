@@ -13,15 +13,17 @@ fn build_coin_from_row(row: &rusqlite::Row) -> Result<Coin, rusqlite::Error> {
         issuer: IssuerDisplay {
             id: row.get(5)?,
             name: row.get(6)?,
-            flag: row.get(7)?,
+            start_year: row.get(7)?,
+            end_year: row.get(8)?,
+            flag: row.get(9)?,
         },
-        description: row.get(8)?,
-        obverse_image: row.get(9)?,
-        reverse_image: row.get(10)?,
-        quantity: row.get(11)?,
-        sale_value: row.get(12)?,
-        notes: row.get(13)?,
-        created_at: row.get(14)?,
+        description: row.get(10)?,
+        obverse_image: row.get(11)?,
+        reverse_image: row.get(12)?,
+        quantity: row.get(13)?,
+        sale_value: row.get(14)?,
+        notes: row.get(15)?,
+        created_at: row.get(16)?,
     })
 }
 
@@ -94,7 +96,7 @@ pub fn list_coins(
 
     // Get paginated coins
     let query = format!(
-        "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.flag, c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at
+        "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.start_year, i.end_year, i.flag, c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at
          FROM coins c
          LEFT JOIN issuers i ON c.issuer_id = i.id
          {} ORDER BY {} {} LIMIT ?1 OFFSET ?2",
@@ -118,7 +120,7 @@ pub fn list_coins(
 pub fn get_coin(app_handle: tauri::AppHandle, id: i32) -> Result<Coin, String> {
     let conn = get_db_connection(&app_handle)?;
 
-    let query = "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.flag, c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at
+    let query = "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.start_year, i.end_year, i.flag, c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at
                 FROM coins c
                 LEFT JOIN issuers i ON c.issuer_id = i.id 
                 WHERE c.id = ?1";

@@ -12,6 +12,8 @@ export interface Issuer {
 export interface IssuerDisplay {
   id: number;
   name: string;
+  start_year: number;
+  end_year: number | null;
   flag: string;
 }
 
