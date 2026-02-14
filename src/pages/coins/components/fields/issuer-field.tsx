@@ -35,7 +35,7 @@ const IssuerItemContent = ({
 }) => (
   <div className="w-full flex justify-between">
     <div className="flex items-start gap-2 pt-0.5">
-      <span>
+      <span className="pt-0.5">
         <img
           alt={`${issuer.name} flag`}
           className="h-4 w-6"
