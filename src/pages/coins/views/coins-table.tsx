@@ -25,7 +25,7 @@ export function CoinsTable({ selection }: CoinsListProps) {
   ]);
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
-  const { page, size, setPage } = usePagination(6);
+  const { page, size, setPage } = usePagination(10);
 
   // Build search/sort options for the hook
   const listCoinsOptions: ListCoinsRequest = {
