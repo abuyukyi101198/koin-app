@@ -57,7 +57,7 @@ export function CoinsTable({ selection }: CoinsListProps) {
   }, [data?.items, selection]);
 
   return (
-    <div className="h-full w-full flex justify-center items-start p-6">
+    <div className="h-full w-full flex justify-center items-start p-6 pb-0">
       <DataTable<Coin>
         actions={<AddCoinDialog onSuccess={handleRefresh} />}
         columns={columns}

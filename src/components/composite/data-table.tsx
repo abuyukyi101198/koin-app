@@ -15,6 +15,8 @@ import {
 } from "@tanstack/react-table";
 import { LoaderIcon } from "lucide-react";
 
+import { ScrollArea } from "../ui/scroll-area";
+
 import { DataTableActionHeader } from "@/components/composite/data-table-action-header.tsx";
 import {
   Table,
@@ -100,7 +102,7 @@ export function DataTable<TData extends { id: number | string }>({
   });
 
   return (
-    <div className="w-full">
+    <div className="h-full w-full">
       {(search || actions || pagination) && (
         <DataTableActionHeader
           actions={actions}
@@ -108,90 +110,92 @@ export function DataTable<TData extends { id: number | string }>({
           search={search}
         />
       )}
-      <div className="overflow-x-auto">
-        <Table {...props}>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow className="hover:bg-background" key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  const meta = getMeta(header.column.columnDef);
-                  const widthPercent = getColumnWidth(meta.size);
-                  const responsiveClass = meta.responsiveClass || "";
-
-                  return (
-                    <TableHead
-                      className={`px-6 ${responsiveClass}`}
-                      key={header.id}
-                      style={{ width: `${widthPercent}%` }}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  className="cursor-pointer"
-                  key={row.id}
-                  onClick={() => {
-                    table.setRowSelection({
-                      [row.id]: !row.getIsSelected(),
-                    });
-                  }}
-                >
-                  {row.getVisibleCells().map((cell) => {
-                    const meta = getMeta(cell.column.columnDef);
+      <div className="h-full max-h-[calc(100%-50px)] overflow-x-auto">
+        <ScrollArea className="h-full w-full">
+          <Table {...props}>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow className="hover:bg-background" key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    const meta = getMeta(header.column.columnDef);
                     const widthPercent = getColumnWidth(meta.size);
                     const responsiveClass = meta.responsiveClass || "";
 
                     return (
-                      <TableCell
+                      <TableHead
                         className={`px-6 ${responsiveClass}`}
-                        key={cell.id}
+                        key={header.id}
                         style={{ width: `${widthPercent}%` }}
                       >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
                     );
                   })}
                 </TableRow>
-              ))
-            ) : loading ? (
-              <TableRow>
-                <TableCell className="h-24" colSpan={columns.length}>
-                  <div className="flex items-center justify-center h-full">
-                    <LoaderIcon
-                      aria-label="Loading"
-                      className="size-4 animate-spin"
-                      role="status"
-                    />
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : (
-              <TableRow>
-                <TableCell
-                  className="h-24 text-center"
-                  colSpan={columns.length}
-                >
-                  {empty ? empty : "No results."}
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    className="cursor-pointer"
+                    key={row.id}
+                    onClick={() => {
+                      table.setRowSelection({
+                        [row.id]: !row.getIsSelected(),
+                      });
+                    }}
+                  >
+                    {row.getVisibleCells().map((cell) => {
+                      const meta = getMeta(cell.column.columnDef);
+                      const widthPercent = getColumnWidth(meta.size);
+                      const responsiveClass = meta.responsiveClass || "";
+
+                      return (
+                        <TableCell
+                          className={`px-6 ${responsiveClass}`}
+                          key={cell.id}
+                          style={{ width: `${widthPercent}%` }}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                ))
+              ) : loading ? (
+                <TableRow>
+                  <TableCell className="h-24" colSpan={columns.length}>
+                    <div className="flex items-center justify-center h-full">
+                      <LoaderIcon
+                        aria-label="Loading"
+                        className="size-4 animate-spin"
+                        role="status"
+                      />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                <TableRow>
+                  <TableCell
+                    className="h-24 text-center"
+                    colSpan={columns.length}
+                  >
+                    {empty ? empty : "No results."}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </ScrollArea>
       </div>
     </div>
   );

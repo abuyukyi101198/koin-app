@@ -159,8 +159,8 @@ export function IssuersList() {
   };
 
   return (
-    <div className="h-full max-w-full pl-6 pt-6 flex flex-col">
-      <div className="max-w-full flex items-center pb-3.5 pr-6 gap-2.5">
+    <div className="h-full max-w-full p-6 pb-0 flex flex-col">
+      <div className="max-w-full flex items-center pb-3.5 gap-2.5">
         <Input
           className="max-w-full"
           onChange={(e) => {
@@ -171,7 +171,7 @@ export function IssuersList() {
         />
       </div>
       <ScrollArea className="w-full overflow-hidden">
-        <div className="mr-6 mb-6 flex flex-col gap-2">
+        <div className="mb-3 flex flex-col gap-2">
           {issuers?.map((item) => renderItem(item))}
         </div>
       </ScrollArea>
