@@ -106,7 +106,9 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
       )}
       <Dialog modal={false} onOpenChange={setIsOpen} open={isOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline">Add new coin</Button>
+          <Button className="cursor-pointer" variant="outline">
+            Add new coin
+          </Button>
         </DialogTrigger>
         <DialogContent
           className="sm:max-w-4xl p-8 z-50"
@@ -265,9 +267,12 @@ export function AddCoinDialog({ onSuccess }: AddCoinDialogForm) {
                   <FieldSeparator />
                   <DialogFooter className="pt-2.5">
                     <DialogClose asChild>
-                      <Button variant="outline">Cancel</Button>
+                      <Button className="cursor-pointer" variant="outline">
+                        Cancel
+                      </Button>
                     </DialogClose>
                     <Button
+                      className="cursor-pointer"
                       disabled={
                         createCoinMutation.isPending || !(isValid && dirty)
                       }

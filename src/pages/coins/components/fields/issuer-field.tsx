@@ -113,7 +113,7 @@ export function IssuerField({
             render={
               <Button
                 aria-invalid={!!(error && touched)}
-                className="w-full justify-between font-normal px-3"
+                className="w-full justify-between font-normal px-3 cursor-pointer"
                 variant="outline"
               >
                 <ComboboxValue>
@@ -133,13 +133,13 @@ export function IssuerField({
           />
           <ComboboxContent>
             <ComboboxInput placeholder="Search issuer..." showTrigger={false} />
-            <ComboboxList>
+            <ComboboxList className="[scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {(item) => (
                 <ComboboxItem
-                  className={cn("cursor-pointer", {
-                    "pl-4":
+                  className={cn("cursor-pointer px-2", {
+                    "pl-2":
                       "predecessors" in item && item.predecessors !== null,
-                    "pl-6":
+                    "pl-4":
                       "predecessors" in item && item.predecessors === null,
                   })}
                   key={item.id}
