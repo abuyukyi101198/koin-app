@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTableColumnHeader } from "@/components/composite/data-table-column-header.tsx";
 import { Coin } from "@/query/types";
+import { asFraction } from "@/utils/asFraction.tsx";
 
 export function useCoinsTableColumns(): ColumnDef<Coin>[] {
   return useMemo(
@@ -63,12 +64,14 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
         },
         cell: ({
           row: {
-            original: { title, description },
+            original: { title, value, description },
           },
         }) => {
+          const formattedTitle = asFraction(title, value);
+
           return (
             <div className="flex flex-col">
-              <span className="text-xs font-medium">{title}</span>
+              <span className="text-xs font-medium">{formattedTitle}</span>
               <span className="text-muted-foreground text-xs italic">
                 {description?.length ? description : "—"}
               </span>

@@ -1,4 +1,5 @@
 import { useGetCoin } from "@/query/commands";
+import { asFraction } from "@/utils/asFraction.tsx";
 
 interface CoinInfoProps {
   coinId: number;
@@ -30,7 +31,7 @@ export function CoinInfo({ coinId }: CoinInfoProps) {
       <div className="shrink-0 border-b px-6 pt-8 pb-3">
         <div className="space-y-1">
           <h1 className="scroll-m-20 text-2xl font-medium tracking-wide text-balance">
-            {data?.title}
+            {asFraction(data?.title, data?.value)}
           </h1>
           <h2 className="text-lg font-normal italic text-muted-foreground">
             {data?.description || "—"}
