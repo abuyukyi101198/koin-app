@@ -10,7 +10,7 @@ import { ThemeProvider } from "@/components/ui/theme-provider.tsx";
 import { TooltipProvider } from "@/components/ui/tooltip.tsx";
 import { CoinInfo } from "@/pages/coins/views/coin-info.tsx";
 import { CoinPreview } from "@/pages/coins/views/coin-preview.tsx";
-import { CoinsList } from "@/pages/coins/views/coins-list.tsx";
+import { CoinsTable } from "@/pages/coins/views/coins-table.tsx";
 import { IssuersList } from "@/pages/coins/views/issuers-list.tsx";
 
 const queryClient = new QueryClient();
@@ -48,7 +48,7 @@ function App() {
               </div>
               <div className="flex flex-1 max-h-1/2">
                 <div className="w-3/4 border-r">
-                  <CoinsList
+                  <CoinsTable
                     selection={{
                       rowSelection,
                       onRowSelectionChange: setRowSelection,

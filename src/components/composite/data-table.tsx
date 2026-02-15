@@ -98,7 +98,7 @@ export function DataTable<TData extends { id: number | string }>({
         <Table {...props}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow className="hover:bg-background" key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead className="px-6" key={header.id}>

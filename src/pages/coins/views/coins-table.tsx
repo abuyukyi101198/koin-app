@@ -18,7 +18,7 @@ interface CoinsListProps {
   selection: DataTableProps<Coin>["selection"];
 }
 
-export function CoinsList({ selection }: CoinsListProps) {
+export function CoinsTable({ selection }: CoinsListProps) {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sorting, setSorting] = useState<SortingState>([
     { id: "issuer", desc: false },

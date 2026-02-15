@@ -99,8 +99,8 @@ pub fn list_coins(
         "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.start_year, i.end_year, i.flag, c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at
          FROM coins c
          LEFT JOIN issuers i ON c.issuer_id = i.id
-         {} ORDER BY {} {} LIMIT ?1 OFFSET ?2",
-        where_clause, order_by_field, sort_direction
+         {} ORDER BY {} {}, c.year {}, c.value {} LIMIT ?1 OFFSET ?2",
+        where_clause, order_by_field, sort_direction, sort_direction, sort_direction
     );
 
     let mut stmt = conn

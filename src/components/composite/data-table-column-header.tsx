@@ -26,7 +26,7 @@ export function DataTableColumnHeader<TData, TValue>({
   return (
     <div className={cn("flex items-center gap-2", className)}>
       <Button
-        className="data-[state=open]:bg-accent -ml-3 h-8"
+        className="data-[state=open]:bg-accent -ml-3 h-8 cursor-pointer"
         onClick={() => {
           column.toggleSorting(column.getIsSorted() === "asc");
         }}
