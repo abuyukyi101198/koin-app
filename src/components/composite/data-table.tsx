@@ -68,6 +68,20 @@ export function DataTable<TData extends { id: number | string }>({
 }: DataTableProps<TData>) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
+  // Calculate total size and percentage widths
+  const getMeta = (col: ColumnDef<TData>) =>
+    (col.meta as { size?: number; responsiveClass?: string }) || {};
+
+  const totalSize = columns.reduce(
+    (sum, col) => sum + (getMeta(col).size || 100),
+    0
+  );
+
+  const getColumnWidth = (columnSize: number | undefined) => {
+    const size = columnSize || 100;
+    return Math.round((size / totalSize) * 10000) / 100; // 2 decimal precision
+  };
+
   const table = useReactTable({
     data,
     columns,
@@ -94,14 +108,22 @@ export function DataTable<TData extends { id: number | string }>({
           search={search}
         />
       )}
-      <div className="overflow-hidden">
+      <div className="overflow-x-auto">
         <Table {...props}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow className="hover:bg-background" key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
+                  const meta = getMeta(header.column.columnDef);
+                  const widthPercent = getColumnWidth(meta.size);
+                  const responsiveClass = meta.responsiveClass || "";
+
                   return (
-                    <TableHead className="px-6" key={header.id}>
+                    <TableHead
+                      className={`px-6 ${responsiveClass}`}
+                      key={header.id}
+                      style={{ width: `${widthPercent}%` }}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -126,14 +148,24 @@ export function DataTable<TData extends { id: number | string }>({
                     });
                   }}
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell className="px-6" key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
+                  {row.getVisibleCells().map((cell) => {
+                    const meta = getMeta(cell.column.columnDef);
+                    const widthPercent = getColumnWidth(meta.size);
+                    const responsiveClass = meta.responsiveClass || "";
+
+                    return (
+                      <TableCell
+                        className={`px-6 ${responsiveClass}`}
+                        key={cell.id}
+                        style={{ width: `${widthPercent}%` }}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               ))
             ) : loading ? (

@@ -12,6 +12,9 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
         id: "images",
         accessorKey: "obverse_image",
         header: "Images",
+        meta: {
+          size: 120,
+        },
         cell: ({
           row: {
             original: { reverse_image, obverse_image },
@@ -55,6 +58,9 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title="Title" />
         ),
+        meta: {
+          size: 200,
+        },
         cell: ({
           row: {
             original: { title, description },
@@ -76,6 +82,10 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title="Issuer" />
         ),
+        meta: {
+          size: 180,
+          responsiveClass: "md:table-cell hidden",
+        },
         cell: ({
           row: {
             original: { issuer },
@@ -104,6 +114,10 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title="Year" />
         ),
+        meta: {
+          size: 100,
+          responsiveClass: "lg:table-cell hidden",
+        },
         cell: ({ row }) => {
           return (
             <div className="text-xs text-right">
@@ -118,6 +132,10 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title="Quantity" />
         ),
+        meta: {
+          size: 100,
+          responsiveClass: "xl:table-cell hidden",
+        },
         cell: ({
           row: {
             original: { quantity },
@@ -132,6 +150,10 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title="Est. sale value" />
         ),
+        meta: {
+          size: 140,
+          responsiveClass: "2xl:table-cell hidden",
+        },
         cell: ({
           row: {
             original: { sale_value },
