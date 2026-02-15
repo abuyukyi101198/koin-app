@@ -39,7 +39,7 @@ export function DataTableActionHeader<TData extends { id: number | string }>({
         {pagination && (
           <div className="flex items-center space-x-2">
             <Button
-              className="hidden size-8 lg:flex"
+              className="hidden size-8 lg:flex cursor-pointer"
               disabled={pagination.pageIndex === 1}
               onClick={() =>
                 pagination.onPaginationChange(1, pagination.pageSize)
@@ -51,7 +51,7 @@ export function DataTableActionHeader<TData extends { id: number | string }>({
               <ChevronsLeft />
             </Button>
             <Button
-              className="size-8"
+              className="size-8 cursor-pointer"
               disabled={pagination.pageIndex === 1}
               onClick={() =>
                 pagination.onPaginationChange(
@@ -70,8 +70,8 @@ export function DataTableActionHeader<TData extends { id: number | string }>({
               {pagination.pageCount ? pagination.pageCount : 1}
             </div>
             <Button
-              className="size-8"
-              disabled={pagination.pageIndex >= pagination.pageCount - 1}
+              className="size-8 cursor-pointer"
+              disabled={pagination.pageIndex >= pagination.pageCount}
               onClick={() =>
                 pagination.onPaginationChange(
                   pagination.pageIndex + 1,
@@ -85,11 +85,11 @@ export function DataTableActionHeader<TData extends { id: number | string }>({
               <ChevronRight />
             </Button>
             <Button
-              className="hidden size-8 lg:flex"
-              disabled={pagination.pageIndex >= pagination.pageCount - 1}
+              className="hidden size-8 lg:flex cursor-pointer"
+              disabled={pagination.pageIndex >= pagination.pageCount}
               onClick={() =>
                 pagination.onPaginationChange(
-                  pagination.pageCount - 1,
+                  pagination.pageCount,
                   pagination.pageSize
                 )
               }

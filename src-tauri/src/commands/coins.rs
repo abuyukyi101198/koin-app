@@ -79,7 +79,7 @@ pub fn list_coins(
     };
 
     let order_by_field = if sort_field == "issuer" {
-        "i.name".to_string()
+        "i.id".to_string()
     } else {
         format!("c.{}", sort_field)
     };

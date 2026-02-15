@@ -25,16 +25,19 @@ export function CoinsList({ selection }: CoinsListProps) {
   ]);
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
+  const { page, size, setPage } = usePagination(6);
+
   // Build search/sort options for the hook
   const listCoinsOptions: ListCoinsRequest = {
     search: debouncedSearchQuery || undefined,
+    page: page - 1,
+    pageSize: size,
     sortField: sorting.length > 0 ? sorting[0].id : "year",
     sortDirection: sorting.length > 0 && !sorting[0].desc ? "asc" : "desc",
   };
 
   const { data, isLoading, refetch } = useListCoins(listCoinsOptions);
   const columns = useCoinsTableColumns();
-  const { page, size, setPage } = usePagination();
 
   const handlePaginationChange = async (pageIndex: number) => {
     setPage(pageIndex);
