@@ -8,7 +8,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible.tsx";
-import { Input } from "@/components/ui/input.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { cn } from "@/lib/utils.ts";
 import { useListIssuers } from "@/query/commands";
@@ -96,7 +95,7 @@ export function IssuersList() {
   const renderItem = (issuer: Issuer | Omit<Issuer, "predecessors">) => {
     const buttonProps = {
       className:
-        "text-foreground font-normal w-full justify-start gap-2 max-w-full",
+        "text-foreground font-normal w-full justify-start gap-2 max-w-full rounded-none h-8 pr-6!",
       size: "xs" as const,
       variant: "ghost" as const,
     };
@@ -131,11 +130,11 @@ export function IssuersList() {
               {...buttonProps}
               className={cn(buttonProps.className, "group cursor-pointer")}
             >
-              <ChevronRightIcon className="transition-transform group-data-[state=open]:rotate-90" />
+              <ChevronRightIcon className="transition-transform group-data-[state=open]:rotate-90 text-muted-foreground" />
               <IssuerItem issuer={issuer} />
             </Button>
           </CollapsibleTrigger>
-          <CollapsibleContent className="style-lyra:ml-4 mt-1 ml-5">
+          <CollapsibleContent>
             <div className="flex flex-col gap-1">
               {filteredPredecessors?.map((child) => renderItem(child))}
             </div>
@@ -149,8 +148,8 @@ export function IssuersList() {
         key={issuer.id}
         {...buttonProps}
         className={cn(buttonProps.className, {
-          "pl-4.5": "predecessors" in issuer && issuer.predecessors === null,
           "pl-6.5": "predecessors" in issuer && issuer.predecessors !== null,
+          "pl-9.5": "predecessors" in issuer && issuer.predecessors === null,
         })}
       >
         <IssuerItem issuer={issuer} />
@@ -159,19 +158,9 @@ export function IssuersList() {
   };
 
   return (
-    <div className="h-full max-w-full p-6 pb-0 flex flex-col">
-      <div className="max-w-full flex items-center pb-3.5 gap-2.5">
-        <Input
-          className="max-w-full"
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-          }}
-          placeholder="Search issuers..."
-          value={searchQuery}
-        />
-      </div>
+    <div className="h-full max-w-full flex flex-col">
       <ScrollArea className="w-full overflow-hidden">
-        <div className="mb-3 flex flex-col gap-2">
+        <div className="flex flex-col border-collapse gap-0 py-2">
           {issuers?.map((item) => renderItem(item))}
         </div>
       </ScrollArea>

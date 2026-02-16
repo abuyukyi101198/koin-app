@@ -17,7 +17,7 @@ import { LoaderIcon } from "lucide-react";
 
 import { ScrollArea } from "../ui/scroll-area";
 
-import { DataTableActionHeader } from "@/components/composite/data-table-action-header.tsx";
+import { DataTablePagination } from "@/components/composite/data-table-pagination.tsx";
 import {
   Table,
   TableBody,
@@ -33,11 +33,6 @@ export interface DataTableProps<
   data: TData[];
   columns: ColumnDef<TData>[];
   loading: boolean;
-  search?: {
-    value: string;
-    onChange: (value: string) => void;
-    placeholder?: string;
-  };
   selection?: {
     rowSelection: RowSelectionState;
     onRowSelectionChange: (updaterOrValue: Updater<RowSelectionState>) => void;
@@ -52,7 +47,6 @@ export interface DataTableProps<
     pageCount: number;
     onPaginationChange: (pageIndex: number, pageSize: number) => Promise<void>;
   };
-  actions?: ReactNode;
   empty?: ReactNode;
 }
 
@@ -60,11 +54,9 @@ export function DataTable<TData extends { id: number | string }>({
   data,
   columns,
   loading,
-  search,
   selection,
   sort,
   pagination,
-  actions,
   empty,
   ...props
 }: DataTableProps<TData>) {
@@ -103,47 +95,45 @@ export function DataTable<TData extends { id: number | string }>({
 
   return (
     <div className="h-full w-full">
-      {(search || actions || pagination) && (
-        <DataTableActionHeader
-          actions={actions}
-          pagination={pagination}
-          search={search}
-        />
-      )}
-      <div className="h-full max-h-[calc(100%-50px)] overflow-x-auto">
-        <ScrollArea className="h-full w-full">
-          <Table {...props}>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow className="hover:bg-background" key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    const meta = getMeta(header.column.columnDef);
-                    const widthPercent = getColumnWidth(meta.size);
-                    const responsiveClass = meta.responsiveClass || "";
+      <div className="h-full max-h-[calc(100%-57px)] overflow-x-auto overflow-hidden">
+        <Table {...props}>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow
+                className="hover:bg-background pr-2"
+                key={headerGroup.id}
+              >
+                {headerGroup.headers.map((header) => {
+                  const meta = getMeta(header.column.columnDef);
+                  const widthPercent = getColumnWidth(meta.size);
+                  const responsiveClass = meta.responsiveClass || "";
 
-                    return (
-                      <TableHead
-                        className={`px-6 ${responsiveClass}`}
-                        key={header.id}
-                        style={{ width: `${widthPercent}%` }}
-                      >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
+                  return (
+                    <TableHead
+                      className={`px-6 ${responsiveClass} text-muted-foreground`}
+                      key={header.id}
+                      style={{ width: `${widthPercent}%` }}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+        </Table>
+        <ScrollArea className="h-full max-h-[calc(100%-41px)] w-full">
+          <Table>
             <TableBody>
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow
-                    className="cursor-pointer"
+                    className="cursor-pointer pr-2"
                     key={row.id}
                     onClick={() => {
                       table.setRowSelection({
@@ -197,6 +187,14 @@ export function DataTable<TData extends { id: number | string }>({
           </Table>
         </ScrollArea>
       </div>
+      {pagination && (
+        <DataTablePagination
+          onPaginationChange={pagination.onPaginationChange}
+          pageCount={pagination.pageCount}
+          pageIndex={pagination.pageIndex}
+          pageSize={pagination.pageSize}
+        />
+      )}
     </div>
   );
 }

@@ -8,7 +8,6 @@ import {
 } from "@/components/composite/data-table.tsx";
 import { useDebounce } from "@/hooks/use-debounce.ts";
 import usePagination from "@/hooks/use-pagination.ts";
-import { AddCoinDialog } from "@/pages/coins/components/add-coin-dialog.tsx";
 import { EmptyCoins } from "@/pages/coins/components/empty-coins.tsx";
 import { useCoinsTableColumns } from "@/pages/coins/hooks/use-coins-table-columns.tsx";
 import { useListCoins } from "@/query/commands/coins.ts";
@@ -57,9 +56,8 @@ export function CoinsTable({ selection }: CoinsListProps) {
   }, [data?.items, selection]);
 
   return (
-    <div className="h-full w-full flex justify-center items-start p-6 pb-0">
+    <div className="h-full w-full flex justify-center items-start pt-3 pb-0">
       <DataTable<Coin>
-        actions={<AddCoinDialog onSuccess={handleRefresh} />}
         columns={columns}
         data={data?.items ?? []}
         empty={
@@ -74,11 +72,6 @@ export function CoinsTable({ selection }: CoinsListProps) {
           pageSize: size,
           pageCount: Math.ceil((data?.total ?? 0) / size),
           onPaginationChange: handlePaginationChange,
-        }}
-        search={{
-          value: searchQuery,
-          onChange: setSearchQuery,
-          placeholder: "Search your catalogue...",
         }}
         selection={selection}
         sort={{
