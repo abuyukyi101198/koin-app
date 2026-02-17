@@ -174,8 +174,8 @@ export function IssuersList() {
   };
 
   return (
-    <div className="h-full max-w-full flex flex-col pt-4 pb-0">
-      <div className="max-w-full flex items-center pl-2 pr-5 gap-2.5 mt-[0.5px]">
+    <div className="h-full max-w-full flex flex-col pt-4 pb-0 gap-2">
+      <div className="max-w-full flex items-center pl-2 pr-5 gap-2.5">
         <SearchInput
           count={totalResultsCount}
           onSearch={(e) => {
@@ -186,7 +186,7 @@ export function IssuersList() {
         />
       </div>
       <ScrollArea className="w-full overflow-hidden">
-        <div className="flex flex-col border-collapse gap-0 py-2">
+        <div className="flex flex-col border-collapse gap-0 pb-2">
           {issuers?.map((item) => renderItem(item))}
         </div>
       </ScrollArea>

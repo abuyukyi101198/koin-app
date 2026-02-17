@@ -6,8 +6,10 @@ import {
   DataTable,
   DataTableProps,
 } from "@/components/composite/data-table.tsx";
+import { SearchInput } from "@/components/composite/search-input.tsx";
 import { useDebounce } from "@/hooks/use-debounce.ts";
 import usePagination from "@/hooks/use-pagination.ts";
+import { AddCoinDialog } from "@/pages/coins/components/add-coin-dialog.tsx";
 import { EmptyCoins } from "@/pages/coins/components/empty-coins.tsx";
 import { useCoinsTableColumns } from "@/pages/coins/hooks/use-coins-table-columns.tsx";
 import { useListCoins } from "@/query/commands/coins.ts";
@@ -56,7 +58,18 @@ export function CoinsTable({ selection }: CoinsListProps) {
   }, [data?.items, selection]);
 
   return (
-    <div className="h-full w-full flex justify-center items-start pt-3 pb-0">
+    <div className="h-full w-full flex flex-col pt-4 pb-0 gap-2">
+      <div className="max-w-full flex items-center pl-5 pr-2 gap-2.5">
+        <SearchInput
+          count={data?.total}
+          onSearch={(e) => {
+            setSearchQuery(e.target.value);
+          }}
+          placeholder="Search coins..."
+          search={searchQuery}
+        />
+        <AddCoinDialog onSuccess={handleRefresh} />
+      </div>
       <DataTable<Coin>
         columns={columns}
         data={data?.items ?? []}

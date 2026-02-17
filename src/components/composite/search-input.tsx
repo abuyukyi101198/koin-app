@@ -31,7 +31,7 @@ export function SearchInput({
         placeholder={placeholder ?? "Search..."}
         value={search}
       />
-      {count && (
+      {search && count && (
         <InputGroupAddon
           align="inline-end"
           className="text-xs font-normal leading-5 italic pt-2.5 pr-1.5"
