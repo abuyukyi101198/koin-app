@@ -26,6 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table.tsx";
+import { cn } from "@/lib/utils.ts";
 
 export interface DataTableProps<
   TData extends { id: number | string },
@@ -94,15 +95,12 @@ export function DataTable<TData extends { id: number | string }>({
   });
 
   return (
-    <div className="h-full w-full">
+    <>
       <div className="h-full max-h-[calc(100%-57px)] overflow-x-auto overflow-hidden">
-        <Table {...props}>
+        <Table {...props} className={cn("table-fixed", props.className)}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow
-                className="hover:bg-background pr-2"
-                key={headerGroup.id}
-              >
+              <TableRow className="hover:bg-background" key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   const meta = getMeta(header.column.columnDef);
                   const widthPercent = getColumnWidth(meta.size);
@@ -128,12 +126,12 @@ export function DataTable<TData extends { id: number | string }>({
           </TableHeader>
         </Table>
         <ScrollArea className="h-full max-h-[calc(100%-41px)] w-full">
-          <Table>
+          <Table {...props} className={cn("table-fixed", props.className)}>
             <TableBody>
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow
-                    className="cursor-pointer pr-2"
+                    className="cursor-pointer max-w-full"
                     key={row.id}
                     onClick={() => {
                       table.setRowSelection({
@@ -179,7 +177,7 @@ export function DataTable<TData extends { id: number | string }>({
                     className="h-24 text-center"
                     colSpan={columns.length}
                   >
-                    {empty ? empty : "No results."}
+                    {empty ?? "No results."}
                   </TableCell>
                 </TableRow>
               )}
@@ -195,6 +193,6 @@ export function DataTable<TData extends { id: number | string }>({
           pageSize={pagination.pageSize}
         />
       )}
-    </div>
+    </>
   );
 }
