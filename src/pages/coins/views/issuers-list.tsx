@@ -1,18 +1,14 @@
 import { useMemo, useState } from "react";
 
-import { ChevronRightIcon, Search } from "lucide-react";
+import { ChevronRightIcon } from "lucide-react";
 
+import { SearchInput } from "@/components/composite/search-input.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible.tsx";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { cn } from "@/lib/utils.ts";
 import { useListIssuers } from "@/query/commands";
@@ -180,24 +176,14 @@ export function IssuersList() {
   return (
     <div className="h-full max-w-full flex flex-col pt-4 pb-0">
       <div className="max-w-full flex items-center pl-2 pr-5 gap-2.5 mt-[0.5px]">
-        <InputGroup className="w-full border-l-0 border-t-0 border-r-0 rounded-none bg-background! has-[[data-slot=input-group-control]:focus-visible]:ring-0">
-          <InputGroupAddon className="pl-1.5">
-            <Search />
-          </InputGroupAddon>
-          <InputGroupInput
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-            }}
-            placeholder="Search issuers..."
-            value={searchQuery}
-          />
-          <InputGroupAddon
-            align="inline-end"
-            className="text-xs font-normal leading-5 italic pt-2.5 pr-1.5"
-          >
-            {totalResultsCount} results
-          </InputGroupAddon>
-        </InputGroup>
+        <SearchInput
+          count={totalResultsCount}
+          onSearch={(e) => {
+            setSearchQuery(e.target.value);
+          }}
+          placeholder="Search issuers..."
+          search={searchQuery}
+        />
       </div>
       <ScrollArea className="w-full overflow-hidden">
         <div className="flex flex-col border-collapse gap-0 py-2">
