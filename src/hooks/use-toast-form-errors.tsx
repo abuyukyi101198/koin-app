@@ -38,9 +38,11 @@ export function useToastFormErrors<TValues>() {
             const toastId = toast.promise(promise, {
               loading: errorMessage,
               position: "top-center",
-              icon: <CircleAlertIcon className="size-4 text-destructive" />,
+              icon: (
+                <CircleAlertIcon className="size-4 text-destructive dark:text-foreground!" />
+              ),
               className:
-                "border-destructive! bg-red-100! dark:bg-red-900! text-destructive! text-xs!",
+                "border-destructive! bg-red-100! dark:bg-red-950! text-destructive! dark:text-foreground! text-xs!",
             }) as number | string;
 
             if (resolveToast) {
