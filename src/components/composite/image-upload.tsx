@@ -122,19 +122,16 @@ export function ImageUploadField({
         <ContextMenuTrigger asChild>
           <div
             className={cn(
-              "relative rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/50 transition-colors hover:bg-muted overflow-hidden",
-              value && "border-solid border-border bg-transparent",
+              "relative rounded-none border border-input border-l-0 border-t-0 border-r-0 transition-colors overflow-hidden aspect-square cursor-context-menu",
+              "placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-transparent shadow-xs transition-[color,box-shadow] outline-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-0",
+              value && "bg-transparent rounded-lg",
               uploadError && "border-destructive/50 bg-destructive/5"
             )}
-            style={{
-              aspectRatio: 1,
-              cursor: "context-menu",
-            }}
           >
             {value ? (
               <img
                 alt={label || "Uploaded image"}
-                className="max-h-full w-full rounded-[6px] object-contain object-center p-0.5"
+                className="h-full w-full object-cover object-center"
                 src={value}
               />
             ) : (
@@ -148,7 +145,7 @@ export function ImageUploadField({
         </ContextMenuTrigger>
         <ContextMenuContent>
           <ContextMenuItem
-            className="flex gap-2"
+            className="flex gap-2 cursor-pointer"
             onClick={() => {
               setShowUrlDialog(true);
               setUrlError(null);
@@ -158,7 +155,7 @@ export function ImageUploadField({
             Embed image URL
           </ContextMenuItem>
           <ContextMenuItem
-            className="flex gap-2"
+            className="flex gap-2 cursor-pointer"
             onClick={() => fileInputRef.current?.click()}
           >
             <Upload className="h-4 w-4" />
@@ -168,7 +165,7 @@ export function ImageUploadField({
             <>
               <div className="my-1" data-slot="separator" />
               <ContextMenuItem
-                className="text-destructive focus:text-destructive"
+                className="text-destructive focus:text-destructive cursor-pointer"
                 onClick={() => {
                   onChange?.("");
                   setUploadError(null);
@@ -199,7 +196,7 @@ export function ImageUploadField({
         }}
         open={showUrlDialog}
       >
-        <DialogContent className="sm:max-w-sm">
+        <DialogContent className="sm:max-w-sm" showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>Embed Image URL</DialogTitle>
             <DialogDescription>
@@ -225,9 +222,13 @@ export function ImageUploadField({
           </div>
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button className="cursor-pointer" variant="outline">
+                Cancel
+              </Button>
             </DialogClose>
-            <Button onClick={handleUrlSubmit}>Embed</Button>
+            <Button className="cursor-pointer" onClick={handleUrlSubmit}>
+              Embed
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -1,7 +1,9 @@
-import { ChangeEventHandler } from "react";
+import { ChangeEventHandler, useEffect, useRef, useState } from "react";
 
 import { Search } from "lucide-react";
 
+import { ButtonGroup } from "@/components/ui/button-group.tsx";
+import { Button } from "@/components/ui/button.tsx";
 import {
   InputGroup,
   InputGroupAddon,
@@ -21,24 +23,63 @@ export function SearchInput({
   placeholder,
   count,
 }: SearchInputProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleIconClick = () => {
+    setIsExpanded((prev) => !prev);
+  };
+
+  const handleBlur = () => {
+    if (!search) {
+      setIsExpanded(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isExpanded && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isExpanded]);
+
   return (
-    <InputGroup className="w-full border-l-0 border-t-0 border-r-0 rounded-none bg-background! has-[[data-slot=input-group-control]:focus-visible]:ring-0">
-      <InputGroupAddon className="pl-1.5">
-        <Search />
-      </InputGroupAddon>
-      <InputGroupInput
-        onChange={onSearch}
-        placeholder={placeholder ?? "Search..."}
-        value={search}
-      />
-      {search && count && (
-        <InputGroupAddon
-          align="inline-end"
-          className="text-xs font-normal leading-5 italic pt-2.5 pr-1.5"
+    <ButtonGroup className="w-full justify-end gap-0!">
+      <ButtonGroup>
+        <Button
+          className="text-muted-foreground cursor-pointer p-0"
+          onClick={handleIconClick}
+          size="icon"
+          variant="ghost"
         >
-          {count} results
-        </InputGroupAddon>
-      )}
-    </InputGroup>
+          <Search />
+        </Button>
+      </ButtonGroup>
+      <ButtonGroup
+        className={`overflow-hidden transition-all duration-300 ease-out ${
+          isExpanded || search ? "w-full" : "w-0"
+        }`}
+      >
+        <InputGroup className="border-l-0 border-t-0 border-r-0 rounded-none bg-background! has-[[data-slot=input-group-control]:focus-visible]:ring-0">
+          <InputGroupInput
+            onBlur={handleBlur}
+            onChange={onSearch}
+            onFocus={() => {
+              setIsExpanded(true);
+            }}
+            placeholder={placeholder ?? "Search..."}
+            ref={inputRef}
+            value={search}
+          />
+          {search && count && (
+            <InputGroupAddon
+              align="inline-end"
+              className="text-xs font-normal leading-5 italic pt-2.5 pr-1.5"
+            >
+              {count} results
+            </InputGroupAddon>
+          )}
+        </InputGroup>
+      </ButtonGroup>
+    </ButtonGroup>
   );
 }

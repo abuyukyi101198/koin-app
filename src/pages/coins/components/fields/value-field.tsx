@@ -38,7 +38,7 @@ export function ValueField({
           aria-required
           autoCapitalize="off"
           autoComplete="off"
-          className="[&::-webkit-inner-spin-button]:appearance-none rounded-r-none text-right"
+          className="[&::-webkit-inner-spin-button]:appearance-none text-right border-l-0 border-t-0 border-r-0 rounded-none bg-background! focus-visible:ring-0"
           id="value"
           onChange={async (e) => validateInputOnChange(e.target.value)}
           placeholder="e.g. 10.00"

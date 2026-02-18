@@ -26,23 +26,25 @@ export function QuantityField({
     <Field className="flex-1 gap-1" orientation="vertical">
       <FieldLabel htmlFor="quantity">Quantity</FieldLabel>
       <FieldContent>
-        <ButtonGroup className="w-full">
-          <Button
-            aria-label="Decrease quantity"
-            className="border-r-0"
-            disabled={Number(value) <= 1}
-            onClick={async () =>
-              await setFieldValue("quantity", (Number(value) - 1).toString())
-            }
-            type="button"
-            variant="outline"
-          >
-            <MinusIcon />
-          </Button>
+        <ButtonGroup className="w-full border-b">
+          <ButtonGroup>
+            <Button
+              aria-label="Decrease quantity"
+              className="rounded-b-none cursor-pointer"
+              disabled={Number(value) <= 1}
+              onClick={async () =>
+                await setFieldValue("quantity", (Number(value) - 1).toString())
+              }
+              type="button"
+              variant="ghost"
+            >
+              <MinusIcon />
+            </Button>
+          </ButtonGroup>
           <Input
             aria-describedby={touched && error ? "quantity-error" : undefined}
             aria-invalid={touched && !!error}
-            className="[&::-webkit-inner-spin-button]:appearance-none text-center border!"
+            className="[&::-webkit-inner-spin-button]:appearance-none text-center border-0 rounded-none bg-background! focus-visible:ring-0"
             id="quantity"
             max="100"
             min="1"
@@ -54,18 +56,20 @@ export function QuantityField({
             }}
             value={value}
           />
-          <Button
-            aria-label="Increase quantity"
-            className="border-l-0"
-            disabled={Number(value) >= 99}
-            onClick={async () =>
-              await setFieldValue("quantity", (Number(value) + 1).toString())
-            }
-            type="button"
-            variant="outline"
-          >
-            <PlusIcon />
-          </Button>
+          <ButtonGroup>
+            <Button
+              aria-label="Increase quantity"
+              className="rounded-b-none cursor-pointer"
+              disabled={Number(value) >= 99}
+              onClick={async () =>
+                await setFieldValue("quantity", (Number(value) + 1).toString())
+              }
+              type="button"
+              variant="ghost"
+            >
+              <PlusIcon />
+            </Button>
+          </ButtonGroup>
         </ButtonGroup>
       </FieldContent>
     </Field>

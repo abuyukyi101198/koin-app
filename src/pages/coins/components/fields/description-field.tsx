@@ -32,6 +32,7 @@ export function DescriptionField({
           aria-invalid={touched && !!error}
           autoCapitalize="off"
           autoComplete="off"
+          className="border-l-0 border-t-0 border-r-0 rounded-none bg-background! focus-visible:ring-0"
           id="description"
           maxLength={100}
           onChange={async (e) => validateInputOnChange(e.target.value)}

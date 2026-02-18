@@ -113,7 +113,7 @@ export function IssuerField({
             render={
               <Button
                 aria-invalid={!!(error && touched)}
-                className="w-full justify-between font-normal px-3 cursor-pointer"
+                className="w-full justify-between font-normal px-3 cursor-pointer border-l-0 border-t-0 border-r-0 rounded-none bg-background! has-[[data-slot=input-group-control]:focus-visible]:ring-0"
                 variant="outline"
               >
                 <ComboboxValue>

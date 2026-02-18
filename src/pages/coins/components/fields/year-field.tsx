@@ -38,7 +38,7 @@ export function YearField({
           aria-required
           autoCapitalize="off"
           autoComplete="off"
-          className="[&::-webkit-inner-spin-button]:appearance-none text-right"
+          className="[&::-webkit-inner-spin-button]:appearance-none text-right border-l-0 border-t-0 border-r-0 rounded-none bg-background! focus-visible:ring-0"
           id="year"
           onChange={async (e) => validateInputOnChange(e.target.value)}
           placeholder="e.g. 1999"

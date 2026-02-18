@@ -32,7 +32,7 @@ export function NotesField({
           aria-invalid={touched && !!error}
           autoCapitalize="off"
           autoComplete="off"
-          className="flex-1 resize-none"
+          className="flex-1 resize-none border-l-0 border-t-0 border-r-0 rounded-none bg-background! focus-visible:ring-0"
           id="notes"
           maxLength={1000}
           onChange={async (e) => validateInputOnChange(e.target.value)}

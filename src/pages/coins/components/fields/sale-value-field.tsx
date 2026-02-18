@@ -36,7 +36,7 @@ export function SaleValueField({
         Est. sale value
       </FieldLabel>
       <FieldContent>
-        <InputGroup>
+        <InputGroup className="border-l-0 border-t-0 border-r-0 rounded-none bg-background! has-[[data-slot=input-group-control]:focus-visible]:ring-0">
           <InputGroupAddon>
             <InputGroupText>$</InputGroupText>
           </InputGroupAddon>

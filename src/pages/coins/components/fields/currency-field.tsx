@@ -37,7 +37,7 @@ export function CurrencyField({
           aria-required
           autoCapitalize="off"
           autoComplete="off"
-          className="border-l-0 rounded-l-none text-right"
+          className="text-right border-l-0 border-t-0 border-r-0 rounded-none bg-background! focus-visible:ring-0"
           id="currency"
           onChange={async (e) => validateInputOnChange(e.target.value)}
           placeholder="e.g. Lira"
