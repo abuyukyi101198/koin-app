@@ -62,9 +62,9 @@ export function useGetSimilarCoins(
   options?: GetSimilarCoinsRequest
 ): UseQueryResult<PaginatedCoins> {
   return useQuery({
-    queryKey: [COINS_QUERY_KEY, "get_similar", options?.pageSize],
+    queryKey: [COINS_QUERY_KEY, "get_similar", options?.id, options?.pageSize],
     queryFn: async () => {
-      return await invoke<PaginatedCoins>("list_coins", {
+      return await invoke<PaginatedCoins>("get_similar_coins", {
         id: options?.id,
         limit: options?.pageSize,
       });
