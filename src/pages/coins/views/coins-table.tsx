@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { SortingState } from "@tanstack/react-table";
 
@@ -26,7 +26,7 @@ export function CoinsTable({ selection }: CoinsListProps) {
   ]);
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
-  const { page, size, setPage } = usePagination(10);
+  const { page, size, setPage, handlePageSizeChange } = usePagination(10);
 
   // Build search/sort options for the hook
   const listCoinsOptions: ListCoinsRequest = {
@@ -40,9 +40,17 @@ export function CoinsTable({ selection }: CoinsListProps) {
   const { data, isLoading, refetch } = useListCoins(listCoinsOptions);
   const columns = useCoinsTableColumns();
 
-  const handlePaginationChange = async (pageIndex: number) => {
-    setPage(pageIndex);
-  };
+  const handlePaginationChange = useCallback(
+    async (pageIndex: number, pageSize: number) => {
+      if (pageSize !== size) {
+        handlePageSizeChange(pageSize);
+        setPage(1);
+      } else {
+        setPage(pageIndex);
+      }
+    },
+    [size, handlePageSizeChange, setPage]
+  );
 
   const handleRefresh = async () => {
     await refetch();
