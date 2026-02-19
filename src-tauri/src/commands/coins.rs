@@ -266,13 +266,14 @@ pub fn get_similar_coins(
     limit: Option<i64>,
 ) -> Result<PaginatedCoinsResponse, String> {
     let conn = get_db_connection(&app_handle)?;
-    let limit = limit.unwrap_or(5);
+    let limit = limit.unwrap_or(10);
+    const SIMILARITY_THRESHOLD: i32 = 25;
 
     // Fetch the target coin to compare against
     let target_coin = get_coin(app_handle.clone(), id)?;
 
     // Query all coins except the target
-    let query = "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.flag, c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at
+    let query = "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.start_year, i.end_year, i.flag, c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at
                  FROM coins c
                  LEFT JOIN issuers i ON c.issuer_id = i.id
                  WHERE c.id != ?1";
@@ -303,10 +304,15 @@ pub fn get_similar_coins(
 
                 // Year proximity scoring - closer years are more similar
                 let year_distance = (coin.year - target_coin.year).abs();
-                let year_score = (45 - year_distance.min(45)) as i32;
+                let year_score = (25 - year_distance.min(25)) as i32;
                 score += year_score;
 
-                Some((coin, score))
+                // Only include coins that meet the similarity threshold
+                if score >= SIMILARITY_THRESHOLD {
+                    Some((coin, score))
+                } else {
+                    None
+                }
             } else {
                 None
             }
