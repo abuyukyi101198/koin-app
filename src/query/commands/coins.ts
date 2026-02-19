@@ -4,6 +4,7 @@ import {
   useQueryClient,
   UseQueryResult,
   UseMutationResult,
+  keepPreviousData,
 } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
 
@@ -46,6 +47,7 @@ export function useListCoins(
         sortDirection: options?.sortDirection || "desc",
       });
     },
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -55,6 +57,7 @@ export function useGetCoin(options: GetCoinRequest): UseQueryResult<Coin> {
     queryFn: async () => {
       return await invoke<Coin>("get_coin", { id: options.id });
     },
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -69,6 +72,7 @@ export function useGetSimilarCoins(
         limit: options?.pageSize,
       });
     },
+    placeholderData: keepPreviousData,
   });
 }
 
