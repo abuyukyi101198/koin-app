@@ -49,6 +49,7 @@ export interface DataTableProps<
     onPaginationChange: (pageIndex: number, pageSize: number) => Promise<void>;
   };
   empty?: ReactNode;
+  header?: boolean;
 }
 
 export function DataTable<TData extends { id: number | string }>({
@@ -59,6 +60,7 @@ export function DataTable<TData extends { id: number | string }>({
   sort,
   pagination,
   empty,
+  header = true,
   ...props
 }: DataTableProps<TData>) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -96,36 +98,45 @@ export function DataTable<TData extends { id: number | string }>({
 
   return (
     <>
-      <div className="h-full max-h-[calc(100%-57px)] overflow-x-auto overflow-hidden">
-        <Table {...props} className={cn("table-fixed", props.className)}>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow className="hover:bg-background" key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  const meta = getMeta(header.column.columnDef);
-                  const widthPercent = getColumnWidth(meta.size);
-                  const responsiveClass = meta.responsiveClass || "";
+      <div
+        className={cn("h-full overflow-x-auto overflow-hidden", {
+          "max-h-[calc(100%-57px)]": header,
+          "max-h-full": !header,
+        })}
+      >
+        {header && (
+          <Table {...props} className={cn("table-fixed", props.className)}>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow className="hover:bg-background" key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    const meta = getMeta(header.column.columnDef);
+                    const widthPercent = getColumnWidth(meta.size);
+                    const responsiveClass = meta.responsiveClass || "";
 
-                  return (
-                    <TableHead
-                      className={`px-6 ${responsiveClass} text-muted-foreground`}
-                      key={header.id}
-                      style={{ width: `${widthPercent}%` }}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-        </Table>
-        <ScrollArea className="h-full max-h-[calc(100%-41px)] w-full">
+                    return (
+                      <TableHead
+                        className={`px-6 ${responsiveClass} text-muted-foreground`}
+                        key={header.id}
+                        style={{ width: `${widthPercent}%` }}
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+          </Table>
+        )}
+        <ScrollArea
+          className={cn("h-full w-full", { "max-h-[calc(100%-41px)]": header })}
+        >
           <Table {...props} className={cn("table-fixed", props.className)}>
             <TableBody>
               {table.getRowModel().rows?.length ? (
@@ -160,8 +171,8 @@ export function DataTable<TData extends { id: number | string }>({
                   </TableRow>
                 ))
               ) : loading ? (
-                <TableRow>
-                  <TableCell className="h-24" colSpan={columns.length}>
+                <TableRow className="hover:bg-background">
+                  <TableCell className="h-12" colSpan={columns.length}>
                     <div className="flex items-center justify-center h-full">
                       <LoaderIcon
                         aria-label="Loading"
@@ -172,9 +183,9 @@ export function DataTable<TData extends { id: number | string }>({
                   </TableCell>
                 </TableRow>
               ) : (
-                <TableRow>
+                <TableRow className="hover:bg-background">
                   <TableCell
-                    className="h-24 text-center"
+                    className="h-12 text-center"
                     colSpan={columns.length}
                   >
                     {empty ?? "No results."}
