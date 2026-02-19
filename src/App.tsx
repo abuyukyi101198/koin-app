@@ -12,6 +12,7 @@ import { CoinInfo } from "@/pages/coins/views/coin-info.tsx";
 import { CoinPreview } from "@/pages/coins/views/coin-preview.tsx";
 import { CoinsTable } from "@/pages/coins/views/coins-table.tsx";
 import { IssuersList } from "@/pages/coins/views/issuers-list.tsx";
+import { SimilarCoins } from "@/pages/coins/views/similar-coins.tsx";
 
 const queryClient = new QueryClient();
 
@@ -41,8 +42,16 @@ function App() {
                   </div>
                 </div>
                 <div className="w-1/4 border-b">
-                  <div className="flex h-full items-center justify-center p-6">
-                    <span className="font-semibold">Similar</span>
+                  <div className="flex h-full items-center justify-center">
+                    {coinSelectionIds.length ? (
+                      <SimilarCoins
+                        coinId={coinSelectionIds[0]}
+                        selection={{
+                          rowSelection,
+                          onRowSelectionChange: setRowSelection,
+                        }}
+                      />
+                    ) : null}
                   </div>
                 </div>
               </div>
