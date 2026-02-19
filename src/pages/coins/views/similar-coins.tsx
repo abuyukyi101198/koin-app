@@ -37,6 +37,7 @@ export function SimilarCoins({
         </div>
       </div>
       <DataTable<Coin>
+        className="[&_tr_td]:py-3"
         columns={columns}
         data={data?.items ?? []}
         empty={
