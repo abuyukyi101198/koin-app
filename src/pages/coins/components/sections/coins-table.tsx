@@ -28,7 +28,6 @@ export function CoinsTable({ selection }: CoinsListProps) {
 
   const { page, size, setPage, handlePageSizeChange } = usePagination(10);
 
-  // Build search/sort options for the hook
   const listCoinsOptions: ListCoinsRequest = {
     search: debouncedSearchQuery || undefined,
     page: page - 1,
@@ -66,18 +65,28 @@ export function CoinsTable({ selection }: CoinsListProps) {
   }, [data?.items, selection]);
 
   return (
-    <div className="h-full w-full flex flex-col pt-4 pb-0">
-      <div className="max-w-full flex items-center pl-5 pr-3 pb-2 gap-2.5">
-        <SearchInput
-          count={data?.total}
-          onSearch={(e) => {
-            setSearchQuery(e.target.value);
-          }}
-          placeholder="Search coins..."
-          search={searchQuery}
-        />
-        <CreateCoinDialog size="sm" />
-      </div>
+    <section
+      aria-busy={isLoading}
+      aria-label="Coins table"
+      className="h-full w-3/4 flex flex-col pt-4 pb-0 border-r"
+    >
+      <header className="shrink-0 px-5 pb-2">
+        <div className="flex items-center gap-2.5">
+          <SearchInput
+            aria-describedby="search-help"
+            count={data?.total}
+            onSearch={(e) => {
+              setSearchQuery(e.target.value);
+            }}
+            placeholder="Search coins..."
+            search={searchQuery}
+          />
+          <span className="sr-only" id="search-help">
+            Search by issuer, year, or value
+          </span>
+          <CreateCoinDialog size="sm" />
+        </div>
+      </header>
       <DataTable<Coin>
         columns={columns}
         data={data?.items ?? []}
@@ -100,6 +109,6 @@ export function CoinsTable({ selection }: CoinsListProps) {
           onSortingChange: setSorting,
         }}
       />
-    </div>
+    </section>
   );
 }

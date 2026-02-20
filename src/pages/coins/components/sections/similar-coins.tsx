@@ -25,28 +25,42 @@ export function SimilarCoins({
   const columns = useSimilarCoinsTableColumns();
 
   return (
-    <div className="h-full w-full flex-col overflow-hidden">
-      <div className="shrink-0 border-b px-6 pt-8 pb-5">
+    <section
+      aria-busy={isLoading}
+      aria-label="Similar coins table"
+      className="flex flex-col h-full w-1/4 overflow-hidden border-b"
+    >
+      <header className="shrink-0 border-b px-6 pt-8 pb-5">
         <div className="space-y-1">
           <h2 className="scroll-m-20 text-xl font-medium tracking-wide text-balance">
             Similar coins
           </h2>
-          <h3 className="text-base font-normal italic text-muted-foreground">
+          <p className="text-base font-normal italic text-muted-foreground">
             Browse similar coins from your catalogue.
-          </h3>
+          </p>
         </div>
-      </div>
+      </header>
+
       <DataTable<Coin>
+        aria-label="Similar coins list"
         className="[&_tr_td]:py-3"
         columns={columns}
         data={data?.items ?? []}
         empty={
-          <div className="w-full text-left pl-4">No similar coins found.</div>
+          <div
+            aria-live="polite"
+            className="w-full text-left pl-4"
+            role="status"
+          >
+            <p className="text-sm text-muted-foreground">
+              No similar coins found.
+            </p>
+          </div>
         }
         header={false}
         loading={isLoading}
         selection={selection}
       />
-    </div>
+    </section>
   );
 }

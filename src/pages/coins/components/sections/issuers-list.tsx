@@ -10,6 +10,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
+import { useDebounce } from "@/hooks/use-debounce.ts";
 import { cn } from "@/lib/utils.ts";
 import { useListIssuers } from "@/query/commands";
 import { Issuer } from "@/query/types";
@@ -19,6 +20,11 @@ function IssuerItem({
 }: {
   issuer: Issuer | Omit<Issuer, "predecessors">;
 }) {
+  const displayName =
+    issuer.name.length > 30
+      ? `${issuer.name.substring(0, 30).trimEnd()}...`
+      : issuer.name;
+
   return (
     <div className="w-full flex justify-between">
       <div className="flex items-start gap-2 pt-0.5">
@@ -30,14 +36,15 @@ function IssuerItem({
             src={issuer.flag?.length ? issuer.flag : undefined}
           />
         </span>
-        <span>
-          {issuer.name.length > 30
-            ? `${issuer.name.substring(0, 30).trimEnd()}...`
-            : issuer.name}
+        <span title={issuer.name.length > 30 ? issuer.name : undefined}>
+          {displayName}
         </span>
       </div>
       {issuer.name !== "Other" && (
-        <span className="text-xs italic text-muted-foreground text-right leading-5 grow">
+        <span
+          aria-label={`Years of issue: ${issuer.start_year} to ${issuer.end_year ? issuer.end_year : "present"}`}
+          className="text-xs italic text-muted-foreground text-right leading-5 grow"
+        >
           ({issuer.start_year}-{issuer.end_year ?? "pres."})
         </span>
       )}
@@ -50,55 +57,54 @@ export function IssuersList() {
   const [openCollapsibles, setOpenCollapsibles] = useState<Set<number>>(
     new Set()
   );
-  const { data } = useListIssuers();
 
-  // Helper function to check if an issuer or its predecessors match the search
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
+  const { data } = useListIssuers();
 
   const issuers = useMemo(() => {
     const matchesSearch = (
       issuer: Issuer | Omit<Issuer, "predecessors">
     ): boolean => {
       return (
-        issuer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        issuer.name
+          .toLowerCase()
+          .includes(debouncedSearchQuery.toLowerCase()) ||
         ("predecessors" in issuer &&
           issuer.predecessors &&
           issuer.predecessors.some((pred) =>
-            pred.name.toLowerCase().includes(searchQuery.toLowerCase())
+            pred.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
           ))
       );
     };
     return data?.items.filter(matchesSearch);
-  }, [data?.items, searchQuery]);
+  }, [data?.items, debouncedSearchQuery]);
 
   const totalResultsCount = useMemo(() => {
     let count = 0;
     issuers?.forEach((issuer) => {
-      count += 1; // Count the main issuer
+      count += 1;
       if ("predecessors" in issuer && issuer.predecessors) {
-        // Count filtered predecessors
         const filteredPredecessors = issuer.predecessors.filter((pred) =>
-          pred.name.toLowerCase().includes(searchQuery.toLowerCase())
+          pred.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
         );
         count += filteredPredecessors.length;
       }
     });
     return count;
-  }, [issuers, searchQuery]);
+  }, [issuers, debouncedSearchQuery]);
 
-  // Auto-open collapsibles when search query exists and has matching predecessors
   useMemo(() => {
-    if (searchQuery.trim() === "") {
-      // Clear auto-opened collapsibles when search is cleared
+    if (debouncedSearchQuery.trim() === "") {
       setOpenCollapsibles(new Set());
     } else {
-      // Auto-open collapsibles with matching predecessors
       const toOpen = new Set<number>();
       data?.items.forEach((issuer) => {
         if (
           "predecessors" in issuer &&
           issuer.predecessors &&
           issuer.predecessors.some((pred) =>
-            pred.name.toLowerCase().includes(searchQuery.toLowerCase())
+            pred.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
           )
         ) {
           toOpen.add(issuer.id);
@@ -106,7 +112,7 @@ export function IssuersList() {
       });
       setOpenCollapsibles(toOpen);
     }
-  }, [searchQuery, data?.items]);
+  }, [debouncedSearchQuery, data?.items]);
 
   const renderItem = (issuer: Issuer | Omit<Issuer, "predecessors">) => {
     const buttonProps = {
@@ -116,11 +122,10 @@ export function IssuersList() {
       variant: "ghost" as const,
     };
 
-    // Filter predecessors based on search query
     const filteredPredecessors =
       "predecessors" in issuer && issuer.predecessors
         ? issuer.predecessors.filter((pred) =>
-            pred.name.toLowerCase().includes(searchQuery.toLowerCase())
+            pred.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
           )
         : null;
 
@@ -144,16 +149,22 @@ export function IssuersList() {
           <CollapsibleTrigger asChild>
             <Button
               {...buttonProps}
+              aria-label={`${issuer.name}, ${filteredPredecessors.length} predecessor${filteredPredecessors.length !== 1 ? "s" : ""}`}
               className={cn(buttonProps.className, "group cursor-pointer")}
             >
-              <ChevronRightIcon className="transition-transform group-data-[state=open]:rotate-90 text-muted-foreground" />
+              <ChevronRightIcon
+                aria-hidden="true"
+                className="transition-transform group-data-[state=open]:rotate-90 text-muted-foreground"
+              />
               <IssuerItem issuer={issuer} />
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <div className="flex flex-col gap-1">
-              {filteredPredecessors?.map((child) => renderItem(child))}
-            </div>
+            <ul className="flex flex-col gap-1">
+              {filteredPredecessors?.map((child) => (
+                <li key={child.id}>{renderItem(child)}</li>
+              ))}
+            </ul>
           </CollapsibleContent>
         </Collapsible>
       );
@@ -174,9 +185,13 @@ export function IssuersList() {
   };
 
   return (
-    <div className="h-full max-w-full flex flex-col pt-4 pb-0 gap-2">
-      <div className="max-w-full flex items-center pl-2 pr-5 gap-2.5">
+    <section
+      aria-label="Issuers catalogue"
+      className="h-full w-1/4 flex flex-col pt-4 pb-0 gap-2"
+    >
+      <header className="max-w-full flex items-center pl-2 pr-5 gap-2.5">
         <SearchInput
+          aria-describedby="issuer-search-help"
           count={totalResultsCount}
           onSearch={(e) => {
             setSearchQuery(e.target.value);
@@ -184,12 +199,20 @@ export function IssuersList() {
           placeholder="Search issuers..."
           search={searchQuery}
         />
+        <span className="sr-only" id="issuer-search-help">
+          Search by issuer name
+        </span>
+      </header>
+
+      <div aria-atomic="true" aria-live="polite" className="sr-only">
+        {totalResultsCount} issuer{totalResultsCount !== 1 ? "s" : ""} found
       </div>
+
       <ScrollArea className="w-full overflow-hidden">
-        <div className="flex flex-col border-collapse gap-0 pb-2">
+        <nav className="flex flex-col border-collapse gap-0 pb-2">
           {issuers?.map((item) => renderItem(item))}
-        </div>
+        </nav>
       </ScrollArea>
-    </div>
+    </section>
   );
 }
