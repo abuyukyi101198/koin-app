@@ -31,52 +31,75 @@ export function DataTablePagination({
   onPaginationChange,
 }: DataTablePaginationProps) {
   const [sizeSelectOpen, setSizeSelectOpen] = useState<boolean>(false);
+  const isFirstPage = pageIndex === 1;
+  const isLastPage = pageIndex >= pageCount;
 
   return (
-    <div className="relative flex justify-center items-center px-4 py-3 border-t">
+    <nav
+      aria-label="Pagination navigation"
+      className="relative flex justify-center items-center px-4 py-3 border-t"
+    >
       <div className="flex justify-center items-center space-x-2">
         <Button
+          aria-disabled={isFirstPage}
+          aria-label="Go to first page"
           className="hidden size-8 lg:flex cursor-pointer"
-          disabled={pageIndex === 1}
+          disabled={isFirstPage}
           onClick={() => onPaginationChange(1, pageSize)}
           size="icon"
+          title={isFirstPage ? "You are on the first page" : "Go to first page"}
           variant="outline"
         >
-          <span className="sr-only">Go to first page</span>
-          <ChevronsLeft />
+          <ChevronsLeft aria-hidden="true" className="size-4" />
         </Button>
         <Button
+          aria-disabled={isFirstPage}
+          aria-label="Go to previous page"
           className="size-8 cursor-pointer"
-          disabled={pageIndex === 1}
+          disabled={isFirstPage}
           onClick={() => onPaginationChange(pageIndex - 1, pageSize)}
           size="icon"
+          title={
+            isFirstPage ? "You are on the first page" : "Go to previous page"
+          }
           variant="outline"
         >
-          <span className="sr-only">Go to previous page</span>
-          <ChevronLeft />
+          <ChevronLeft aria-hidden="true" className="size-4" />
         </Button>
-        <div className="flex w-25 items-center justify-center text-xs font-medium">
-          Page {pageIndex} of {pageCount ? pageCount : 1}
+
+        <div
+          aria-current="page"
+          className="flex w-25 items-center justify-center text-xs font-medium"
+        >
+          Page <span className="mx-1 font-semibold">{pageIndex}</span> of
+          <span className="ml-1 font-semibold">
+            {pageCount ? pageCount : 1}
+          </span>
         </div>
+
         <Button
+          aria-disabled={isLastPage}
+          aria-label="Go to next page"
           className="size-8 cursor-pointer"
-          disabled={pageIndex >= pageCount}
+          disabled={isLastPage}
           onClick={() => onPaginationChange(pageIndex + 1, pageSize)}
           size="icon"
+          title={isLastPage ? "You are on the last page" : "Go to next page"}
           variant="outline"
         >
-          <span className="sr-only">Go to next page</span>
-          <ChevronRight />
+          <ChevronRight aria-hidden="true" className="size-4" />
         </Button>
         <Button
+          aria-disabled={isLastPage}
+          aria-label="Go to last page"
           className="hidden size-8 lg:flex cursor-pointer"
-          disabled={pageIndex >= pageCount}
+          disabled={isLastPage}
           onClick={() => onPaginationChange(pageCount, pageSize)}
           size="icon"
+          title={isLastPage ? "You are on the last page" : "Go to last page"}
           variant="outline"
         >
-          <span className="sr-only">Go to last page</span>
-          <ChevronsRight />
+          <ChevronsRight aria-hidden="true" className="size-4" />
         </Button>
       </div>
 
@@ -93,11 +116,16 @@ export function DataTablePagination({
         value={pageSize.toString()}
       >
         <SelectTrigger
+          aria-describedby="page-size-help"
+          aria-label="Rows per page"
           className="w-fit absolute right-4 cursor-pointer focus-visible:ring-0 text-xs"
           size="sm"
         >
           <SelectValue />
         </SelectTrigger>
+        <span className="sr-only" id="page-size-help">
+          Select how many rows to display per page
+        </span>
         <SelectContent align="start">
           <SelectGroup>
             <SelectItem className="text-xs cursor-pointer" value="10">
@@ -112,6 +140,6 @@ export function DataTablePagination({
           </SelectGroup>
         </SelectContent>
       </Select>
-    </div>
+    </nav>
   );
 }

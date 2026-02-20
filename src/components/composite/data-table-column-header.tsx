@@ -20,11 +20,24 @@ export function DataTableColumnHeader<TData, TValue>({
   className,
 }: DataTableColumnHeaderProps<TData, TValue>) {
   if (!column.getCanSort()) {
-    return <div className={cn(className)}>{title}</div>;
+    return (
+      <div className={cn(className)} role="columnheader">
+        {title}
+      </div>
+    );
   }
+
+  const sortState = column.getIsSorted();
+  const ariaSort =
+    sortState === "asc"
+      ? "ascending"
+      : sortState === "desc"
+        ? "descending"
+        : "none";
 
   return (
     <Button
+      aria-sort={ariaSort}
       className={cn(
         className,
         "data-[state=open]:bg-accent h-8 cursor-pointer text-muted-foreground px-0!"
@@ -32,16 +45,20 @@ export function DataTableColumnHeader<TData, TValue>({
       onClick={() => {
         column.toggleSorting(column.getIsSorted() === "asc");
       }}
+      role="columnheader"
       size="sm"
       variant="link"
     >
       <span>{title}</span>
-      {column.getIsSorted() === "desc" ? (
-        <ChevronUp />
-      ) : column.getIsSorted() === "asc" ? (
-        <ChevronDown />
+      {sortState === "desc" ? (
+        <ChevronUp aria-hidden="true" className="ml-2" />
+      ) : sortState === "asc" ? (
+        <ChevronDown aria-hidden="true" className="ml-2" />
       ) : (
-        <ChevronsUpDown className="text-muted-foreground" />
+        <ChevronsUpDown
+          aria-hidden="true"
+          className="ml-2 text-muted-foreground"
+        />
       )}
     </Button>
   );
