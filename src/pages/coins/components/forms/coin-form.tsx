@@ -22,7 +22,7 @@ import { YearField } from "@/pages/coins/components/fields/year-field.tsx";
 import {
   CoinFormData,
   coinFormSchema,
-} from "@/pages/coins/components/schemas/coin-form-schema.ts";
+} from "@/pages/coins/schemas/coin-form-schema.ts";
 
 interface CoinFormProps {
   initialValues: CoinFormData;

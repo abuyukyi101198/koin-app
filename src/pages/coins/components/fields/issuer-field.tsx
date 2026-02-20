@@ -15,7 +15,7 @@ import {
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field.tsx";
 import { InputGroupAddon } from "@/components/ui/input-group.tsx";
 import { cn } from "@/lib/utils.ts";
-import { CoinFormData } from "@/pages/coins/components/schemas/coin-form-schema.ts";
+import { CoinFormData } from "@/pages/coins/schemas/coin-form-schema.ts";
 import { useListIssuers } from "@/query/commands";
 import { Issuer } from "@/query/types";
 

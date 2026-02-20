@@ -9,8 +9,8 @@ import {
 import { SearchInput } from "@/components/composite/search-input.tsx";
 import { useDebounce } from "@/hooks/use-debounce.ts";
 import usePagination from "@/hooks/use-pagination.ts";
-import { EmptyCoins } from "@/pages/coins/components/empty-coins.tsx";
 import { CreateCoinDialog } from "@/pages/coins/components/forms/create-coin-dialog.tsx";
+import { EmptyCoins } from "@/pages/coins/components/misc/empty-coins.tsx";
 import { useCoinsTableColumns } from "@/pages/coins/hooks/use-coins-table-columns.tsx";
 import { useListCoins } from "@/query/commands/coins.ts";
 import { Coin, ListCoinsRequest } from "@/query/types";

@@ -5,7 +5,7 @@ import { ButtonGroup } from "@/components/ui/button-group.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field.tsx";
 import { Input } from "@/components/ui/input.tsx";
-import { CoinFormData } from "@/pages/coins/components/schemas/coin-form-schema.ts";
+import { CoinFormData } from "@/pages/coins/schemas/coin-form-schema.ts";
 
 interface QuantityFieldProps {
   value: CoinFormData["quantity"];

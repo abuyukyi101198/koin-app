@@ -2,7 +2,7 @@ import { FormikProps } from "formik";
 
 import { Field, FieldContent } from "@/components/ui/field.tsx";
 import { Textarea } from "@/components/ui/textarea.tsx";
-import { CoinFormData } from "@/pages/coins/components/schemas/coin-form-schema.ts";
+import { CoinFormData } from "@/pages/coins/schemas/coin-form-schema.ts";
 
 interface NotesFieldProps {
   value: CoinFormData["notes"];

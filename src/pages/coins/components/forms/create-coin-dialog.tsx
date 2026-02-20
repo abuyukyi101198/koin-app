@@ -13,7 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog.tsx";
 import { CoinForm } from "@/pages/coins/components/forms/coin-form.tsx";
-import { CoinFormData } from "@/pages/coins/components/schemas/coin-form-schema.ts";
+import { CoinFormData } from "@/pages/coins/schemas/coin-form-schema.ts";
 import { useCreateCoin } from "@/query/commands";
 import { CreateCoinRequest } from "@/query/types";
 

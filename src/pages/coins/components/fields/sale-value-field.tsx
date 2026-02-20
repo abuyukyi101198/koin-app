@@ -7,7 +7,7 @@ import {
   InputGroupInput,
   InputGroupText,
 } from "@/components/ui/input-group.tsx";
-import { CoinFormData } from "@/pages/coins/components/schemas/coin-form-schema.ts";
+import { CoinFormData } from "@/pages/coins/schemas/coin-form-schema.ts";
 
 interface SaleValueFieldProps {
   value: CoinFormData["saleValue"];

@@ -2,7 +2,7 @@ import { FormikProps } from "formik";
 
 import { ImageUploadField } from "@/components/composite/image-upload.tsx";
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field.tsx";
-import { CoinFormData } from "@/pages/coins/components/schemas/coin-form-schema.ts";
+import { CoinFormData } from "@/pages/coins/schemas/coin-form-schema.ts";
 
 interface ImagesFieldProps {
   value: {
