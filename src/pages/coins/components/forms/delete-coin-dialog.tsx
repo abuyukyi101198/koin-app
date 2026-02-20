@@ -14,7 +14,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog.tsx";
-import { FieldLabel } from "@/components/ui/field.tsx";
 import { useDeleteCoin, useGetCoin } from "@/query/commands";
 
 interface DeleteCoinDialogProps {
@@ -74,7 +73,7 @@ export function DeleteCoinDialog({
             </Button>
           ) : (
             <Button
-              className="text-destructive hover:text-destructive-foreground cursor-pointer p-0"
+              className="bg-destructive/20 text-destructive hover:bg-destructive/50! hover:text-destructive-foreground cursor-pointer p-0"
               size="icon-xs"
               variant="ghost"
             >
@@ -83,15 +82,14 @@ export function DeleteCoinDialog({
           )}
         </DialogTrigger>
         <DialogContent className="sm:max-w-lg p-8 z-50" showCloseButton={false}>
-          <DialogHeader className="hidden">
-            <DialogTitle>Delete coin</DialogTitle>
+          <DialogHeader>
+            <DialogTitle className="text-base">
+              Delete <span className="underline">{data?.title}</span>?
+            </DialogTitle>
             <DialogDescription>
-              Delete the coin record from your catalogue.
+              This will permanently delete this coin from your catalogue.
             </DialogDescription>
           </DialogHeader>
-          <FieldLabel>
-            Are you sure you want to delete {data?.title}?
-          </FieldLabel>
           <DialogFooter className="pt-2.5">
             <DialogClose asChild>
               <Button className="cursor-pointer" variant="outline">
@@ -99,7 +97,7 @@ export function DeleteCoinDialog({
               </Button>
             </DialogClose>
             <Button
-              className="hover:bg-destructive-foreground! cursor-pointer"
+              className="bg-destructive/20 hover:bg-destructive/50! cursor-pointer"
               onClick={handleSubmit}
               variant="destructive"
             >

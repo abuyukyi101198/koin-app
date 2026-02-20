@@ -194,7 +194,7 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
             },
           }) => {
             return (
-              <div className="text-xs text-right">
+              <div className="flex justify-end gap-1">
                 <UpdateCoinDialog id={id} size="sm" />
                 <DeleteCoinDialog id={id} size="sm" />
               </div>
