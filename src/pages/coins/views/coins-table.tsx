@@ -67,7 +67,7 @@ export function CoinsTable({ selection }: CoinsListProps) {
 
   return (
     <div className="h-full w-full flex flex-col pt-4 pb-0">
-      <div className="max-w-full flex items-center pl-5 pr-2 pb-2 gap-2.5">
+      <div className="max-w-full flex items-center pl-5 pr-3 pb-2 gap-2.5">
         <SearchInput
           count={data?.total}
           onSearch={(e) => {

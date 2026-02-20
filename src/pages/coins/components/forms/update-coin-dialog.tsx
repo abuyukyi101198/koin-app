@@ -95,7 +95,7 @@ export function UpdateCoinDialog({
       {/* Background overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50"
+          className="fixed inset-0 z-40 bg-black/50 cursor-default"
           onClick={() => {
             setIsOpen(false);
           }}
@@ -126,7 +126,7 @@ export function UpdateCoinDialog({
             <DialogDescription>
               Update the details of your coin record.
             </DialogDescription>
-          </DialogHeader>{" "}
+          </DialogHeader>
           <CoinForm
             initialValues={initialValues}
             isOpen={isOpen}

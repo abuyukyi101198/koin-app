@@ -74,7 +74,7 @@ export function CreateCoinDialog({ size = "default" }: CreateCoinDialogProps) {
       {/* Background overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50"
+          className="fixed inset-0 z-40 bg-black/50 cursor-default"
           onClick={() => {
             setIsOpen(false);
           }}

@@ -70,7 +70,7 @@ export function SearchInput({
             ref={inputRef}
             value={search}
           />
-          {search && count && (
+          {search && count !== undefined && (
             <InputGroupAddon
               align="inline-end"
               className="text-xs font-normal leading-5 italic pt-2.5 pr-1.5"

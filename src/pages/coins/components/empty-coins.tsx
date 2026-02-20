@@ -27,7 +27,7 @@ export function EmptyCoins({ type, refresh }: EmptyCoinsProps) {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent className="flex-row justify-center gap-2">
-        <Button onClick={refresh} variant="ghost">
+        <Button className="cursor-pointer" onClick={refresh} variant="ghost">
           Refresh
         </Button>
         <CreateCoinDialog />
