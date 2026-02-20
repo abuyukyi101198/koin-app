@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTableColumnHeader } from "@/components/composite/data-table-column-header.tsx";
+import { UpdateCoinDialog } from "@/pages/coins/components/forms/update-coin-dialog.tsx";
 import { Coin } from "@/query/types";
 import { asFraction } from "@/utils/asFraction.tsx";
 
@@ -18,7 +19,7 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
             <DataTableColumnHeader column={column} title="Image" />
           ),
           meta: {
-            size: 100,
+            size: 75,
           },
           cell: ({
             row: {
@@ -172,6 +173,28 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
                       currency: "USD",
                     }).format(sale_value)
                   : "—"}
+              </div>
+            );
+          },
+        },
+        {
+          id: "actions",
+          accessorKey: "id",
+          enableSorting: false,
+          header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="" />
+          ),
+          meta: {
+            size: 50,
+          },
+          cell: ({
+            row: {
+              original: { id },
+            },
+          }) => {
+            return (
+              <div className="text-xs text-right">
+                <UpdateCoinDialog id={id} size="sm" />
               </div>
             );
           },

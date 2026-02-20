@@ -6,7 +6,7 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty.tsx";
-import { AddCoinDialog } from "@/pages/coins/components/add-coin-dialog.tsx";
+import { CreateCoinDialog } from "@/pages/coins/components/forms/create-coin-dialog.tsx";
 
 interface EmptyCoinsProps {
   type: "no data" | "no match";
@@ -30,7 +30,7 @@ export function EmptyCoins({ type, refresh }: EmptyCoinsProps) {
         <Button onClick={refresh} variant="ghost">
           Refresh
         </Button>
-        <AddCoinDialog onSuccess={refresh} />
+        <CreateCoinDialog />
       </EmptyContent>
     </Empty>
   );
