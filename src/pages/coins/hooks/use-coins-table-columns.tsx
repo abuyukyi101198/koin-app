@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTableColumnHeader } from "@/components/composite/data-table-column-header.tsx";
+import { DeleteCoinDialog } from "@/pages/coins/components/forms/delete-coin-dialog.tsx";
 import { UpdateCoinDialog } from "@/pages/coins/components/forms/update-coin-dialog.tsx";
 import { Coin } from "@/query/types";
 import { asFraction } from "@/utils/asFraction.tsx";
@@ -195,6 +196,7 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
             return (
               <div className="text-xs text-right">
                 <UpdateCoinDialog id={id} size="sm" />
+                <DeleteCoinDialog id={id} size="sm" />
               </div>
             );
           },
