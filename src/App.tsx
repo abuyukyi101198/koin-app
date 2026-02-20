@@ -3,6 +3,7 @@ import { CSSProperties } from "react";
 
 import { QueryClientProvider } from "@tanstack/react-query";
 import { QueryClient } from "@tanstack/react-query";
+import { Link, Outlet } from "@tanstack/react-router";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { Coins, Github } from "lucide-react";
 
@@ -25,7 +26,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip.tsx";
-import { CoinsView } from "@/pages/coins/views/coins-view.tsx";
 
 const queryClient = new QueryClient();
 
@@ -50,10 +50,13 @@ function App() {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <SidebarMenuButton
+                              asChild
                               className="cursor-pointer"
                               size="default"
                             >
-                              <Coins />
+                              <Link to="/coins">
+                                <Coins />
+                              </Link>
                             </SidebarMenuButton>
                           </TooltipTrigger>
                           <TooltipContent side="right" sideOffset={8}>
@@ -91,7 +94,7 @@ function App() {
               </SidebarFooter>
             </Sidebar>
             <main className="h-screen w-screen">
-              <CoinsView />
+              <Outlet />
             </main>
           </SidebarProvider>
           <Toaster />
