@@ -86,6 +86,11 @@ export function IssuerField({
     );
   };
 
+  const resolvedValue: Issuer | null = useMemo(() => {
+    if (!value) return null;
+    return (flattenedIssuers.find((i) => i.id === value.id) as Issuer) ?? null;
+  }, [value, flattenedIssuers]);
+
   const validateInputOnChange = async (value: Issuer | null) => {
     await setFieldValue("issuer", value, true);
     await setFieldTouched("issuer", true, false);
@@ -107,7 +112,7 @@ export function IssuerField({
           items={flattenedIssuers}
           onValueChange={(value) => validateInputOnChange(value)}
           required
-          value={value}
+          value={resolvedValue}
         >
           <ComboboxInput
             aria-invalid={!!(error && touched)}

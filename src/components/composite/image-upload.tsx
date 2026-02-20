@@ -205,6 +205,7 @@ export function ImageUploadField({
           </DialogHeader>
           <div className="flex flex-col gap-4">
             <Input
+              className="[&::-webkit-inner-spin-button]:appearance-none border-l-0 border-t-0 border-r-0 rounded-none bg-background! focus-visible:ring-0"
               onChange={(e) => {
                 setUrlInput(e.target.value);
               }}
