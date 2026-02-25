@@ -1,7 +1,7 @@
 use crate::commands::utils::get_db_connection;
 use crate::types::coins::{Coin, CreateCoinRequest, PaginatedCoinsResponse, UpdateCoinRequest};
 
-fn build_coin_from_row(row: &rusqlite::Row) -> Result<Coin, rusqlite::Error> {
+pub fn build_coin_from_row(row: &rusqlite::Row) -> Result<Coin, rusqlite::Error> {
     use crate::types::issuers::IssuerDisplay;
 
     Ok(Coin {
