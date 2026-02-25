@@ -93,7 +93,7 @@ export function useSimilarCoinsTableColumns(): ColumnDef<Coin>[] {
           enableSorting: false,
           meta: {
             size: 20,
-            responsiveClass: "md:table-cell hidden",
+            responsiveClass: "2xl:table-cell hidden",
           },
           cell: ({
             row: {

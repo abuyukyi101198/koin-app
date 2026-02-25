@@ -208,10 +208,11 @@ export function IssuersList() {
         {totalResultsCount} issuer{totalResultsCount !== 1 ? "s" : ""} found
       </div>
 
+      {/* Issuers list */}
       <ScrollArea className="w-full overflow-hidden">
-        <nav className="flex flex-col border-collapse gap-0 pb-2">
+        <div className="flex flex-col border-collapse gap-0 pb-2">
           {issuers?.map((item) => renderItem(item))}
-        </nav>
+        </div>
       </ScrollArea>
     </section>
   );
