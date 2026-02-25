@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { SortingState } from "@tanstack/react-table";
 
@@ -51,19 +51,6 @@ export function CoinsTable({ selection }: CoinsListProps) {
     [size, handlePageSizeChange, setPage]
   );
 
-  const handleRefresh = async () => {
-    await refetch();
-  };
-
-  useEffect(() => {
-    if (
-      data?.items &&
-      Object.keys(selection?.rowSelection ?? {}).length === 0
-    ) {
-      selection?.onRowSelectionChange({ [data.items[0].id]: true });
-    }
-  }, [data?.items, selection]);
-
   return (
     <section
       aria-busy={isLoading}
@@ -92,8 +79,10 @@ export function CoinsTable({ selection }: CoinsListProps) {
         data={data?.items ?? []}
         empty={
           <EmptyCoins
-            refresh={handleRefresh}
-            type={searchQuery.length ? "no match" : "no data"}
+            refresh={async () => {
+              await refetch();
+            }}
+            type={debouncedSearchQuery.length ? "no match" : "no data"}
           />
         }
         loading={isLoading}
