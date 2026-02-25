@@ -84,7 +84,11 @@ export function CreateCoinDialog({ size = "default" }: CreateCoinDialogProps) {
         <DialogTrigger asChild>
           {size === "default" ? (
             <Button className="cursor-pointer" variant="outline">
-              Add new coin
+              <span className="flex items-center p-0 gap-0">
+                <Plus className="size-3" />
+                <BadgeCent />
+              </span>
+              Add a new coin
             </Button>
           ) : (
             <Button className="cursor-pointer p-0 gap-0" variant="outline">

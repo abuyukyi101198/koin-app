@@ -1,9 +1,12 @@
+import { Coins, RefreshCcw } from "lucide-react";
+
 import { Button } from "@/components/ui/button.tsx";
 import {
   Empty,
   EmptyContent,
   EmptyDescription,
   EmptyHeader,
+  EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty.tsx";
 import { CreateCoinDialog } from "@/pages/coins/components/forms/create-coin-dialog.tsx";
@@ -17,8 +20,11 @@ export function EmptyCoins({ type, refresh }: EmptyCoinsProps) {
   return (
     <Empty>
       <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <Coins />
+        </EmptyMedia>
         <EmptyTitle>
-          {type === "no data" ? "No Coins Yet" : "No Matching Coins"}
+          {type === "no data" ? "No coins yet" : "No matching coins"}
         </EmptyTitle>
         <EmptyDescription>
           {type === "no data"
@@ -28,6 +34,7 @@ export function EmptyCoins({ type, refresh }: EmptyCoinsProps) {
       </EmptyHeader>
       <EmptyContent className="flex-row justify-center gap-2">
         <Button className="cursor-pointer" onClick={refresh} variant="ghost">
+          <RefreshCcw />
           Refresh
         </Button>
         <CreateCoinDialog />
