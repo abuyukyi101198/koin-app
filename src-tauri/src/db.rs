@@ -88,6 +88,47 @@ fn run_migrations(conn: &Connection) -> SqliteResult<()> {
             CREATE INDEX idx_coins_currency ON coins(currency);
         "#,
     )?;
+    
+    // Migration 3: Create notebooks table
+    apply_migration(
+        conn,
+        "003_create_notebooks_table",
+        r#"
+            CREATE TABLE notebooks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                description TEXT,
+                rows_per_page INTEGER NOT NULL DEFAULT 5,
+                columns_per_page INTEGER NOT NULL DEFAULT 4,
+                number_of_pages INTEGER NOT NULL DEFAULT 1,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE INDEX idx_notebooks_title ON notebooks(title);
+        "#,
+    )?;
+
+    // Migration 4: Create notebook_coins junction table for many-to-many relationship
+    apply_migration(
+        conn,
+        "004_create_notebook_coins_table",
+        r#"
+            CREATE TABLE notebook_coins (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                notebook_id INTEGER NOT NULL,
+                coin_id INTEGER NOT NULL,
+                position INTEGER NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (notebook_id) REFERENCES notebooks(id) ON DELETE CASCADE,
+                FOREIGN KEY (coin_id) REFERENCES coins(id) ON DELETE CASCADE,
+                UNIQUE(notebook_id, coin_id)
+            );
+
+            CREATE INDEX idx_notebook_coins_notebook_id ON notebook_coins(notebook_id);
+            CREATE INDEX idx_notebook_coins_coin_id ON notebook_coins(coin_id);
+            CREATE INDEX idx_notebook_coins_position ON notebook_coins(notebook_id, position);
+        "#,
+    )?;
 
     Ok(())
 }
