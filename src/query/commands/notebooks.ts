@@ -48,7 +48,7 @@ export function useListNotebooks(
   });
 }
 
-export function useGetNotebooks(
+export function useGetNotebook(
   options: GetNotebookRequest
 ): UseQueryResult<Notebook> {
   return useQuery({

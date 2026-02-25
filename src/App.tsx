@@ -5,7 +5,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { QueryClient } from "@tanstack/react-query";
 import { Link, Outlet } from "@tanstack/react-router";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { Coins, Github } from "lucide-react";
+import { BookCopy, Coins, Github } from "lucide-react";
 
 import {
   Sidebar,
@@ -51,7 +51,7 @@ function App() {
                           <TooltipTrigger asChild>
                             <SidebarMenuButton
                               asChild
-                              className="cursor-pointer"
+                              className="text-muted-foreground hover:text-base cursor-pointer"
                               size="default"
                             >
                               <Link to="/coins">
@@ -61,6 +61,24 @@ function App() {
                           </TooltipTrigger>
                           <TooltipContent side="right" sideOffset={8}>
                             Coins
+                          </TooltipContent>
+                        </Tooltip>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <SidebarMenuButton
+                              asChild
+                              className="text-muted-foreground hover:text-base cursor-pointer"
+                              size="default"
+                            >
+                              <Link to="/notebooks">
+                                <BookCopy />
+                              </Link>
+                            </SidebarMenuButton>
+                          </TooltipTrigger>
+                          <TooltipContent side="right" sideOffset={8}>
+                            Notebooks
                           </TooltipContent>
                         </Tooltip>
                       </SidebarMenuItem>
@@ -74,7 +92,7 @@ function App() {
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <SidebarMenuButton
-                          className="cursor-pointer"
+                          className="text-muted-foreground hover:text-base cursor-pointer"
                           onClick={async () => {
                             await openUrl(
                               "https://github.com/abuyukyi101198/koin-app"
