@@ -19,7 +19,7 @@ import {
 
 interface DataTablePaginationProps {
   pageIndex: number;
-  pageSize: number;
+  pageSize?: number;
   pageCount: number;
   onPaginationChange: (pageIndex: number, pageSize: number) => Promise<void>;
 }
@@ -45,7 +45,7 @@ export function DataTablePagination({
           aria-label="Go to first page"
           className="hidden size-8 lg:flex cursor-pointer"
           disabled={isFirstPage}
-          onClick={() => onPaginationChange(1, pageSize)}
+          onClick={() => onPaginationChange(1, pageSize ?? 0)}
           size="icon"
           title={isFirstPage ? "You are on the first page" : "Go to first page"}
           variant="outline"
@@ -57,7 +57,7 @@ export function DataTablePagination({
           aria-label="Go to previous page"
           className="size-8 cursor-pointer"
           disabled={isFirstPage}
-          onClick={() => onPaginationChange(pageIndex - 1, pageSize)}
+          onClick={() => onPaginationChange(pageIndex - 1, pageSize ?? 0)}
           size="icon"
           title={
             isFirstPage ? "You are on the first page" : "Go to previous page"
@@ -82,7 +82,7 @@ export function DataTablePagination({
           aria-label="Go to next page"
           className="size-8 cursor-pointer"
           disabled={isLastPage}
-          onClick={() => onPaginationChange(pageIndex + 1, pageSize)}
+          onClick={() => onPaginationChange(pageIndex + 1, pageSize ?? 0)}
           size="icon"
           title={isLastPage ? "You are on the last page" : "Go to next page"}
           variant="outline"
@@ -94,7 +94,7 @@ export function DataTablePagination({
           aria-label="Go to last page"
           className="hidden size-8 lg:flex cursor-pointer"
           disabled={isLastPage}
-          onClick={() => onPaginationChange(pageCount, pageSize)}
+          onClick={() => onPaginationChange(pageCount, pageSize ?? 0)}
           size="icon"
           title={isLastPage ? "You are on the last page" : "Go to last page"}
           variant="outline"
@@ -103,43 +103,45 @@ export function DataTablePagination({
         </Button>
       </div>
 
-      <Select
-        onOpenChange={(open) => {
-          setSizeSelectOpen(open);
-        }}
-        onValueChange={(value) => {
-          onPaginationChange(pageIndex, Number.parseInt(value)).then(() => {
-            setSizeSelectOpen(false);
-          });
-        }}
-        open={sizeSelectOpen}
-        value={pageSize.toString()}
-      >
-        <SelectTrigger
-          aria-describedby="page-size-help"
-          aria-label="Rows per page"
-          className="w-fit absolute right-4 cursor-pointer focus-visible:ring-0 text-xs"
-          size="sm"
+      {pageSize && (
+        <Select
+          onOpenChange={(open) => {
+            setSizeSelectOpen(open);
+          }}
+          onValueChange={(value) => {
+            onPaginationChange(pageIndex, Number.parseInt(value)).then(() => {
+              setSizeSelectOpen(false);
+            });
+          }}
+          open={sizeSelectOpen}
+          value={pageSize.toString()}
         >
-          <SelectValue />
-        </SelectTrigger>
-        <span className="sr-only" id="page-size-help">
-          Select how many rows to display per page
-        </span>
-        <SelectContent align="start">
-          <SelectGroup>
-            <SelectItem className="text-xs cursor-pointer" value="10">
-              10 / page
-            </SelectItem>
-            <SelectItem className="text-xs cursor-pointer" value="25">
-              25 / page
-            </SelectItem>
-            <SelectItem className="text-xs cursor-pointer" value="50">
-              50 / page
-            </SelectItem>
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+          <SelectTrigger
+            aria-describedby="page-size-help"
+            aria-label="Rows per page"
+            className="w-fit absolute right-4 cursor-pointer focus-visible:ring-0 text-xs"
+            size="sm"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <span className="sr-only" id="page-size-help">
+            Select how many rows to display per page
+          </span>
+          <SelectContent align="start">
+            <SelectGroup>
+              <SelectItem className="text-xs cursor-pointer" value="10">
+                10 / page
+              </SelectItem>
+              <SelectItem className="text-xs cursor-pointer" value="25">
+                25 / page
+              </SelectItem>
+              <SelectItem className="text-xs cursor-pointer" value="50">
+                50 / page
+              </SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      )}
     </nav>
   );
 }

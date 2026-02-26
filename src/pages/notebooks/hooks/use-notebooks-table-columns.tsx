@@ -21,24 +21,24 @@ export function useNotebooksTableColumns(): ColumnDef<Notebook>[] {
             },
           }) => {
             const displayTitle =
-              title.length > 60
-                ? `${title.substring(0, 60).trimEnd()}...`
+              title.length > 40
+                ? `${title.substring(0, 40).trimEnd()}...`
                 : title;
 
             const displayDescription =
-              description && description.length > 60
-                ? `${description.substring(0, 60).trimEnd()}...`
+              description && description.length > 40
+                ? `${description.substring(0, 40).trimEnd()}...`
                 : description;
 
             return (
               <div className="w-full flex flex-col justify-between">
-                <span title={title.length > 60 ? title : undefined}>
+                <span title={title.length > 40 ? title : undefined}>
                   {displayTitle}
                 </span>
                 {description && (
                   <span
                     className="text-xs italic text-muted-foreground leading-5 grow"
-                    title={description.length > 60 ? description : undefined}
+                    title={description.length > 40 ? description : undefined}
                   >
                     {displayDescription}
                   </span>

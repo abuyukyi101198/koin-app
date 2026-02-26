@@ -36,7 +36,7 @@ export function NotebooksList({ selection }: NotebookListProps) {
     <section
       aria-busy={isLoading}
       aria-label="Notebooks catalogue"
-      className="h-full w-1/4 flex flex-col pt-4 pb-0 gap-2 border-r"
+      className="h-full w-1/6 flex flex-col pt-4 pb-0 gap-2 border-r"
     >
       {/* Header */}
       <header className="max-w-full flex items-center pl-2 pr-5 gap-2.5">

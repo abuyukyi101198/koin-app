@@ -1,17 +1,22 @@
+import { DataTablePagination } from "@/components/composite/data-table-pagination.tsx";
+import usePagination from "@/hooks/use-pagination.ts";
 import {
   useGetNotebook,
   useGetNotebookPage,
 } from "@/query/commands/notebooks.ts";
+import { asFraction } from "@/utils/asFraction.tsx";
 
 interface NotebookContentsProps {
   notebookId: number;
 }
 
 export function NotebookContents({ notebookId }: NotebookContentsProps) {
+  const { page, setPage } = usePagination();
+
   const { data: notebook } = useGetNotebook({ id: notebookId });
   const { data: notebookPage, isLoading } = useGetNotebookPage({
     id: notebookId,
-    page: 0,
+    page: page - 1,
   });
 
   const rows = notebook?.rows_per_page ?? 1;
@@ -21,7 +26,7 @@ export function NotebookContents({ notebookId }: NotebookContentsProps) {
     <section
       aria-busy={isLoading}
       aria-label="Notebook contents"
-      className="h-full w-3/4 flex flex-col overflow-hidden"
+      className="h-full w-5/6 flex flex-col overflow-hidden"
     >
       {/* Header */}
       <header className="shrink-0 border-b px-6 pt-8 pb-3">
@@ -47,44 +52,74 @@ export function NotebookContents({ notebookId }: NotebookContentsProps) {
             (row: (typeof notebookPage.cells)[number], rowIdx: number) =>
               row.map((coin: (typeof row)[number], colIdx: number) => (
                 <div
-                  className="flex items-start justify-center overflow-hidden rounded-sm border border-border bg-background"
+                  className="relative flex items-start justify-center overflow-hidden rounded-sm border border-border bg-background"
                   key={`${rowIdx}-${colIdx}`}
                   role="gridcell"
                 >
                   {coin ? (
-                    <div className="flex gap-2 mt-auto mb-auto px-2">
-                      <div className="aspect-square flex items-center justify-center">
-                        {coin.reverse_image ? (
-                          <img
-                            alt="Coin reverse"
-                            className="max-w-full max-h-full object-contain rounded-full"
-                            src={coin.reverse_image}
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
-                            R
-                          </div>
-                        )}
+                    <>
+                      <div className="flex gap-2 mt-auto mb-auto px-2">
+                        <div className="aspect-square flex items-center justify-center">
+                          {coin.reverse_image ? (
+                            <img
+                              alt="Coin reverse"
+                              className="max-w-full max-h-full object-contain rounded-full"
+                              src={coin.reverse_image}
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
+                              R
+                            </div>
+                          )}
+                        </div>
+                        <div className="aspect-square flex items-center justify-center">
+                          {coin.obverse_image ? (
+                            <img
+                              alt="Coin obverse"
+                              className="max-w-full max-h-full object-contain rounded-full"
+                              src={coin.obverse_image}
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
+                              O
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <div className="aspect-square flex items-center justify-center">
-                        {coin.obverse_image ? (
-                          <img
-                            alt="Coin obverse"
-                            className="max-w-full max-h-full object-contain rounded-full"
-                            src={coin.obverse_image}
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
-                            O
-                          </div>
-                        )}
+                      <div className="absolute right-0 h-full max-w-1/3 bg-muted text-xs p-4">
+                        <div className="flex gap-2 w-fit">
+                          <span className="text-xs font-medium">
+                            {asFraction(coin.title, coin.value)}
+                          </span>
+                          <span>
+                            <img
+                              alt={`${coin.issuer.name} flag`}
+                              className="h-3 w-4.5"
+                              loading="lazy"
+                              src={
+                                coin.issuer.flag?.length
+                                  ? coin.issuer.flag
+                                  : undefined
+                              }
+                            />
+                          </span>
+                        </div>
                       </div>
-                    </div>
+                    </>
                   ) : null}
                 </div>
               ))
           )}
         </div>
+      </div>
+      <div aria-atomic="true" aria-live="polite">
+        <DataTablePagination
+          onPaginationChange={async (pageIndex) => {
+            setPage(pageIndex);
+          }}
+          pageCount={notebook?.number_of_pages ?? 1}
+          pageIndex={page}
+        />
       </div>
     </section>
   );
