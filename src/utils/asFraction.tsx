@@ -34,7 +34,7 @@ export function asFraction(
 
   return (
     <>
-      {`${wholeNumber} `}
+      {wholeNumber ? `${wholeNumber} ` : ""}
       <sup>{numerator}</sup>&#x2044;<sub>{denominator}</sub>
       {restOfTitle && ` ${restOfTitle}`}
     </>

@@ -14,16 +14,14 @@ import { useDebounce } from "@/hooks/use-debounce.ts";
 import { cn } from "@/lib/utils.ts";
 import { useListIssuers } from "@/query/commands";
 import { Issuer } from "@/query/types";
+import { truncate } from "@/utils/truncate.ts";
 
 function IssuerItem({
   issuer,
 }: {
   issuer: Issuer | Omit<Issuer, "predecessors">;
 }) {
-  const displayName =
-    issuer.name.length > 30
-      ? `${issuer.name.substring(0, 30).trimEnd()}...`
-      : issuer.name;
+  const limit = 30;
 
   return (
     <div className="w-full flex justify-between">
@@ -36,8 +34,8 @@ function IssuerItem({
             src={issuer.flag?.length ? issuer.flag : undefined}
           />
         </span>
-        <span title={issuer.name.length > 30 ? issuer.name : undefined}>
-          {displayName}
+        <span title={issuer.name.length > limit ? issuer.name : undefined}>
+          {truncate(issuer.name, limit)}
         </span>
       </div>
       {issuer.name !== "Other" && (

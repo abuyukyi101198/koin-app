@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 
 import { Coin } from "@/query/types";
 import { asFraction } from "@/utils/asFraction.tsx";
+import { truncate } from "@/utils/truncate.ts";
 
 export function useSimilarCoinsTableColumns(): ColumnDef<Coin>[] {
   return useMemo(
@@ -65,6 +66,7 @@ export function useSimilarCoinsTableColumns(): ColumnDef<Coin>[] {
               original: { title, value, description, issuer },
             },
           }) => {
+            const limit = 30;
             const formattedTitle = asFraction(title, value);
 
             return (
@@ -80,8 +82,13 @@ export function useSimilarCoinsTableColumns(): ColumnDef<Coin>[] {
                   </span>
                   <span className="text-xs font-medium">{formattedTitle}</span>
                 </div>
-                <span className="text-muted-foreground text-xs italic pl-6.5">
-                  {description?.length ? description : "—"}
+                <span
+                  className="text-muted-foreground text-xs italic pl-6.5"
+                  title={
+                    (description?.length ?? 0) > limit ? description : undefined
+                  }
+                >
+                  {description?.length ? truncate(description, limit) : "—"}
                 </span>
               </div>
             );

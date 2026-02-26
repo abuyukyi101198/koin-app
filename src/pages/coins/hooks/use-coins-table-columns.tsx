@@ -7,6 +7,7 @@ import { DeleteCoinDialog } from "@/pages/coins/components/forms/delete-coin-dia
 import { UpdateCoinDialog } from "@/pages/coins/components/forms/update-coin-dialog.tsx";
 import { Coin } from "@/query/types";
 import { asFraction } from "@/utils/asFraction.tsx";
+import { truncate } from "@/utils/truncate.ts";
 
 export function useCoinsTableColumns(): ColumnDef<Coin>[] {
   return useMemo(
@@ -73,13 +74,19 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
               original: { title, value, description },
             },
           }) => {
+            const limit = 40;
             const formattedTitle = asFraction(title, value);
 
             return (
               <div className="flex flex-col">
                 <span className="text-xs font-medium">{formattedTitle}</span>
-                <span className="text-muted-foreground text-xs italic">
-                  {description?.length ? description : "—"}
+                <span
+                  className="text-muted-foreground text-xs italic"
+                  title={
+                    (description?.length ?? 0) > limit ? description : undefined
+                  }
+                >
+                  {description?.length ? truncate(description, limit) : "—"}
                 </span>
               </div>
             );
@@ -100,6 +107,8 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
               original: { issuer },
             },
           }) => {
+            const limit = 30;
+
             return (
               <div className="flex items-start gap-2">
                 <span className="pt-0.5">
@@ -110,7 +119,12 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
                     src={issuer.flag?.length ? issuer.flag : undefined}
                   />
                 </span>
-                <span className="text-xs">{issuer.name}</span>
+                <span
+                  className="text-xs"
+                  title={issuer.name.length > limit ? issuer.name : undefined}
+                >
+                  {truncate(issuer.name, limit)}
+                </span>
               </div>
             );
           },
