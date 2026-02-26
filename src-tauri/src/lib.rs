@@ -3,7 +3,7 @@ mod db;
 mod types;
 use crate::commands::coins::{create_coin, delete_coin, get_coin, get_similar_coins, list_coins, update_coin};
 use crate::commands::issuers::list_issuers;
-use crate::commands::notebooks::{list_notebooks, get_notebook, create_notebook};
+use crate::commands::notebooks::{list_notebooks, get_notebook, create_notebook, get_notebook_page};
 use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -21,7 +21,8 @@ pub fn run() {
             list_issuers,
             list_notebooks,
             get_notebook,
-            create_notebook
+            create_notebook,
+            get_notebook_page
         ])
         .setup(|app| {
             // Initialize database on app startup

@@ -1,6 +1,9 @@
 use crate::commands::coins::build_coin_from_row;
 use crate::commands::utils::get_db_connection;
-use crate::types::notebooks::{Notebook, PaginatedNotebooksResponse, CreateNotebookRequest};
+use crate::types::coins::Coin;
+use crate::types::notebooks::{
+    CreateNotebookRequest, Notebook, NotebookPage, PaginatedNotebooksResponse,
+};
 
 fn build_notebook_from_row(row: &rusqlite::Row) -> Result<Notebook, rusqlite::Error> {
     Ok(Notebook {
@@ -10,7 +13,6 @@ fn build_notebook_from_row(row: &rusqlite::Row) -> Result<Notebook, rusqlite::Er
         rows_per_page: row.get(3)?,
         columns_per_page: row.get(4)?,
         number_of_pages: row.get(5)?,
-        coins: None,
         created_at: row.get(6)?,
     })
 }
@@ -95,7 +97,7 @@ pub fn list_notebooks(
 pub fn get_notebook(app_handle: tauri::AppHandle, id: i32) -> Result<Notebook, String> {
     let conn = get_db_connection(&app_handle)?;
 
-    // First, fetch the notebook metadata
+    // Fetch the notebook metadata
     let notebook_query = "SELECT id, title, description, rows_per_page, columns_per_page, number_of_pages, created_at
                          FROM notebooks
                          WHERE id = ?1";
@@ -104,30 +106,32 @@ pub fn get_notebook(app_handle: tauri::AppHandle, id: i32) -> Result<Notebook, S
         .prepare(notebook_query)
         .map_err(|e| format!("Failed to prepare notebook statement: {}", e))?;
 
-    let (
-        notebook_id,
-        title,
-        description,
-        rows_per_page,
-        columns_per_page,
-        number_of_pages,
-        created_at,
-    ): (i32, String, Option<String>, i32, i32, i32, String) = notebook_stmt
-        .query_row([id], |row| {
-            Ok((
-                row.get(0)?,
-                row.get(1)?,
-                row.get(2)?,
-                row.get(3)?,
-                row.get(4)?,
-                row.get(5)?,
-                row.get(6)?,
-            ))
-        })
-        .map_err(|e| format!("Failed to get notebook: {}", e))?;
+    notebook_stmt
+        .query_row([id], |row| build_notebook_from_row(row))
+        .map_err(|e| format!("Failed to get notebook: {}", e))
+}
 
-    // Then, fetch all coins in this notebook ordered by position
-    let coins_query = "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.start_year, i.end_year, i.flag, c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at
+#[tauri::command]
+pub fn get_notebook_page(
+    app_handle: tauri::AppHandle,
+    id: i32,
+    page: i32,
+) -> Result<NotebookPage, String> {
+    let conn = get_db_connection(&app_handle)?;
+
+    // First, get notebook metadata to know grid dimensions
+    let notebook_query = "SELECT rows_per_page, columns_per_page FROM notebooks WHERE id = ?1";
+    let (rows, cols): (i32, i32) = conn
+        .query_row(notebook_query, [id], |row| {
+            Ok((row.get(0)?, row.get(1)?))
+        })
+        .map_err(|e| format!("Failed to get notebook dimensions: {}", e))?;
+
+    // Initialize empty grid
+    let mut grid: Vec<Vec<Option<Coin>>> = vec![vec![None; cols as usize]; rows as usize];
+
+    // Fetch all coins for this notebook page
+    let coins_query = "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.start_year, i.end_year, i.flag, c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at, nc.position
                       FROM coins c
                       LEFT JOIN issuers i ON c.issuer_id = i.id
                       INNER JOIN notebook_coins nc ON c.id = nc.coin_id
@@ -138,23 +142,34 @@ pub fn get_notebook(app_handle: tauri::AppHandle, id: i32) -> Result<Notebook, S
         .prepare(coins_query)
         .map_err(|e| format!("Failed to prepare coins statement: {}", e))?;
 
-    let coins = coins_stmt
-        .query_map([id], |row| build_coin_from_row(row))
+    let coins_iter = coins_stmt
+        .query_map([id], |row| {
+            let position: i32 = row.get(17)?;
+            let coin = build_coin_from_row(row)?;
+            Ok((coin, position))
+        })
         .map_err(|e| format!("Failed to query coins: {}", e))?;
 
-    let coin_list = coins
-        .collect::<Result<Vec<_>, _>>()
-        .map_err(|e| format!("Failed to collect coins: {}", e))?;
+    // Place coins in grid based on position
+    for result in coins_iter {
+        let (coin, position) = result.map_err(|e| format!("Failed to collect coin: {}", e))?;
 
-    Ok(Notebook {
-        id: notebook_id,
-        title,
-        description,
-        rows_per_page,
-        columns_per_page,
-        number_of_pages,
-        coins: Some(coin_list),
-        created_at,
+        // Calculate row and column from position (accounting for page)
+        let cols_usize = cols as usize;
+        let row_idx = ((position as usize) / cols_usize) % (rows as usize);
+        let col_idx = (position as usize) % cols_usize;
+
+        // Only add if it's on the current page
+        if (position as usize) / (cols_usize * rows as usize) == page as usize {
+            if row_idx < rows as usize && col_idx < cols as usize {
+                grid[row_idx][col_idx] = Some(coin);
+            }
+        }
+    }
+
+    Ok(NotebookPage {
+        index: page,
+        cells: grid,
     })
 }
 
