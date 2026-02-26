@@ -10,13 +10,15 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty.tsx";
 import { CreateCoinDialog } from "@/pages/coins/components/forms/create-coin-dialog.tsx";
+import { useListCoins } from "@/query/commands";
 
 interface EmptyCoinsProps {
   type: "no data" | "no match";
-  refresh: () => Promise<void>;
 }
 
-export function EmptyCoins({ type, refresh }: EmptyCoinsProps) {
+export function EmptyCoins({ type }: EmptyCoinsProps) {
+  const { refetch } = useListCoins();
+
   return (
     <Empty>
       <EmptyHeader>
@@ -33,7 +35,13 @@ export function EmptyCoins({ type, refresh }: EmptyCoinsProps) {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent className="flex-row justify-center gap-2">
-        <Button className="cursor-pointer" onClick={refresh} variant="ghost">
+        <Button
+          className="cursor-pointer"
+          onClick={async () => {
+            await refetch();
+          }}
+          variant="ghost"
+        >
           <RefreshCcw />
           Refresh
         </Button>
