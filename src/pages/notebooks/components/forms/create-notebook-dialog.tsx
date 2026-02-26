@@ -41,8 +41,8 @@ export function CreateNotebookDialog({
       title: (values.title ?? "").trim(),
       description: (values.description ?? "").trim() || undefined,
       rows_per_page: parseInt(values.rows_per_page ?? "0", 10),
-      columns_per_page: parseInt(values.rows_per_page ?? "0", 10),
-      number_of_pages: parseInt(values.rows_per_page ?? "0", 10),
+      columns_per_page: parseInt(values.columns_per_page ?? "0", 10),
+      number_of_pages: parseInt(values.number_of_pages ?? "0", 10),
     };
 
     createNotebookMutation.mutate(createData, {

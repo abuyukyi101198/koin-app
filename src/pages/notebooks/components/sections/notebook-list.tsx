@@ -1,43 +1,22 @@
 import { useState } from "react";
 
+import {
+  DataTable,
+  DataTableProps,
+} from "@/components/composite/data-table.tsx";
 import { SearchInput } from "@/components/composite/search-input.tsx";
-import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { useDebounce } from "@/hooks/use-debounce.ts";
 import usePagination from "@/hooks/use-pagination.ts";
+import { EmptyNotebooks } from "@/pages/notebooks/components/misc/empty-notebooks.tsx";
+import { useNotebooksTableColumns } from "@/pages/notebooks/hooks/use-notebooks-table-columns.tsx";
 import { useListNotebooks } from "@/query/commands/notebooks.ts";
 import { ListNotebooksRequest, Notebook } from "@/query/types/notebooks.ts";
 
-function NotebookItem({ notebook }: { notebook: Notebook }) {
-  const displayTitle =
-    notebook.title.length > 30
-      ? `${notebook.title.substring(0, 30).trimEnd()}...`
-      : notebook.title;
-
-  const displayDescription =
-    notebook.description && notebook.description.length > 30
-      ? `${notebook.description.substring(0, 30).trimEnd()}...`
-      : notebook.description;
-
-  return (
-    <div className="w-full flex justify-between">
-      <span title={notebook.title.length > 30 ? notebook.title : undefined}>
-        {displayTitle}
-      </span>
-      {notebook.description && (
-        <span
-          className="text-xs italic text-muted-foreground text-right leading-5 grow"
-          title={
-            notebook.description.length > 30 ? notebook.description : undefined
-          }
-        >
-          {displayDescription}
-        </span>
-      )}
-    </div>
-  );
+interface NotebookListProps {
+  selection: DataTableProps<Notebook>["selection"];
 }
 
-export function NotebooksList() {
+export function NotebooksList({ selection }: NotebookListProps) {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
@@ -49,11 +28,9 @@ export function NotebooksList() {
     pageSize: size,
   };
 
-  const { data, isLoading } = useListNotebooks(listNotebooksOptions);
+  const { data, isLoading, refetch } = useListNotebooks(listNotebooksOptions);
 
-  const renderItem = (notebook: Notebook) => (
-    <NotebookItem notebook={notebook} />
-  );
+  const columns = useNotebooksTableColumns();
 
   return (
     <section
@@ -82,11 +59,23 @@ export function NotebooksList() {
       </div>
 
       {/* Notebooks list */}
-      <ScrollArea className="w-full overflow-hidden">
-        <div className="flex flex-col border-collapse gap-0 pb-2">
-          {data?.items?.map((item) => renderItem(item))}
-        </div>
-      </ScrollArea>
+      <DataTable<Notebook>
+        aria-label="Notebooks list"
+        className="[&_tr_td]:py-3"
+        columns={columns}
+        data={data?.items ?? []}
+        empty={
+          <EmptyNotebooks
+            refresh={async () => {
+              await refetch();
+            }}
+            type={debouncedSearchQuery.length ? "no match" : "no data"}
+          />
+        }
+        header={false}
+        loading={isLoading}
+        selection={selection}
+      />
     </section>
   );
 }
