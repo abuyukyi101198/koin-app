@@ -85,7 +85,10 @@ export function useCreateCoin(): UseMutationResult<
 
   return useMutation({
     mutationFn: async (data: CreateCoinRequest) => {
-      return await invoke<Coin>("create_coin", { coin: data });
+      return await invoke<Coin>("create_coin", {
+        // TODO: add settings for default image storage behavior
+        coin: { ...data, download_images: false } as CreateCoinRequest,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [COINS_QUERY_KEY] });
@@ -102,7 +105,10 @@ export function useUpdateCoin(): UseMutationResult<
 
   return useMutation({
     mutationFn: async (data: UpdateCoinRequest) => {
-      return await invoke<Coin>("update_coin", { coin: data });
+      // TODO: add settings for default image storage behavior
+      return await invoke<Coin>("update_coin", {
+        coin: { ...data, download_images: false } as UpdateCoinRequest,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [COINS_QUERY_KEY] });

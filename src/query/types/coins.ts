@@ -49,6 +49,7 @@ export interface CreateCoinRequest {
   quantity?: number;
   sale_value?: number;
   notes?: string;
+  download_images?: boolean;
 }
 
 export interface UpdateCoinRequest {
@@ -63,6 +64,7 @@ export interface UpdateCoinRequest {
   quantity?: number;
   sale_value?: number;
   notes?: string;
+  download_images?: boolean;
 }
 
 export interface DeleteCoinRequest {
