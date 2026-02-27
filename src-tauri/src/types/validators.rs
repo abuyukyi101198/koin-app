@@ -51,3 +51,10 @@ pub fn validate_url_or_data(url_str: &str) -> Result<(), ValidationError> {
         .map(|_| ())
         .map_err(|_| ValidationError::new("invalid_url"))
 }
+
+pub fn validate_non_negative_integer(value: i32) -> Result<(), ValidationError> {
+    if value < 0 {
+        return Err(ValidationError::new("negative_value"));
+    }
+    Ok(())
+}

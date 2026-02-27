@@ -4,6 +4,7 @@ use crate::types::coins::Coin;
 use crate::types::notebooks::{
     CreateNotebookRequest, Notebook, NotebookPage, PaginatedNotebooksResponse,
 };
+use validator::Validate;
 
 fn build_notebook_from_row(row: &rusqlite::Row) -> Result<Notebook, rusqlite::Error> {
     Ok(Notebook {
@@ -122,9 +123,7 @@ pub fn get_notebook_page(
     // First, get notebook metadata to know grid dimensions
     let notebook_query = "SELECT rows_per_page, columns_per_page FROM notebooks WHERE id = ?1";
     let (rows, cols): (i32, i32) = conn
-        .query_row(notebook_query, [id], |row| {
-            Ok((row.get(0)?, row.get(1)?))
-        })
+        .query_row(notebook_query, [id], |row| Ok((row.get(0)?, row.get(1)?)))
         .map_err(|e| format!("Failed to get notebook dimensions: {}", e))?;
 
     // Initialize empty grid
@@ -178,6 +177,10 @@ pub fn create_notebook(
     app_handle: tauri::AppHandle,
     notebook: CreateNotebookRequest,
 ) -> Result<Notebook, String> {
+    notebook
+        .validate()
+        .map_err(|e| format!("Validation failed: {}", e))?;
+
     let conn = get_db_connection(&app_handle)?;
 
     const INSERT_QUERY: &str = "INSERT INTO notebooks (title, description, rows_per_page, columns_per_page, number_of_pages)

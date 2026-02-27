@@ -1,5 +1,7 @@
 use crate::types::coins::Coin;
+use crate::types::validators::validate_non_negative_integer;
 use serde::{Deserialize, Serialize};
+use validator::Validate;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Notebook {
@@ -27,22 +29,41 @@ pub struct NotebookCoin {
     pub created_at: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct CreateNotebookRequest {
+    #[validate(length(max = 100, message = "Title cannot exceed 100 characters"))]
     pub title: String,
+
+    #[validate(length(max = 100, message = "Description cannot exceed 100 characters"))]
     pub description: Option<String>,
+
+    #[validate(custom = "validate_non_negative_integer")]
     pub rows_per_page: i32,
+
+    #[validate(custom = "validate_non_negative_integer")]
     pub columns_per_page: i32,
+
+    #[validate(custom = "validate_non_negative_integer")]
     pub number_of_pages: i32,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct UpdateNotebookRequest {
     pub id: i32,
+
+    #[validate(length(max = 100, message = "Title cannot exceed 100 characters"))]
     pub title: Option<String>,
+
+    #[validate(length(max = 100, message = "Description cannot exceed 100 characters"))]
     pub description: Option<String>,
+
+    #[validate(custom = "validate_non_negative_integer")]
     pub rows_per_page: Option<i32>,
+
+    #[validate(custom = "validate_non_negative_integer")]
     pub columns_per_page: Option<i32>,
+
+    #[validate(custom = "validate_non_negative_integer")]
     pub number_of_pages: Option<i32>,
 }
 
