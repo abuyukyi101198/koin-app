@@ -36,7 +36,7 @@ export function CoinsTable({ selection }: CoinsListProps) {
     sortDirection: sorting.length > 0 && !sorting[0].desc ? "asc" : "desc",
   };
 
-  const { data, isLoading, refetch } = useListCoins(listCoinsOptions);
+  const { data, isLoading } = useListCoins(listCoinsOptions);
   const columns = useCoinsTableColumns();
 
   const handlePaginationChange = useCallback(
@@ -79,9 +79,6 @@ export function CoinsTable({ selection }: CoinsListProps) {
         data={data?.items ?? []}
         empty={
           <EmptyCoins
-            refresh={async () => {
-              await refetch();
-            }}
             type={debouncedSearchQuery.length ? "no match" : "no data"}
           />
         }
