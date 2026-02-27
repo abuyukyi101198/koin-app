@@ -30,7 +30,10 @@ interface CoinSelectionProviderProps {
 export function CoinSelectionProvider({
   children,
 }: CoinSelectionProviderProps) {
-  const { data, isSuccess } = useListCoins();
+  const { data, isSuccess } = useListCoins({
+    sortField: "issuer",
+    sortDirection: "asc",
+  });
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const selectedCoinId = useMemo(() => {
