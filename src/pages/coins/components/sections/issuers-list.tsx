@@ -14,34 +14,27 @@ import { useDebounce } from "@/hooks/use-debounce.ts";
 import { cn } from "@/lib/utils.ts";
 import { useListIssuers } from "@/query/commands";
 import { Issuer } from "@/query/types";
-import { truncate } from "@/utils/truncate.ts";
 
 function IssuerItem({
   issuer,
 }: {
   issuer: Issuer | Omit<Issuer, "predecessors">;
 }) {
-  const limit = 30;
-
   return (
     <div className="w-full flex justify-between">
-      <div className="flex items-start gap-2 pt-0.5">
-        <span>
-          <img
-            alt={`${issuer.name} flag`}
-            className="h-4 w-6"
-            loading="lazy"
-            src={issuer.flag?.length ? issuer.flag : undefined}
-          />
-        </span>
-        <span title={issuer.name.length > limit ? issuer.name : undefined}>
-          {truncate(issuer.name, limit)}
-        </span>
+      <div className="max-w-3/4 flex items-start gap-2 pt-0.5">
+        <img
+          alt={`${issuer.name} flag`}
+          className="h-4 w-6"
+          loading="lazy"
+          src={issuer.flag?.length ? issuer.flag : undefined}
+        />
+        <span className="text-left truncate">{issuer.name}</span>
       </div>
       {issuer.name !== "Other" && (
         <span
           aria-label={`Years of issue: ${issuer.start_year} to ${issuer.end_year ? issuer.end_year : "present"}`}
-          className="text-xs italic text-muted-foreground text-right leading-5 grow"
+          className="text-xs italic text-muted-foreground text-right leading-5"
         >
           ({issuer.start_year}-{issuer.end_year ?? "pres."})
         </span>

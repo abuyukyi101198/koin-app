@@ -34,14 +34,12 @@ const IssuerItemContent = ({
 }) => (
   <div className="w-full flex justify-between">
     <div className="flex items-start gap-2 pt-0.5">
-      <span className="pt-0.5">
-        <img
-          alt={`${issuer.name} flag`}
-          className="h-4 w-6"
-          loading="lazy"
-          src={issuer.flag?.length ? issuer.flag : undefined}
-        />
-      </span>
+      <img
+        alt={`${issuer.name} flag`}
+        className="h-4 w-6 mt-0.5"
+        loading="lazy"
+        src={issuer.flag?.length ? issuer.flag : undefined}
+      />
       <span className="truncate text-sm">{issuer.name}</span>
     </div>
     {issuer.name !== "Other" && (

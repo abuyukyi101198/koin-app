@@ -3,7 +3,6 @@ import { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { Notebook } from "@/query/types/notebooks.ts";
-import { truncate } from "@/utils/truncate.ts";
 
 export function useNotebooksTableColumns(): ColumnDef<Notebook>[] {
   return useMemo(
@@ -21,19 +20,12 @@ export function useNotebooksTableColumns(): ColumnDef<Notebook>[] {
               original: { title, description },
             },
           }) => {
-            const limit = 40;
-
             return (
               <div className="w-full flex flex-col justify-between">
-                <span title={title.length > limit ? title : undefined}>
-                  {truncate(title, limit)}
-                </span>
+                <span className="text-left truncate">{title}</span>
                 {description && (
-                  <span
-                    className="text-xs italic text-muted-foreground leading-5 grow"
-                    title={description.length > limit ? description : undefined}
-                  >
-                    {truncate(description, limit)}
+                  <span className="text-left text-xs italic text-muted-foreground leading-5 grow truncate">
+                    {description}
                   </span>
                 )}
               </div>
