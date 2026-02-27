@@ -1,5 +1,6 @@
 use crate::commands::utils::get_db_connection;
 use crate::types::coins::{Coin, CreateCoinRequest, PaginatedCoinsResponse, UpdateCoinRequest};
+use crate::handlers::image_handler;
 use validator::Validate;
 
 pub fn build_coin_from_row(row: &rusqlite::Row) -> Result<Coin, rusqlite::Error> {
@@ -135,11 +136,24 @@ pub fn get_coin(app_handle: tauri::AppHandle, id: i32) -> Result<Coin, String> {
 }
 
 #[tauri::command]
-pub fn create_coin(app_handle: tauri::AppHandle, coin: CreateCoinRequest) -> Result<Coin, String> {
+pub async fn create_coin(app_handle: tauri::AppHandle, coin: CreateCoinRequest) -> Result<Coin, String> {
     coin.validate()
         .map_err(|e| format!("Validation failed: {}", e))?;
 
     let conn = get_db_connection(&app_handle)?;
+
+    // Process images if download_images is true
+    let obverse_image = if coin.download_images.unwrap_or(false) {
+        image_handler::process_image(coin.obverse_image.clone()).await?
+    } else {
+        coin.obverse_image.clone()
+    };
+
+    let reverse_image = if coin.download_images.unwrap_or(false) {
+        image_handler::process_image(coin.reverse_image.clone()).await?
+    } else {
+        coin.reverse_image.clone()
+    };
 
     // Generate title from value, currency, and year
     let title = format!("{} {} {}", coin.value, coin.currency, coin.year);
@@ -156,8 +170,8 @@ pub fn create_coin(app_handle: tauri::AppHandle, coin: CreateCoinRequest) -> Res
             coin.year,
             coin.issuer_id,
             coin.description,
-            coin.obverse_image,
-            coin.reverse_image,
+            obverse_image,
+            reverse_image,
             coin.quantity.unwrap_or(1),
             coin.sale_value,
             coin.notes,
@@ -172,7 +186,7 @@ pub fn create_coin(app_handle: tauri::AppHandle, coin: CreateCoinRequest) -> Res
 }
 
 #[tauri::command]
-pub fn update_coin(
+pub async fn update_coin(
     app_handle: tauri::AppHandle,
     coin: UpdateCoinRequest,
 ) -> Result<Coin, String> {
@@ -180,6 +194,19 @@ pub fn update_coin(
         .map_err(|e| format!("Validation failed: {}", e))?;
 
     let conn = get_db_connection(&app_handle)?;
+
+    // Process images if download_images is true
+    let obverse_image = if coin.download_images.unwrap_or(false) {
+        image_handler::process_image(coin.obverse_image.clone()).await?
+    } else {
+        coin.obverse_image.clone()
+    };
+
+    let reverse_image = if coin.download_images.unwrap_or(false) {
+        image_handler::process_image(coin.reverse_image.clone()).await?
+    } else {
+        coin.reverse_image.clone()
+    };
 
     // Build dynamic update query
     let mut updates = Vec::new();
@@ -220,14 +247,15 @@ pub fn update_coin(
         updates.push("description = ?");
         params.push(Box::new(description));
     }
-    if let Some(obverse_image) = coin.obverse_image {
-        updates.push("obverse_image = ?");
-        params.push(Box::new(obverse_image));
-    }
-    if let Some(reverse_image) = coin.reverse_image {
-        updates.push("reverse_image = ?");
-        params.push(Box::new(reverse_image));
-    }
+
+    // Always update images if they are part of the request (frontend sends complete form)
+    // None/undefined means explicit removal (set to NULL)
+    // Some(value) means update with the value
+    updates.push("obverse_image = ?");
+    params.push(Box::new(obverse_image));
+    updates.push("reverse_image = ?");
+    params.push(Box::new(reverse_image));
+
     if let Some(quantity) = coin.quantity {
         updates.push("quantity = ?");
         params.push(Box::new(quantity));
@@ -341,3 +369,4 @@ pub fn get_similar_coins(
 
     Ok(PaginatedCoinsResponse { items, total: limit })
 }
+

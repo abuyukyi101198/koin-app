@@ -53,6 +53,9 @@ pub struct CreateCoinRequest {
 
     #[validate(length(max = 1000, message = "Notes cannot exceed 1000 characters"))]
     pub notes: Option<String>,
+
+    /// Download and store images locally as data URLs
+    pub download_images: Option<bool>,
     // Note: title is generated internally as "{value} {currency} {year}"
 }
 
@@ -88,6 +91,9 @@ pub struct UpdateCoinRequest {
 
     #[validate(length(max = 1000, message = "Notes cannot exceed 1000 characters"))]
     pub notes: Option<String>,
+
+    /// Download and store images locally as data URLs
+    pub download_images: Option<bool>,
     // Note: title is generated internally as "{value} {currency} {year}"
 }
 
@@ -96,3 +102,4 @@ pub struct PaginatedCoinsResponse {
     pub items: Vec<Coin>,
     pub total: i64,
 }
+
