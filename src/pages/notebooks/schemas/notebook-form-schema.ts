@@ -19,9 +19,10 @@ export const notebookFormSchema = yup.object().shape({
       if (value === "" || value === undefined) return false;
       return !isNaN(parseInt(value)) && isFinite(parseInt(value));
     })
-    .test("rows-min", "Number of rows cannot be negative.", (value) => {
+    .test("rows-range", "Number of rows must be between 1 and 50.", (value) => {
       if (value === "" || value === undefined) return true;
-      return parseInt(value) >= 0;
+      const num = parseInt(value);
+      return num >= 0 && num <= 50;
     })
     .default(""),
 
@@ -35,10 +36,15 @@ export const notebookFormSchema = yup.object().shape({
         return !isNaN(parseInt(value)) && isFinite(parseInt(value));
       }
     )
-    .test("columns-min", "Number of columns cannot be negative.", (value) => {
-      if (value === "" || value === undefined) return true;
-      return parseInt(value) >= 0;
-    })
+    .test(
+      "columns-range",
+      "Number of columns must be between 1 and 50.",
+      (value) => {
+        if (value === "" || value === undefined) return true;
+        const num = parseInt(value);
+        return num >= 1 && num <= 50;
+      }
+    )
     .default(""),
 
   number_of_pages: yup
@@ -51,10 +57,15 @@ export const notebookFormSchema = yup.object().shape({
         return !isNaN(parseInt(value)) && isFinite(parseInt(value));
       }
     )
-    .test("pages-min", "Number of pages cannot be negative.", (value) => {
-      if (value === "" || value === undefined) return true;
-      return parseInt(value) >= 0;
-    })
+    .test(
+      "pages-range",
+      "Number of pages must be between 1 and 50.",
+      (value) => {
+        if (value === "" || value === undefined) return true;
+        const num = parseInt(value);
+        return num >= 1 && num <= 50;
+      }
+    )
     .default(""),
 });
 

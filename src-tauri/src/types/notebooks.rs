@@ -1,5 +1,5 @@
 use crate::types::coins::Coin;
-use crate::types::validators::validate_non_negative_integer;
+use crate::types::validators::validate_notebook_grid_dimension;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
@@ -37,13 +37,13 @@ pub struct CreateNotebookRequest {
     #[validate(length(max = 100, message = "Description cannot exceed 100 characters"))]
     pub description: Option<String>,
 
-    #[validate(custom = "validate_non_negative_integer")]
+    #[validate(custom = "validate_notebook_grid_dimension")]
     pub rows_per_page: i32,
 
-    #[validate(custom = "validate_non_negative_integer")]
+    #[validate(custom = "validate_notebook_grid_dimension")]
     pub columns_per_page: i32,
 
-    #[validate(custom = "validate_non_negative_integer")]
+    #[validate(custom = "validate_notebook_grid_dimension")]
     pub number_of_pages: i32,
 }
 
@@ -57,13 +57,13 @@ pub struct UpdateNotebookRequest {
     #[validate(length(max = 100, message = "Description cannot exceed 100 characters"))]
     pub description: Option<String>,
 
-    #[validate(custom = "validate_non_negative_integer")]
+    #[validate(custom = "validate_notebook_grid_dimension")]
     pub rows_per_page: Option<i32>,
 
-    #[validate(custom = "validate_non_negative_integer")]
+    #[validate(custom = "validate_notebook_grid_dimension")]
     pub columns_per_page: Option<i32>,
 
-    #[validate(custom = "validate_non_negative_integer")]
+    #[validate(custom = "validate_notebook_grid_dimension")]
     pub number_of_pages: Option<i32>,
 }
 
