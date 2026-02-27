@@ -1,5 +1,6 @@
 use crate::commands::utils::get_db_connection;
 use crate::types::coins::{Coin, CreateCoinRequest, PaginatedCoinsResponse, UpdateCoinRequest};
+use validator::Validate;
 
 pub fn build_coin_from_row(row: &rusqlite::Row) -> Result<Coin, rusqlite::Error> {
     use crate::types::issuers::IssuerDisplay;
@@ -135,6 +136,9 @@ pub fn get_coin(app_handle: tauri::AppHandle, id: i32) -> Result<Coin, String> {
 
 #[tauri::command]
 pub fn create_coin(app_handle: tauri::AppHandle, coin: CreateCoinRequest) -> Result<Coin, String> {
+    coin.validate()
+        .map_err(|e| format!("Validation failed: {}", e))?;
+
     let conn = get_db_connection(&app_handle)?;
 
     // Generate title from value, currency, and year
@@ -170,8 +174,11 @@ pub fn create_coin(app_handle: tauri::AppHandle, coin: CreateCoinRequest) -> Res
 #[tauri::command]
 pub fn update_coin(
     app_handle: tauri::AppHandle,
-    request: UpdateCoinRequest,
+    coin: UpdateCoinRequest,
 ) -> Result<Coin, String> {
+    coin.validate()
+        .map_err(|e| format!("Validation failed: {}", e))?;
+
     let conn = get_db_connection(&app_handle)?;
 
     // Build dynamic update query
@@ -180,56 +187,56 @@ pub fn update_coin(
 
     // Check if any of value, currency, year are being updated to regenerate title
     let should_update_title =
-        request.value.is_some() || request.currency.is_some() || request.year.is_some();
+        coin.value.is_some() || coin.currency.is_some() || coin.year.is_some();
 
     if should_update_title {
         // Fetch current coin to get missing fields
-        let current_coin = get_coin(app_handle.clone(), request.id)?;
-        let value = request.value.unwrap_or(current_coin.value);
-        let currency = request.currency.clone().unwrap_or(current_coin.currency);
-        let year = request.year.unwrap_or(current_coin.year);
+        let current_coin = get_coin(app_handle.clone(), coin.id)?;
+        let value = coin.value.unwrap_or(current_coin.value);
+        let currency = coin.currency.clone().unwrap_or(current_coin.currency);
+        let year = coin.year.unwrap_or(current_coin.year);
         let new_title = format!("{} {} {}", value, currency, year);
 
         updates.push("title = ?");
         params.push(Box::new(new_title));
     }
-    if let Some(value) = request.value {
+    if let Some(value) = coin.value {
         updates.push("value = ?");
         params.push(Box::new(value));
     }
-    if let Some(currency) = request.currency {
+    if let Some(currency) = coin.currency {
         updates.push("currency = ?");
         params.push(Box::new(currency));
     }
-    if let Some(year) = request.year {
+    if let Some(year) = coin.year {
         updates.push("year = ?");
         params.push(Box::new(year));
     }
-    if let Some(issuer_id) = request.issuer_id {
+    if let Some(issuer_id) = coin.issuer_id {
         updates.push("issuer_id = ?");
         params.push(Box::new(issuer_id));
     }
-    if let Some(description) = request.description {
+    if let Some(description) = coin.description {
         updates.push("description = ?");
         params.push(Box::new(description));
     }
-    if let Some(obverse_image) = request.obverse_image {
+    if let Some(obverse_image) = coin.obverse_image {
         updates.push("obverse_image = ?");
         params.push(Box::new(obverse_image));
     }
-    if let Some(reverse_image) = request.reverse_image {
+    if let Some(reverse_image) = coin.reverse_image {
         updates.push("reverse_image = ?");
         params.push(Box::new(reverse_image));
     }
-    if let Some(quantity) = request.quantity {
+    if let Some(quantity) = coin.quantity {
         updates.push("quantity = ?");
         params.push(Box::new(quantity));
     }
-    if let Some(sale_value) = request.sale_value {
+    if let Some(sale_value) = coin.sale_value {
         updates.push("sale_value = ?");
         params.push(Box::new(sale_value));
     }
-    if let Some(notes) = request.notes {
+    if let Some(notes) = coin.notes {
         updates.push("notes = ?");
         params.push(Box::new(notes));
     }
@@ -238,7 +245,7 @@ pub fn update_coin(
         return Err("No fields to update".to_string());
     }
 
-    params.push(Box::new(request.id));
+    params.push(Box::new(coin.id));
 
     let query = format!("UPDATE coins SET {} WHERE id = ?", updates.join(", "));
 
@@ -246,7 +253,7 @@ pub fn update_coin(
         .map_err(|e| format!("Failed to update coin: {}", e))?;
 
     // Fetch and return the updated coin
-    get_coin(app_handle, request.id)
+    get_coin(app_handle, coin.id)
 }
 
 #[tauri::command]

@@ -102,7 +102,7 @@ export function useUpdateCoin(): UseMutationResult<
 
   return useMutation({
     mutationFn: async (data: UpdateCoinRequest) => {
-      return await invoke<Coin>("update_coin", { request: data });
+      return await invoke<Coin>("update_coin", { coin: data });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [COINS_QUERY_KEY] });
