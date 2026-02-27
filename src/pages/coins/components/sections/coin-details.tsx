@@ -1,3 +1,4 @@
+import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { useGetCoin } from "@/query/commands";
 import { asFraction } from "@/utils/asFraction.tsx";
 
@@ -56,20 +57,22 @@ export function CoinDetails({ coinId }: CoinInfoProps) {
         {/* Issuer */}
         <div className="space-y-1 border-r px-6">
           <dt className="text-sm font-medium text-muted-foreground">Issuer</dt>
-          <dd className="flex items-center gap-2">
+          <dd className="flex items-start gap-2">
             {data?.issuer.flag && (
               <img
                 alt={`${data.issuer.name} flag`}
-                className="h-3 w-4.5"
+                className="h-3 w-4.5 shrink-0 mt-0.5"
                 loading="lazy"
                 src={data.issuer.flag}
               />
             )}
-            <span className="text-xs font-semibold">{data?.issuer.name}</span>
+            <span className="text-xs font-semibold h-8 leading-4 overflow-hidden text-wrap line-clamp-2">
+              {data?.issuer.name}
+            </span>
             {data?.issuer.name !== "Other" && (
               <span
                 aria-label={`Years of issue: ${data?.issuer.start_year} to ${data?.issuer.end_year ? data.issuer.end_year : "present"}`}
-                className="grow text-xs italic text-muted-foreground"
+                className="grow text-xs italic text-muted-foreground text-right"
               >
                 ({data?.issuer.start_year}-{data?.issuer.end_year ?? "pres."})
               </span>
@@ -113,14 +116,14 @@ export function CoinDetails({ coinId }: CoinInfoProps) {
       </dl>
 
       {/* Notes */}
-      <div
+      <ScrollArea
         aria-label="Additional notes"
-        className="h-full shrink-0 border-t bg-input/30 px-6 py-5"
+        className=" border-t bg-input/30 px-6 py-0 overflow-hidden"
       >
-        <p className="text-sm italic text-muted-foreground">
+        <p className="text-sm italic text-muted-foreground whitespace-pre-wrap break-words py-5 pr-4">
           {data?.notes || "No additional notes."}
         </p>
-      </div>
+      </ScrollArea>
     </section>
   );
 }

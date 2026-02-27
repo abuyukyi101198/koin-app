@@ -104,11 +104,13 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
               <div className="w-full flex items-start gap-2">
                 <img
                   alt={`${issuer.name} flag`}
-                  className="h-3 w-4.5 mt-1"
+                  className="h-3 w-4.5 shrink-0 mt-0.5"
                   loading="lazy"
                   src={issuer.flag?.length ? issuer.flag : undefined}
                 />
-                <span className="text-left truncate">{issuer.name}</span>
+                <span className="text-xs leading-4 overflow-hidden text-wrap line-clamp-2">
+                  {issuer.name}
+                </span>
               </div>
             );
           },
