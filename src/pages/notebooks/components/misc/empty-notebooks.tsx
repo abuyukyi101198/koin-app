@@ -10,13 +10,15 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty.tsx";
 import { CreateNotebookDialog } from "@/pages/notebooks/components/forms/create-notebook-dialog.tsx";
+import { useListNotebooks } from "@/query/commands";
 
 interface EmptyNotebooksProps {
   type: "no data" | "no match";
-  refresh: () => Promise<void>;
 }
 
-export function EmptyNotebooks({ type, refresh }: EmptyNotebooksProps) {
+export function EmptyNotebooks({ type }: EmptyNotebooksProps) {
+  const { refetch } = useListNotebooks();
+
   return (
     <Empty>
       <EmptyHeader>
@@ -33,7 +35,13 @@ export function EmptyNotebooks({ type, refresh }: EmptyNotebooksProps) {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent className="flex-row justify-center gap-2">
-        <Button className="cursor-pointer" onClick={refresh} variant="ghost">
+        <Button
+          className="cursor-pointer"
+          onClick={async () => {
+            await refetch();
+          }}
+          variant="ghost"
+        >
           <RefreshCcw />
           Refresh
         </Button>
