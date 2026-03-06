@@ -26,7 +26,7 @@ export function NotebookContents({ notebookId }: NotebookContentsProps) {
     <section
       aria-busy={isLoading}
       aria-label="Notebook contents"
-      className="h-full w-5/6 flex flex-col overflow-hidden border-r"
+      className="h-full w-7/12 flex flex-col overflow-hidden border-r"
     >
       {/* Header */}
       <header className="shrink-0 border-b px-6 pt-8 pb-3">
@@ -41,7 +41,7 @@ export function NotebookContents({ notebookId }: NotebookContentsProps) {
       {/* Grid Container */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <div
-          className="flex-1 grid gap-2 p-6 max-h-full"
+          className="flex-1 grid gap-2 p-6 pt-4 max-h-full"
           role="grid"
           style={{
             gridTemplateColumns: `repeat(${cols}, 1fr)`,
