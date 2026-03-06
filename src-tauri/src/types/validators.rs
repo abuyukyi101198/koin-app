@@ -42,10 +42,6 @@ pub fn validate_sale_value_positive(value: f64) -> Result<(), ValidationError> {
     validate_float_range(value, 0.0_f64.next_up(), f64::MAX)
 }
 
-pub fn validate_non_negative_integer(value: i32) -> Result<(), ValidationError> {
-    validate_int_range(value, 0, i32::MAX)
-}
-
 pub fn validate_notebook_grid_dimension(value: i32) -> Result<(), ValidationError> {
     validate_int_range(value, 1, 50)
 }
