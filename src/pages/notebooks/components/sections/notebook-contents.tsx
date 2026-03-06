@@ -26,7 +26,7 @@ export function NotebookContents({ notebookId }: NotebookContentsProps) {
     <section
       aria-busy={isLoading}
       aria-label="Notebook contents"
-      className="h-full w-5/6 flex flex-col overflow-hidden"
+      className="h-full w-5/6 flex flex-col overflow-hidden border-r"
     >
       {/* Header */}
       <header className="shrink-0 border-b px-6 pt-8 pb-3">
@@ -86,24 +86,20 @@ export function NotebookContents({ notebookId }: NotebookContentsProps) {
                           )}
                         </div>
                       </div>
-                      <div className="absolute right-0 h-full max-w-1/3 bg-muted text-xs p-4">
-                        <div className="flex gap-2 w-fit">
-                          <span className="text-xs font-medium">
-                            {asFraction(coin.title, coin.value)}
-                          </span>
-                          <span>
-                            <img
-                              alt={`${coin.issuer.name} flag`}
-                              className="h-3 w-4.5"
-                              loading="lazy"
-                              src={
-                                coin.issuer.flag?.length
-                                  ? coin.issuer.flag
-                                  : undefined
-                              }
-                            />
-                          </span>
-                        </div>
+                      <div className="flex gap-2 justify-end absolute bottom-0 w-full text-xs py-1 px-3 backdrop-blur-2xl">
+                        <img
+                          alt={`${coin.issuer.name} flag`}
+                          className="h-3 w-4.5 mt-0.5"
+                          loading="lazy"
+                          src={
+                            coin.issuer.flag?.length
+                              ? coin.issuer.flag
+                              : undefined
+                          }
+                        />
+                        <span className="text-xs font-medium">
+                          {asFraction(coin.title, coin.value)}
+                        </span>
                       </div>
                     </>
                   ) : null}
