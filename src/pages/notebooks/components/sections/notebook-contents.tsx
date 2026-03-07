@@ -1,9 +1,6 @@
 import { DataTablePagination } from "@/components/composite/data-table-pagination.tsx";
 import usePagination from "@/hooks/use-pagination.ts";
-import {
-  useGetNotebook,
-  useGetNotebookPage,
-} from "@/query/commands/notebooks.ts";
+import { useGetNotebook } from "@/query/commands/notebooks.ts";
 import { asFraction } from "@/utils/asFraction.tsx";
 
 interface NotebookContentsProps {
@@ -13,11 +10,7 @@ interface NotebookContentsProps {
 export function NotebookContents({ notebookId }: NotebookContentsProps) {
   const { page, setPage } = usePagination();
 
-  const { data: notebook } = useGetNotebook({ id: notebookId });
-  const { data: notebookPage, isLoading } = useGetNotebookPage({
-    id: notebookId,
-    page: page - 1,
-  });
+  const { data: notebook, isLoading } = useGetNotebook({ id: notebookId });
 
   const rows = notebook?.rows_per_page ?? 1;
   const cols = notebook?.columns_per_page ?? 1;
@@ -48,8 +41,8 @@ export function NotebookContents({ notebookId }: NotebookContentsProps) {
             gridTemplateRows: `repeat(${rows}, 1fr)`,
           }}
         >
-          {notebookPage?.cells.map(
-            (row: (typeof notebookPage.cells)[number], rowIdx: number) =>
+          {notebook?.cells[page - 1].map(
+            (row: (typeof notebook.cells)[number][number], rowIdx: number) =>
               row.map((coin: (typeof row)[number], colIdx: number) => (
                 <div
                   className="relative flex items-start justify-center overflow-hidden rounded-sm border border-border bg-background"

@@ -10,11 +10,9 @@ import { invoke } from "@tauri-apps/api/core";
 
 import {
   CreateNotebookRequest,
-  GetNotebookPageRequest,
   GetNotebookRequest,
   ListNotebooksRequest,
   Notebook,
-  NotebookPage,
   PaginatedNotebooks,
 } from "@/query/types/notebooks.ts";
 
@@ -57,21 +55,6 @@ export function useGetNotebook(
     queryKey: [NOTEBOOKS_QUERY_KEY, "get", options.id],
     queryFn: async () => {
       return await invoke<Notebook>("get_notebook", { id: options.id });
-    },
-    placeholderData: keepPreviousData,
-  });
-}
-
-export function useGetNotebookPage(
-  options: GetNotebookPageRequest
-): UseQueryResult<NotebookPage> {
-  return useQuery({
-    queryKey: [NOTEBOOKS_QUERY_KEY, "page", options.id, options.page],
-    queryFn: async () => {
-      return await invoke<NotebookPage>("get_notebook_page", {
-        id: options.id,
-        page: options.page,
-      });
     },
     placeholderData: keepPreviousData,
   });

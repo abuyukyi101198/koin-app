@@ -8,11 +8,8 @@ export interface Notebook {
   columns_per_page: number;
   number_of_pages: number;
   created_at: string;
-}
-
-export interface NotebookPage {
-  index: number;
-  cells: (Coin | null)[][];
+  /** All pages: cells[page][row][col] */
+  cells: (Coin | null)[][][];
 }
 
 export interface PaginatedNotebooks {
@@ -30,11 +27,6 @@ export interface ListNotebooksRequest {
 
 export interface GetNotebookRequest {
   id: number;
-}
-
-export interface GetNotebookPageRequest {
-  id: number;
-  page: number;
 }
 
 export interface CreateNotebookRequest {

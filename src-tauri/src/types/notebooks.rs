@@ -12,12 +12,8 @@ pub struct Notebook {
     pub columns_per_page: i32,
     pub number_of_pages: i32,
     pub created_at: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct NotebookPage {
-    pub index: i32,
-    pub cells: Vec<Vec<Option<Coin>>>,
+    /// All pages: cells[page][row][col]
+    pub cells: Vec<Vec<Vec<Option<Coin>>>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

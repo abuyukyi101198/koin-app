@@ -7,7 +7,7 @@ use crate::commands::coins::{
 };
 use crate::commands::issuers::list_issuers;
 use crate::commands::notebooks::{
-    create_notebook, get_notebook, get_notebook_page, list_notebooks,
+    create_notebook, get_notebook, list_notebooks,
 };
 use tauri::Manager;
 
@@ -27,7 +27,6 @@ pub fn run() {
             list_notebooks,
             get_notebook,
             create_notebook,
-            get_notebook_page
         ])
         .setup(|app| {
             // Initialize database on app startup
