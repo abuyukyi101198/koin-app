@@ -36,3 +36,13 @@ export interface CreateNotebookRequest {
   columns_per_page: number;
   number_of_pages: number;
 }
+
+export interface CoinPosition {
+  coin_id: number;
+  position: number;
+}
+
+export interface ReorderCoinsRequest {
+  notebook_id: number;
+  coins: CoinPosition[];
+}

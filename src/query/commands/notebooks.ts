@@ -14,6 +14,7 @@ import {
   ListNotebooksRequest,
   Notebook,
   PaginatedNotebooks,
+  ReorderCoinsRequest,
 } from "@/query/types/notebooks.ts";
 
 const NOTEBOOKS_QUERY_KEY = "notebooks";
@@ -73,6 +74,29 @@ export function useCreateNotebook(): UseMutationResult<
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [NOTEBOOKS_QUERY_KEY] });
+    },
+  });
+}
+
+export function useReorderCoins(): UseMutationResult<
+  Notebook,
+  Error,
+  ReorderCoinsRequest
+> {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: ReorderCoinsRequest) => {
+      return await invoke<Notebook>("reorder_coins", {
+        notebookId: data.notebook_id,
+        coins: data.coins,
+      });
+    },
+    onSuccess: (notebook) => {
+      queryClient.setQueryData(
+        [NOTEBOOKS_QUERY_KEY, "get", notebook.id],
+        notebook
+      );
     },
   });
 }

@@ -22,7 +22,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { cn } from "@/lib/utils.ts";
-import { useGetNotebook } from "@/query/commands";
+import { useGetNotebook, useReorderCoins } from "@/query/commands";
 import { Coin } from "@/query/types/coins.ts";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -116,6 +116,7 @@ interface NotebookCoinListProps {
 
 export function NotebookCoinList({ notebookId }: NotebookCoinListProps) {
   const { data: notebook, isLoading } = useGetNotebook({ id: notebookId });
+  const reorderCoinsMutation = useReorderCoins();
 
   // pages[pageIndex][slotIndex] = Coin | null
   const pages = useMemo<(Coin | null)[][]>(() => {
@@ -200,7 +201,7 @@ export function NotebookCoinList({ notebookId }: NotebookCoinListProps) {
       });
     });
 
-    // reorderCoinsMutation.mutate({ notebook_id: notebookId, coins: allCoins });
+    reorderCoinsMutation.mutate({ notebook_id: notebookId, coins: allCoins });
   };
 
   return (

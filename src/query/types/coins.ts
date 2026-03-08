@@ -14,6 +14,8 @@ export interface Coin {
   sale_value?: number;
   notes?: string;
   created_at: string;
+  notebook_id?: number;
+  notebook_position?: number;
 }
 
 export interface PaginatedCoins {
