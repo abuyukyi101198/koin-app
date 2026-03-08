@@ -99,61 +99,52 @@ pub fn list_notebooks(
 pub fn get_notebook(app_handle: tauri::AppHandle, id: i32) -> Result<Notebook, String> {
     let conn = get_db_connection(&app_handle)?;
 
-    let notebook_query =
-        "SELECT id, title, description, rows_per_page, columns_per_page, number_of_pages, created_at
-         FROM notebooks
-         WHERE id = ?1";
-
-    let mut notebook_stmt = conn
-        .prepare(notebook_query)
-        .map_err(|e| format!("Failed to prepare notebook statement: {}", e))?;
-
-    let mut notebook = notebook_stmt
+    let mut notebook = conn
+        .prepare(
+            "SELECT id, title, description, rows_per_page, columns_per_page, number_of_pages, created_at
+             FROM notebooks WHERE id = ?1",
+        )
+        .map_err(|e| format!("Failed to prepare notebook statement: {}", e))?
         .query_row([id], |row| build_notebook_from_row(row))
         .map_err(|e| format!("Failed to get notebook: {}", e))?;
 
     let rows = notebook.rows_per_page as usize;
     let cols = notebook.columns_per_page as usize;
     let pages = notebook.number_of_pages as usize;
+    let cells_per_page = rows * cols;
 
-    // Initialize empty 3-D grid: [page][row][col]
     let mut cells: Vec<Vec<Vec<Option<Coin>>>> =
         vec![vec![vec![None; cols]; rows]; pages];
 
-    let coins_query =
-        "SELECT c.id, c.title, c.value, c.currency, c.year,
-                i.id, i.name, i.start_year, i.end_year, i.flag,
-                c.description, c.obverse_image, c.reverse_image,
-                c.quantity, c.sale_value, c.notes, c.created_at, nc.position
-         FROM coins c
-         LEFT JOIN issuers i ON c.issuer_id = i.id
-         INNER JOIN notebook_coins nc ON c.id = nc.coin_id
-         WHERE nc.notebook_id = ?1
-         ORDER BY nc.position ASC";
-
-    let mut coins_stmt = conn
-        .prepare(coins_query)
+    let mut stmt = conn
+        .prepare(
+            "SELECT c.id, c.title, c.value, c.currency, c.year,
+                    i.id, i.name, i.start_year, i.end_year, i.flag,
+                    c.description, c.obverse_image, c.reverse_image,
+                    c.quantity, c.sale_value, c.notes, c.created_at,
+                    c.notebook_id, c.notebook_position
+             FROM coins c
+             LEFT JOIN issuers i ON i.id = c.issuer_id
+             WHERE c.notebook_id = ?1
+             ORDER BY c.notebook_position ASC",
+        )
         .map_err(|e| format!("Failed to prepare coins statement: {}", e))?;
 
-    let coins_iter = coins_stmt
-        .query_map([id], |row| {
-            let position: i32 = row.get(17)?;
-            let coin = build_coin_from_row(row)?;
-            Ok((coin, position))
-        })
+    let coins_iter = stmt
+        .query_map([id], |row| build_coin_from_row(row))
         .map_err(|e| format!("Failed to query coins: {}", e))?;
 
     for result in coins_iter {
-        let (coin, position) = result.map_err(|e| format!("Failed to collect coin: {}", e))?;
-        let pos = position as usize;
-        let cells_per_page = rows * cols;
-        let page_idx = pos / cells_per_page;
-        let local_pos = pos % cells_per_page;
-        let row_idx = local_pos / cols;
-        let col_idx = local_pos % cols;
-
-        if page_idx < pages && row_idx < rows && col_idx < cols {
-            cells[page_idx][row_idx][col_idx] = Some(coin);
+        let coin = result.map_err(|e| format!("Failed to collect coin: {}", e))?;
+        if let Some(pos) = coin.notebook_position {
+            let pos = pos as usize;
+            let page_idx = pos / cells_per_page;
+            let local_pos = pos % cells_per_page;
+            let row_idx = local_pos / cols;
+            let col_idx = local_pos % cols;
+            if page_idx < pages && row_idx < rows && col_idx < cols {
+                cells[page_idx][row_idx][col_idx] = Some(coin);
+            }
         }
     }
 

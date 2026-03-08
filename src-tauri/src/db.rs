@@ -61,7 +61,7 @@ fn run_migrations(conn: &Connection) -> SqliteResult<()> {
         "#,
     )?;
 
-    // Migration 2: Create coins table with issuer foreign key
+    // Migration 2: Create coins table
     apply_migration(
         conn,
         "002_create_coins_table",
@@ -80,15 +80,20 @@ fn run_migrations(conn: &Connection) -> SqliteResult<()> {
                 sale_value REAL,
                 notes TEXT,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (issuer_id) REFERENCES issuers(id) ON DELETE RESTRICT
+                notebook_id INTEGER,
+                notebook_position INTEGER,
+                FOREIGN KEY (issuer_id) REFERENCES issuers(id) ON DELETE RESTRICT,
+                FOREIGN KEY (notebook_id) REFERENCES notebooks(id) ON DELETE SET NULL
             );
 
             CREATE INDEX idx_coins_issuer_id ON coins(issuer_id);
             CREATE INDEX idx_coins_year ON coins(year);
             CREATE INDEX idx_coins_currency ON coins(currency);
+            CREATE INDEX idx_coins_notebook_id ON coins(notebook_id);
+            CREATE INDEX idx_coins_notebook_position ON coins(notebook_id, notebook_position);
         "#,
     )?;
-    
+
     // Migration 3: Create notebooks table
     apply_migration(
         conn,
@@ -105,28 +110,6 @@ fn run_migrations(conn: &Connection) -> SqliteResult<()> {
             );
 
             CREATE INDEX idx_notebooks_title ON notebooks(title);
-        "#,
-    )?;
-
-    // Migration 4: Create notebook_coins junction table for many-to-many relationship
-    apply_migration(
-        conn,
-        "004_create_notebook_coins_table",
-        r#"
-            CREATE TABLE notebook_coins (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                notebook_id INTEGER NOT NULL,
-                coin_id INTEGER NOT NULL,
-                position INTEGER NOT NULL,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (notebook_id) REFERENCES notebooks(id) ON DELETE CASCADE,
-                FOREIGN KEY (coin_id) REFERENCES coins(id) ON DELETE CASCADE,
-                UNIQUE(notebook_id, coin_id)
-            );
-
-            CREATE INDEX idx_notebook_coins_notebook_id ON notebook_coins(notebook_id);
-            CREATE INDEX idx_notebook_coins_coin_id ON notebook_coins(coin_id);
-            CREATE INDEX idx_notebook_coins_position ON notebook_coins(notebook_id, position);
         "#,
     )?;
 

@@ -16,15 +16,6 @@ pub struct Notebook {
     pub cells: Vec<Vec<Vec<Option<Coin>>>>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct NotebookCoin {
-    pub id: i32,
-    pub notebook_id: i32,
-    pub coin_id: i32,
-    pub position: i32,
-    pub created_at: String,
-}
-
 #[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct CreateNotebookRequest {
     #[validate(length(max = 100, message = "Title cannot exceed 100 characters"))]
@@ -64,30 +55,6 @@ pub struct UpdateNotebookRequest {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct AddCoinToNotebookRequest {
-    pub notebook_id: i32,
-    pub coin_id: i32,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct AddCoinsToNotebookRequest {
-    pub notebook_id: i32,
-    pub coin_ids: Vec<i32>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct RemoveCoinFromNotebookRequest {
-    pub notebook_id: i32,
-    pub coin_id: i32,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct RemoveCoinsFromNotebookRequest {
-    pub notebook_id: i32,
-    pub coin_ids: Vec<i32>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
 pub struct CoinPosition {
     pub coin_id: i32,
     pub position: i32,
@@ -95,13 +62,6 @@ pub struct CoinPosition {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ReorderCoinsRequest {
-    pub notebook_id: i32,
-    pub coin_id: i32,
-    pub new_position: i32,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ReorderCoinsInBulkRequest {
     pub notebook_id: i32,
     pub coins: Vec<CoinPosition>,
 }
@@ -111,4 +71,3 @@ pub struct PaginatedNotebooksResponse {
     pub items: Vec<Notebook>,
     pub total: i64,
 }
-

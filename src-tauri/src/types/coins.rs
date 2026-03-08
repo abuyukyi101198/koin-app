@@ -21,6 +21,8 @@ pub struct Coin {
     pub sale_value: Option<f64>,
     pub notes: Option<String>,
     pub created_at: String,
+    pub notebook_id: Option<i32>,
+    pub notebook_position: Option<i32>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Validate)]

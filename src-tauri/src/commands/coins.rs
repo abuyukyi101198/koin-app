@@ -26,6 +26,8 @@ pub fn build_coin_from_row(row: &rusqlite::Row) -> Result<Coin, rusqlite::Error>
         sale_value: row.get(14)?,
         notes: row.get(15)?,
         created_at: row.get(16)?,
+        notebook_id: row.get(17)?,
+        notebook_position: row.get(18)?,
     })
 }
 
@@ -98,7 +100,7 @@ pub fn list_coins(
 
     // Get paginated coins
     let query = format!(
-        "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.start_year, i.end_year, i.flag, c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at
+        "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.start_year, i.end_year, i.flag, c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at, c.notebook_id, c.notebook_position
          FROM coins c
          LEFT JOIN issuers i ON c.issuer_id = i.id
          {} ORDER BY {} {}, c.year {}, c.value {} LIMIT ?1 OFFSET ?2",
@@ -122,7 +124,7 @@ pub fn list_coins(
 pub fn get_coin(app_handle: tauri::AppHandle, id: i32) -> Result<Coin, String> {
     let conn = get_db_connection(&app_handle)?;
 
-    let query = "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.start_year, i.end_year, i.flag, c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at
+    let query = "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.start_year, i.end_year, i.flag, c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at, c.notebook_id, c.notebook_position
                 FROM coins c
                 LEFT JOIN issuers i ON c.issuer_id = i.id 
                 WHERE c.id = ?1";
@@ -308,7 +310,7 @@ pub fn get_similar_coins(
     let target_coin = get_coin(app_handle.clone(), id)?;
 
     // Query all coins except the target
-    let query = "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.start_year, i.end_year, i.flag, c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at
+    let query = "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.start_year, i.end_year, i.flag, c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at, c.notebook_id, c.notebook_position
                  FROM coins c
                  LEFT JOIN issuers i ON c.issuer_id = i.id
                  WHERE c.id != ?1";
