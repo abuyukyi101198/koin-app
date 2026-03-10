@@ -23,15 +23,26 @@ export function NotebookSlot({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-sm border border-border bg-background",
+        "relative overflow-hidden rounded-sm border bg-background transition-colors duration-150",
         {
-          "ring-2 ring-primary ring-offset-1": isOver && !isActiveDrag,
-          "opacity-0 pointer-events-none": isActiveDrag,
+          // idle with coin
+          "border-border hover:bg-accent/60": coin && !isActiveDrag && !isOver,
+          // idle without coin
+          "border-border border-dashed": !coin && !isActiveDrag && !isOver,
+          // drop target
+          "bg-primary/5": isOver && !isActiveDrag,
+          // ghost source slot
+          "border-dashed border-muted-foreground/30 bg-muted/20": isActiveDrag,
         }
       )}
       ref={setNodeRef}
       role="gridcell"
     >
+      {/* Ghost silhouette while dragging */}
+      {isActiveDrag && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none" />
+      )}
+
       {coin && !isActiveDrag ? <NotebookDraggable coin={coin} id={id} /> : null}
     </div>
   );

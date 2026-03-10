@@ -151,7 +151,7 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
 
         <DragOverlay>
           {activeCoin && (
-            <div className="relative flex items-start justify-center overflow-hidden rounded-sm border border-border bg-background shadow-xl opacity-95 w-full h-full">
+            <div className="relative flex items-start justify-center overflow-hidden rounded-sm border border-border bg-muted shadow-xl opacity-95 w-full h-full">
               <NotebookCoin coin={activeCoin} />
             </div>
           )}
