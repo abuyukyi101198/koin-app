@@ -10,6 +10,8 @@ interface NotebookSlotProps {
   coordinates: SlotCoordinates;
   coin: Coin | null;
   isActiveDrag?: boolean;
+  isSelected?: boolean;
+  onSelect?: (coinId: number) => void;
 }
 
 export function NotebookSlot({
@@ -17,6 +19,8 @@ export function NotebookSlot({
   coordinates,
   coin,
   isActiveDrag = false,
+  isSelected = false,
+  onSelect,
 }: NotebookSlotProps) {
   const { setNodeRef, isOver } = useDroppable({ id, data: coordinates });
 
@@ -43,7 +47,14 @@ export function NotebookSlot({
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none" />
       )}
 
-      {coin && !isActiveDrag ? <NotebookDraggable coin={coin} id={id} /> : null}
+      {coin && !isActiveDrag && (
+        <NotebookDraggable
+          coin={coin}
+          id={id}
+          isSelected={isSelected}
+          onSelect={onSelect}
+        />
+      )}
     </div>
   );
 }

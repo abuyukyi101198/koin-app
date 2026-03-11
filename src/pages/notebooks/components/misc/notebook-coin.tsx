@@ -1,15 +1,23 @@
+import { Check } from "lucide-react";
+
 import { Coin } from "@/query/types";
 import { asFraction } from "@/utils/asFraction.tsx";
 
 interface NotebookCoinProps {
   coin: Coin;
+  isSelected?: boolean;
 }
 
-export function NotebookCoin({ coin }: NotebookCoinProps) {
+export function NotebookCoin({ coin, isSelected = false }: NotebookCoinProps) {
   return (
     <>
+      {isSelected && (
+        <div className="absolute top-1.5 left-1.5 z-10 size-4 rounded-full bg-primary flex items-center justify-center shadow-sm pointer-events-none animate-in zoom-in-50 duration-150">
+          <Check className="size-2.5 text-primary-foreground" strokeWidth={3} />
+        </div>
+      )}
       <div className="flex gap-2 mt-auto mb-auto px-2">
-        <div className="aspect-square flex items-center justify-center">
+        <div className="aspect-square flex flex-1 items-center justify-center">
           {coin.reverse_image ? (
             <img
               alt="Coin reverse"
@@ -23,7 +31,7 @@ export function NotebookCoin({ coin }: NotebookCoinProps) {
             </div>
           )}
         </div>
-        <div className="aspect-square flex items-center justify-center">
+        <div className="aspect-square flex flex-1 items-center justify-center">
           {coin.obverse_image ? (
             <img
               alt="Coin obverse"
