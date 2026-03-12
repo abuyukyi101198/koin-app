@@ -9,7 +9,9 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import { X } from "lucide-react";
 
+import { Button } from "@/components/ui/button.tsx";
 import { NotebookDragOverlay } from "@/pages/notebooks/components/misc/notebook-coin-overlay.tsx";
 import { NotebookSlot } from "@/pages/notebooks/components/misc/notebook-slot.tsx";
 import { useReorderCoins } from "@/query/commands";
@@ -33,17 +35,25 @@ function parseSlotId(id: string): SlotCoordinates {
 interface NotebookGridProps {
   notebook: Notebook;
   page: number;
-  selectedIds: Set<number>;
-  onSelect: (coinId: number) => void;
 }
 
-export function NotebookGrid({
-  notebook,
-  page,
-  selectedIds,
-  onSelect,
-}: NotebookGridProps) {
+export function NotebookGrid({ notebook, page }: NotebookGridProps) {
   const reorderCoinsMutation = useReorderCoins();
+
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+
+  const onSelect = useCallback((coinId: number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(coinId) ? next.delete(coinId) : next.add(coinId);
+      return next;
+    });
+  }, []);
+
+  const clearSelection = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
+
   const { rows_per_page: rows, columns_per_page: cols, cells } = notebook;
   const pageIndex = page - 1;
 
@@ -204,6 +214,27 @@ export function NotebookGrid({
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Selection bar */}
+      <div className="shrink-0 h-8 flex items-center gap-2 px-6 py-2 border-b bg-muted/30 text-sm">
+        <span className="text-muted-foreground">
+          <span className="font-medium text-foreground">
+            {selectedIds.size}
+          </span>{" "}
+          selected
+        </span>
+        {selectedIds.size > 0 && (
+          <Button
+            className="ml-auto h-6 gap-1 text-xs"
+            onClick={clearSelection}
+            size="xs"
+            variant="ghost"
+          >
+            <X className="size-3" />
+            Clear
+          </Button>
+        )}
+      </div>
+
       <DndContext
         onDragEnd={handleDragEnd}
         onDragStart={handleDragStart}

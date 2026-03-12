@@ -1,9 +1,4 @@
-import { useCallback, useState } from "react";
-
-import { X } from "lucide-react";
-
 import { DataTablePagination } from "@/components/composite/data-table-pagination.tsx";
-import { Button } from "@/components/ui/button.tsx";
 import usePagination from "@/hooks/use-pagination.ts";
 import { NotebookGrid } from "@/pages/notebooks/components/misc/notebook-grid.tsx";
 import { useGetNotebook } from "@/query/commands/notebooks.ts";
@@ -15,20 +10,6 @@ interface NotebookContentsProps {
 export function NotebookContents({ notebookId }: NotebookContentsProps) {
   const { page, setPage } = usePagination();
   const { data: notebook, isLoading } = useGetNotebook({ id: notebookId });
-
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
-
-  const handleSelect = useCallback((coinId: number) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      next.has(coinId) ? next.delete(coinId) : next.add(coinId);
-      return next;
-    });
-  }, []);
-
-  const clearSelection = useCallback(() => {
-    setSelectedIds(new Set());
-  }, []);
 
   return (
     <section
@@ -46,36 +27,8 @@ export function NotebookContents({ notebookId }: NotebookContentsProps) {
         </p>
       </header>
 
-      {/* Selection bar */}
-      <div className="shrink-0 h-8 flex items-center gap-2 px-6 py-2 border-b bg-muted/30 text-sm">
-        <span className="text-muted-foreground">
-          <span className="font-medium text-foreground">
-            {selectedIds.size}
-          </span>{" "}
-          selected
-        </span>
-        {selectedIds.size > 0 && (
-          <Button
-            className="ml-auto h-6 gap-1 text-xs"
-            onClick={clearSelection}
-            size="xs"
-            variant="ghost"
-          >
-            <X className="size-3" />
-            Clear
-          </Button>
-        )}
-      </div>
-
       {/* Grid */}
-      {notebook ? (
-        <NotebookGrid
-          notebook={notebook}
-          onSelect={handleSelect}
-          page={page}
-          selectedIds={selectedIds}
-        />
-      ) : null}
+      {notebook ? <NotebookGrid notebook={notebook} page={page} /> : null}
 
       <div aria-atomic="true" aria-live="polite">
         <DataTablePagination
