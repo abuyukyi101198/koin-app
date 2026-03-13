@@ -19,10 +19,10 @@ export function NotebookContents({ notebookId }: NotebookContentsProps) {
     >
       {/* Header */}
       <header className="shrink-0 border-b px-6 pt-8 pb-3">
-        <h2 className="text-2xl font-medium tracking-wide">
+        <h2 className="h-8 text-2xl font-medium tracking-wide">
           {notebook?.title}
         </h2>
-        <p className="text-lg italic text-muted-foreground">
+        <p className="h-7 text-lg italic text-muted-foreground">
           {notebook?.description || "—"}
         </p>
       </header>
