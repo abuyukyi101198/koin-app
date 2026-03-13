@@ -37,7 +37,7 @@ export function DataTablePagination({
   return (
     <nav
       aria-label="Pagination navigation"
-      className="relative flex justify-center items-center px-4 py-3 border-t"
+      className="relative flex justify-center items-center h-14 px-4 py-3 border-t"
     >
       <div className="flex justify-center items-center space-x-2">
         <Button
