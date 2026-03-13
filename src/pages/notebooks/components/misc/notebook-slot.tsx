@@ -1,58 +1,53 @@
-import { useDroppable } from "@dnd-kit/core";
-
 import { cn } from "@/lib/utils.ts";
 import { NotebookDraggable } from "@/pages/notebooks/components/misc/notebook-draggable.tsx";
 import { SlotCoordinates } from "@/pages/notebooks/components/misc/notebook-grid.tsx";
+import { SlotClickPayload } from "@/pages/notebooks/hooks/use-notebook-reorder.tsx";
 import { Coin } from "@/query/types";
 
 interface NotebookSlotProps {
-  id: string;
   coordinates: SlotCoordinates;
   coin: Coin | null;
-  isActiveDrag?: boolean;
   isSelected?: boolean;
+  handActive?: boolean;
   onSelect?: (coinId: number) => void;
+  onPickUp?: (coin: Coin, position: { x: number; y: number }) => void;
+  onPlace?: (payload: SlotClickPayload) => void;
 }
 
 export function NotebookSlot({
-  id,
   coordinates,
   coin,
-  isActiveDrag = false,
   isSelected = false,
+  handActive = false,
   onSelect,
+  onPickUp,
+  onPlace,
 }: NotebookSlotProps) {
-  const { setNodeRef, isOver } = useDroppable({ id, data: coordinates });
-
   return (
     <div
       className={cn(
         "relative overflow-hidden rounded-sm border bg-background transition-colors duration-150",
         {
           // idle with coin
-          "border-border hover:bg-accent/60": coin && !isActiveDrag && !isOver,
+          "border-border hover:bg-accent/60": coin && !handActive,
           // idle without coin
-          "border-border border-dashed": !coin && !isActiveDrag && !isOver,
-          // drop target
-          "bg-primary/5": isOver && !isActiveDrag,
-          // ghost source slot
-          "border-dashed border-muted-foreground/30 bg-muted/20": isActiveDrag,
+          "border-border border-dashed": !coin && !handActive,
+          // hand active: all slots are potential placement targets
+          "hover:bg-accent/60 cursor-cell": handActive,
         }
       )}
-      ref={setNodeRef}
+      onClick={() => {
+        if (handActive) onPlace?.({ coordinates, coin });
+      }}
       role="gridcell"
     >
-      {/* Ghost silhouette while dragging */}
-      {isActiveDrag && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none" />
-      )}
-
-      {coin && !isActiveDrag && (
+      {coin && (
         <NotebookDraggable
           coin={coin}
-          id={id}
+          handActive={handActive}
           isSelected={isSelected}
-          onSelect={onSelect}
+          onPickUp={onPickUp}
+          onSelect={handActive ? undefined : onSelect}
         />
       )}
     </div>

@@ -1,43 +1,40 @@
-import { useDraggable } from "@dnd-kit/core";
-
 import { cn } from "@/lib/utils.ts";
 import { NotebookCoin } from "@/pages/notebooks/components/misc/notebook-coin.tsx";
 import { Coin } from "@/query/types";
 
 interface NotebookDraggableProps {
-  id: string;
   coin: Coin;
   isSelected?: boolean;
+  handActive?: boolean;
   onSelect?: (coinId: number) => void;
+  onPickUp?: (coin: Coin, position: { x: number; y: number }) => void;
 }
 
 export function NotebookDraggable({
-  id,
   coin,
   isSelected = false,
+  handActive = false,
   onSelect,
+  onPickUp,
 }: NotebookDraggableProps) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-    id,
-    data: { coin } satisfies { coin: Coin },
-  });
-
   return (
     <div
-      {...attributes}
-      {...listeners}
       className={cn(
         "absolute inset-0 flex items-start justify-center rounded-sm",
-        "cursor-grab active:cursor-grabbing hover:bg-muted/60",
-        "transition-all duration-100 active:scale-95"
+        "transition-all duration-100",
+        !handActive && "cursor-pointer hover:bg-muted/60"
       )}
       onClick={(e) => {
-        if (!isDragging) {
+        if (!handActive) {
           e.stopPropagation();
           onSelect?.(coin.id);
         }
       }}
-      ref={setNodeRef}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onPickUp?.(coin, { x: e.clientX, y: e.clientY });
+      }}
     >
       <NotebookCoin coin={coin} isSelected={isSelected} />
     </div>

@@ -1,20 +1,17 @@
-import { useCallback, useMemo, useState } from "react";
+import { CSSProperties, useCallback, useEffect, useState } from "react";
+
+import { HandCoins, X } from "lucide-react";
+import { createPortal } from "react-dom";
 
 import {
-  DndContext,
-  DragEndEvent,
-  DragOverlay,
-  DragStartEvent,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import { X } from "lucide-react";
+  SlotClickPayload,
+  useNotebookReorder,
+} from "../../hooks/use-notebook-reorder";
 
 import { Button } from "@/components/ui/button.tsx";
+import { cn } from "@/lib/utils.ts";
 import { NotebookDragOverlay } from "@/pages/notebooks/components/misc/notebook-coin-overlay.tsx";
 import { NotebookSlot } from "@/pages/notebooks/components/misc/notebook-slot.tsx";
-import { useReorderCoins } from "@/query/commands";
 import { Coin, Notebook } from "@/query/types";
 
 export interface SlotCoordinates {
@@ -27,20 +24,41 @@ function slotId({ pageIndex, rowIdx, colIdx }: SlotCoordinates): string {
   return `${pageIndex}-${rowIdx}-${colIdx}`;
 }
 
-function parseSlotId(id: string): SlotCoordinates {
-  const [pageIndex, rowIdx, colIdx] = id.split("-").map(Number);
-  return { pageIndex, rowIdx, colIdx };
-}
-
 interface NotebookGridProps {
   notebook: Notebook;
   page: number;
 }
 
 export function NotebookGrid({ notebook, page }: NotebookGridProps) {
-  const reorderCoinsMutation = useReorderCoins();
-
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
+
+  const { rows_per_page: rows, columns_per_page: cols } = notebook;
+  const pageIndex = page - 1;
+
+  const {
+    hand,
+    isActive: handActive,
+    topCoin,
+    localCells,
+    pickUp,
+    place,
+    discard,
+  } = useNotebookReorder({ notebook });
+
+  useEffect(() => {
+    if (!handActive) {
+      setCursor(null);
+      return;
+    }
+    const onMove = (e: PointerEvent) => {
+      setCursor({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener("pointermove", onMove);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+    };
+  }, [handActive]);
 
   const onSelect = useCallback((coinId: number) => {
     setSelectedIds((prev) => {
@@ -54,237 +72,126 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
     setSelectedIds(new Set());
   }, []);
 
-  const { rows_per_page: rows, columns_per_page: cols, cells } = notebook;
-  const pageIndex = page - 1;
-
-  const [activeDragId, setActiveDragId] = useState<string | null>(null);
-
-  const activeCoin = useMemo<Coin | null>(() => {
-    if (!activeDragId) return null;
-    const { pageIndex: pi, rowIdx: ri, colIdx: ci } = parseSlotId(activeDragId);
-    const draggedCoin = cells[pi]?.[ri]?.[ci] ?? null;
-
-    if (
-      draggedCoin &&
-      selectedIds.has(draggedCoin.id) &&
-      selectedIds.size > 1
-    ) {
-      let lowestCoin: Coin | null = null;
-      cells.forEach((page) => {
-        page.forEach((row) => {
-          row.forEach((coin) => {
-            if (!coin || !selectedIds.has(coin.id)) return;
-            if (
-              lowestCoin === null ||
-              (coin.notebook_position ?? Infinity) <
-                (lowestCoin.notebook_position ?? Infinity)
-            ) {
-              lowestCoin = coin;
-            }
-          });
-        });
-      });
-      return lowestCoin;
-    }
-
-    return draggedCoin;
-  }, [activeDragId, cells, selectedIds]);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
+  const handlePickUp = useCallback(
+    (coin: Coin, position: { x: number; y: number }) => {
+      setCursor(position);
+      pickUp(coin);
+    },
+    [pickUp]
   );
 
-  const handleDragStart = useCallback(({ active }: DragStartEvent) => {
-    setActiveDragId(String(active.id));
-  }, []);
-
-  const handleDragEnd = useCallback(
-    ({ active, over }: DragEndEvent) => {
-      if (!over || active.id === over.id) {
-        setActiveDragId(null);
-        return;
-      }
-
-      const from = parseSlotId(String(active.id));
-      const to = over.data.current as SlotCoordinates;
-
-      if (!to) {
-        setActiveDragId(null);
-        return;
-      }
-
-      const cellsPerPage = rows * cols;
-      const totalSlots = cells.length * cellsPerPage;
-
-      const toFlat = (pi: number, ri: number, ci: number) =>
-        pi * cellsPerPage + ri * cols + ci;
-      const fromFlat = (pos: number): SlotCoordinates => ({
-        pageIndex: Math.floor(pos / cellsPerPage),
-        rowIdx: Math.floor((pos % cellsPerPage) / cols),
-        colIdx: pos % cols,
-      });
-
-      // Build flat ordered list of all coins with their current positions
-      const allCoins: { coin: Coin; pos: number }[] = [];
-      cells.forEach((page, pi) => {
-        page.forEach((row, ri) => {
-          row.forEach((coin, ci) => {
-            if (coin) allCoins.push({ coin, pos: toFlat(pi, ri, ci) });
-          });
-        });
-      });
-
-      const draggedCoinId = activeCoin?.id;
-      const isMultiDrag =
-        draggedCoinId !== undefined &&
-        selectedIds.has(draggedCoinId) &&
-        selectedIds.size > 1;
-
-      const allCoinsResult: { coin_id: number; position: number }[] = [];
-
-      if (isMultiDrag) {
-        // Split into selected (ordered by current pos) and unselected
-        const selected = allCoins
-          .filter((c) => selectedIds.has(c.coin.id))
-          .sort((a, b) => a.pos - b.pos);
-        const unselected = allCoins.filter((c) => !selectedIds.has(c.coin.id));
-
-        // Find free slots starting at the target flat position
-        const occupiedByUnselected = new Set(unselected.map((c) => c.pos));
-        const freeSlots: number[] = [];
-        for (
-          let i = 0;
-          i < totalSlots && freeSlots.length < selected.length;
-          i++
-        ) {
-          const candidate =
-            (toFlat(to.pageIndex, to.rowIdx, to.colIdx) + i) % totalSlots;
-          if (!occupiedByUnselected.has(candidate)) freeSlots.push(candidate);
-        }
-
-        selected.forEach(({ coin }, i) => {
-          allCoinsResult.push({ coin_id: coin.id, position: freeSlots[i] });
-        });
-        unselected.forEach(({ coin, pos }) => {
-          allCoinsResult.push({ coin_id: coin.id, position: pos });
-        });
-      } else {
-        // Simple two-slot swap
-        allCoins.forEach(({ coin, pos }) => {
-          const coords = fromFlat(pos);
-          const isFrom =
-            coords.pageIndex === from.pageIndex &&
-            coords.rowIdx === from.rowIdx &&
-            coords.colIdx === from.colIdx;
-          const isTo =
-            coords.pageIndex === to.pageIndex &&
-            coords.rowIdx === to.rowIdx &&
-            coords.colIdx === to.colIdx;
-
-          const dest = isFrom ? to : isTo ? from : coords;
-          allCoinsResult.push({
-            coin_id: coin.id,
-            position: toFlat(dest.pageIndex, dest.rowIdx, dest.colIdx),
-          });
-        });
-      }
-
-      reorderCoinsMutation.mutate(
-        { notebook_id: notebook.id, coins: allCoinsResult },
-        {
-          onSuccess: () => {
-            setActiveDragId(null);
-          },
-          onError: () => {
-            setActiveDragId(null);
-          },
-        }
-      );
+  const handlePlace = useCallback(
+    (payload: SlotClickPayload) => {
+      if (!handActive) return;
+      place(payload);
     },
-    [
-      activeCoin?.id,
-      cells,
-      cols,
-      notebook.id,
-      reorderCoinsMutation,
-      rows,
-      selectedIds,
-    ]
+    [handActive, place]
   );
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Selection bar */}
+      {/* Status bar */}
       <div className="shrink-0 h-8 flex items-center gap-2 px-6 py-2 border-b bg-muted/30 text-sm">
-        <span className="text-muted-foreground">
-          <span className="font-medium text-foreground">
-            {selectedIds.size}
-          </span>{" "}
-          selected
-        </span>
-        {selectedIds.size > 0 && (
-          <Button
-            className="ml-auto h-6 gap-1 text-xs"
-            onClick={clearSelection}
-            size="xs"
-            variant="ghost"
-          >
-            <X className="size-3" />
-            Clear
-          </Button>
+        {handActive ? (
+          <>
+            <HandCoins className="size-4 shrink-0" />
+            <span className="text-muted-foreground">
+              Holding{" "}
+              <span className="font-medium text-foreground">{hand.length}</span>{" "}
+              coin{hand.length !== 1 ? "s" : ""} —{" "}
+              <span className="font-medium text-foreground">
+                {topCoin?.title ?? ""}
+              </span>{" "}
+              on top
+            </span>
+            <Button
+              className="ml-auto h-6 gap-1 text-xs"
+              onClick={discard}
+              size="xs"
+              variant="ghost"
+            >
+              <X className="size-3" />
+              Discard
+            </Button>
+          </>
+        ) : (
+          <>
+            <span className="text-muted-foreground">
+              <span className="font-medium text-foreground">
+                {selectedIds.size}
+              </span>{" "}
+              selected
+            </span>
+            {selectedIds.size > 0 && (
+              <Button
+                className="ml-auto h-6 gap-1 text-xs"
+                onClick={clearSelection}
+                size="xs"
+                variant="ghost"
+              >
+                <X className="size-3" />
+                Clear
+              </Button>
+            )}
+          </>
         )}
       </div>
 
-      <DndContext
-        onDragEnd={handleDragEnd}
-        onDragStart={handleDragStart}
-        sensors={sensors}
+      <div
+        className={cn(
+          "flex-1 grid gap-2 p-6 pt-4 max-h-full",
+          handActive && "cursor-none"
+        )}
+        role="grid"
+        style={{
+          gridTemplateColumns: `repeat(${cols}, 1fr)`,
+          gridTemplateRows: `repeat(${rows}, 1fr)`,
+        }}
       >
-        <div
-          className="flex-1 grid gap-2 p-6 pt-4 max-h-full"
-          role="grid"
-          style={{
-            gridTemplateColumns: `repeat(${cols}, 1fr)`,
-            gridTemplateRows: `repeat(${rows}, 1fr)`,
-          }}
-        >
-          {cells[pageIndex].map((row, rowIdx) =>
-            row.map((coin, colIdx) => {
-              const coords: SlotCoordinates = { pageIndex, rowIdx, colIdx };
-              const id = slotId(coords);
-              const isActiveDrag = activeDragId === id;
-              const isMultiDragGhost =
-                activeDragId !== null &&
-                coin !== null &&
-                selectedIds.has(coin.id) &&
-                activeCoin !== null &&
-                selectedIds.has(activeCoin.id) &&
-                selectedIds.size > 1;
-              return (
-                <NotebookSlot
-                  coin={coin}
-                  coordinates={coords}
-                  id={id}
-                  isActiveDrag={isActiveDrag || isMultiDragGhost}
-                  isSelected={coin !== null && selectedIds.has(coin.id)}
-                  key={id}
-                  onSelect={onSelect}
-                />
-              );
-            })
-          )}
-        </div>
+        {localCells[pageIndex].map((row, rowIdx) =>
+          row.map((coin, colIdx) => {
+            const coords: SlotCoordinates = { pageIndex, rowIdx, colIdx };
+            const id = slotId(coords);
+            return (
+              <NotebookSlot
+                coin={coin}
+                coordinates={coords}
+                handActive={handActive}
+                isSelected={coin !== null && selectedIds.has(coin.id)}
+                key={id}
+                onPickUp={handlePickUp}
+                onPlace={handlePlace}
+                onSelect={onSelect}
+              />
+            );
+          })
+        )}
+      </div>
 
-        <DragOverlay>
-          {activeCoin && (
+      {/* Cursor-following drag overlay */}
+      {handActive &&
+        topCoin &&
+        cursor &&
+        createPortal(
+          <div
+            className="pointer-events-none fixed -translate-x-2 -translate-y-2 z-50 h-[calc((100vh-62*var(--spacing))/var(--rows))] w-[calc((7/12*100vw-3rem-(var(--cols)-1)*2*var(--spacing))/var(--cols))] scale-90"
+            style={
+              {
+                "--rows": rows,
+                "--cols": cols,
+                left: cursor.x,
+                top: cursor.y,
+              } as CSSProperties
+            }
+          >
             <NotebookDragOverlay
-              coin={activeCoin}
-              isSelected={selectedIds.has(activeCoin.id)}
-              stackCount={selectedIds.has(activeCoin.id) ? selectedIds.size : 1}
+              coin={topCoin}
+              isSelected
+              stackCount={hand.length}
             />
-          )}
-        </DragOverlay>
-      </DndContext>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
