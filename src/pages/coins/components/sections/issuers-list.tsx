@@ -20,7 +20,7 @@ function IssuerItem({
   onNameClick,
 }: {
   issuer: Issuer | Omit<Issuer, "predecessors">;
-  onNameClick?: (name: string) => void;
+  onNameClick: (name: string) => void;
 }) {
   return (
     <div className="w-full flex justify-between">
@@ -31,27 +31,23 @@ function IssuerItem({
           loading="lazy"
           src={issuer.flag?.length ? issuer.flag : undefined}
         />
-        {onNameClick ? (
-          <span
-            className="text-left truncate underline-offset-2 hover:underline cursor-pointer"
-            onClick={(e) => {
+        <span
+          className="text-left text-xs leading-4 overflow-hidden text-wrap line-clamp-2 underline-offset-2 hover:underline cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation();
+            onNameClick(issuer.name);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
               e.stopPropagation();
               onNameClick(issuer.name);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.stopPropagation();
-                onNameClick(issuer.name);
-              }
-            }}
-            role="link"
-            tabIndex={0}
-          >
-            {issuer.name}
-          </span>
-        ) : (
-          <span className="text-left truncate">{issuer.name}</span>
-        )}
+            }
+          }}
+          role="link"
+          tabIndex={0}
+        >
+          {issuer.name}
+        </span>
       </div>
       {issuer.name !== "Other" && (
         <span
@@ -66,7 +62,7 @@ function IssuerItem({
 }
 
 interface IssuersListProps {
-  onIssuerClick?: (name: string) => void;
+  onIssuerClick: (name: string) => void;
 }
 
 export function IssuersList({ onIssuerClick }: IssuersListProps) {
