@@ -9,6 +9,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group.tsx";
+import { cn } from "@/lib/utils.ts";
 
 interface SearchInputProps {
   count?: number;
@@ -60,7 +61,11 @@ export function SearchInput({
 
   return (
     <ButtonGroup className="w-full justify-end gap-0!">
-      <ButtonGroup>
+      <ButtonGroup
+        className={cn("overflow-hidden transition-all duration-300 ease-out", {
+          "w-0": isExpanded || search,
+        })}
+      >
         <Button
           className="text-muted-foreground cursor-pointer p-0"
           onClick={handleIconClick}
@@ -71,9 +76,12 @@ export function SearchInput({
         </Button>
       </ButtonGroup>
       <ButtonGroup
-        className={`overflow-hidden transition-all duration-300 ease-out ${
-          isExpanded || search ? "w-full" : "w-0"
-        }`}
+        className={cn(
+          "overflow-hidden transition-all duration-300 ease-out w-0",
+          {
+            "w-full": isExpanded || search,
+          }
+        )}
       >
         <InputGroup className="border-l-0 border-t-0 border-r-0 rounded-none bg-background! has-[[data-slot=input-group-control]:focus-visible]:ring-0">
           <InputGroupInput
