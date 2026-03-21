@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { SortingState } from "@tanstack/react-table";
 
@@ -50,6 +50,10 @@ export function CoinsTable({ selection }: CoinsListProps) {
     },
     [size, handlePageSizeChange, setPage]
   );
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearchQuery, setPage]);
 
   return (
     <section
