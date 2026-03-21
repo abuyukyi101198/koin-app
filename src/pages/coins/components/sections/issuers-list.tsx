@@ -17,8 +17,10 @@ import { Issuer } from "@/query/types";
 
 function IssuerItem({
   issuer,
+  onNameClick,
 }: {
   issuer: Issuer | Omit<Issuer, "predecessors">;
+  onNameClick?: (name: string) => void;
 }) {
   return (
     <div className="w-full flex justify-between">
@@ -29,7 +31,27 @@ function IssuerItem({
           loading="lazy"
           src={issuer.flag?.length ? issuer.flag : undefined}
         />
-        <span className="text-left truncate">{issuer.name}</span>
+        {onNameClick ? (
+          <span
+            className="text-left truncate underline-offset-2 hover:underline cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              onNameClick(issuer.name);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.stopPropagation();
+                onNameClick(issuer.name);
+              }
+            }}
+            role="link"
+            tabIndex={0}
+          >
+            {issuer.name}
+          </span>
+        ) : (
+          <span className="text-left truncate">{issuer.name}</span>
+        )}
       </div>
       {issuer.name !== "Other" && (
         <span
@@ -43,7 +65,11 @@ function IssuerItem({
   );
 }
 
-export function IssuersList() {
+interface IssuersListProps {
+  onIssuerClick?: (name: string) => void;
+}
+
+export function IssuersList({ onIssuerClick }: IssuersListProps) {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [openCollapsibles, setOpenCollapsibles] = useState<Set<number>>(
     new Set()
@@ -147,7 +173,7 @@ export function IssuersList() {
                 aria-hidden="true"
                 className="transition-transform group-data-[state=open]:rotate-90 text-muted-foreground"
               />
-              <IssuerItem issuer={issuer} />
+              <IssuerItem issuer={issuer} onNameClick={onIssuerClick} />
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent>
@@ -170,7 +196,7 @@ export function IssuersList() {
           "pl-9.5": "predecessors" in issuer && issuer.predecessors === null,
         })}
       >
-        <IssuerItem issuer={issuer} />
+        <IssuerItem issuer={issuer} onNameClick={onIssuerClick} />
       </Button>
     );
   };

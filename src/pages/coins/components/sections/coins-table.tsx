@@ -16,11 +16,16 @@ import { useListCoins } from "@/query/commands/coins.ts";
 import { Coin, ListCoinsRequest } from "@/query/types";
 
 interface CoinsListProps {
+  searchQuery: string;
+  onSearchQueryChange: (value: string) => void;
   selection: DataTableProps<Coin>["selection"];
 }
 
-export function CoinsTable({ selection }: CoinsListProps) {
-  const [searchQuery, setSearchQuery] = useState<string>("");
+export function CoinsTable({
+  searchQuery,
+  onSearchQueryChange,
+  selection,
+}: CoinsListProps) {
   const [sorting, setSorting] = useState<SortingState>([
     { id: "issuer", desc: false },
   ]);
@@ -67,7 +72,7 @@ export function CoinsTable({ selection }: CoinsListProps) {
             aria-describedby="search-help"
             count={data?.total}
             onSearch={(e) => {
-              setSearchQuery(e.target.value);
+              onSearchQueryChange(e.target.value);
             }}
             placeholder="Search coins..."
             search={searchQuery}
