@@ -3,7 +3,7 @@ import { CSSProperties } from "react";
 
 import { QueryClientProvider } from "@tanstack/react-query";
 import { QueryClient } from "@tanstack/react-query";
-import { Link, Outlet } from "@tanstack/react-router";
+import { Link, Outlet, useLocation } from "@tanstack/react-router";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { BookCopy, Coins, Github } from "lucide-react";
 
@@ -32,6 +32,8 @@ import { NotebookSelectionProvider } from "@/context/notebook-selection-context.
 const queryClient = new QueryClient();
 
 function App() {
+  const { pathname } = useLocation();
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
@@ -56,6 +58,7 @@ function App() {
                                 <SidebarMenuButton
                                   asChild
                                   className="text-muted-foreground hover:text-base cursor-pointer"
+                                  isActive={pathname === "/coins"}
                                   size="default"
                                 >
                                   <Link to="/coins">
@@ -74,6 +77,7 @@ function App() {
                                 <SidebarMenuButton
                                   asChild
                                   className="text-muted-foreground hover:text-base cursor-pointer"
+                                  isActive={pathname === "/notebooks"}
                                   size="default"
                                 >
                                   <Link to="/notebooks">
