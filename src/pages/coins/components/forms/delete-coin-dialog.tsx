@@ -66,7 +66,7 @@ export function DeleteCoinDialog({
         <DialogTrigger asChild>
           {size === "default" ? (
             <Button
-              className="hover:bg-destructive-foreground! cursor-pointer"
+              className="bg-destructive/20 hover:bg-destructive/50! cursor-pointer"
               variant="destructive"
             >
               Delete coin

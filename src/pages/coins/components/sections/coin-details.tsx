@@ -1,4 +1,6 @@
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
+import { DeleteCoinDialog } from "@/pages/coins/components/forms/delete-coin-dialog.tsx";
+import { UpdateCoinDialog } from "@/pages/coins/components/forms/update-coin-dialog.tsx";
 import { useGetCoin } from "@/query/commands";
 import { asFraction } from "@/utils/asFraction.tsx";
 
@@ -33,7 +35,7 @@ export function CoinDetails({ coinId }: CoinInfoProps) {
       className="h-full w-7/12 flex flex-col overflow-hidden border-r border-b"
     >
       {/* Header */}
-      <header className="shrink-0 border-b px-6 pt-8 pb-3">
+      <header className="w-full flex justify-between shrink-0 border-b px-6 pt-8 pb-3">
         <div className="space-y-1">
           <h2 className="scroll-m-20 text-2xl font-medium tracking-wide text-balance">
             {asFraction(data?.title, data?.value)}
@@ -41,6 +43,10 @@ export function CoinDetails({ coinId }: CoinInfoProps) {
           <p className="text-lg font-normal italic text-muted-foreground">
             {data?.description || "—"}
           </p>
+        </div>
+        <div className="flex gap-2">
+          <UpdateCoinDialog id={coinId} />
+          <DeleteCoinDialog id={coinId} />
         </div>
       </header>
 
