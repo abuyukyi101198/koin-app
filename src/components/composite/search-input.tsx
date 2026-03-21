@@ -1,6 +1,6 @@
-import { ChangeEventHandler, useEffect, useRef, useState } from "react";
+import React, { ChangeEventHandler, useEffect, useRef, useState } from "react";
 
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 
 import { ButtonGroup } from "@/components/ui/button-group.tsx";
 import { Button } from "@/components/ui/button.tsx";
@@ -34,6 +34,22 @@ export function SearchInput({
     if (!search) {
       setIsExpanded(false);
     }
+  };
+
+  const handleClear = () => {
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype,
+      "value"
+    )?.set;
+    if (inputRef.current && nativeInputValueSetter) {
+      nativeInputValueSetter.call(inputRef.current, "");
+      inputRef.current.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+    const syntheticEvent = {
+      target: { value: "" },
+    } as React.ChangeEvent<HTMLInputElement>;
+    onSearch(syntheticEvent);
+    inputRef.current?.focus();
   };
 
   useEffect(() => {
@@ -71,12 +87,27 @@ export function SearchInput({
             value={search}
           />
           {search && count !== undefined && (
-            <InputGroupAddon
-              align="inline-end"
-              className="text-xs font-normal leading-5 italic pt-2.5 pr-1.5"
-            >
-              {count} results
-            </InputGroupAddon>
+            <>
+              <InputGroupAddon
+                align="inline-end"
+                className="items-baseline pb-1"
+              >
+                <Button
+                  className="h-4 text-muted-foreground cursor-pointer p-0 hover:text-foreground"
+                  onClick={handleClear}
+                  size="icon-sm"
+                  variant="link"
+                >
+                  <X className="size-4" />
+                </Button>
+              </InputGroupAddon>
+              <InputGroupAddon
+                align="inline-end"
+                className="text-xs font-normal leading-5 italic pt-2.5 pr-1.5"
+              >
+                {count} results
+              </InputGroupAddon>
+            </>
           )}
         </InputGroup>
       </ButtonGroup>
