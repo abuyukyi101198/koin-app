@@ -168,6 +168,7 @@ export function DataTable<TData extends { id: number | string }>({
                     aria-rowindex={rowIndex + (header ? 2 : 1)}
                     aria-selected={row.getIsSelected()}
                     className="cursor-pointer max-w-full"
+                    data-coin-id={row.id}
                     key={row.id}
                     onClick={() => {
                       table.setRowSelection({

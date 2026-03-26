@@ -1,17 +1,25 @@
-import { createContext, useContext } from "react";
+import { createContext, RefObject, useContext } from "react";
 
-import { SlotClickPayload } from "@/pages/notebooks/hooks/use-notebook-reorder.tsx";
+import {
+  HandEntry,
+  HandOrigin,
+  SlotClickPayload,
+} from "@/pages/notebooks/types.ts";
 import { Coin } from "@/query/types";
 
 export interface NotebookReorderContextType {
-  hand: Coin[];
+  hand: HandEntry[];
   isActive: boolean;
   topCoin: Coin | null;
+  topOrigin: HandOrigin | null;
   localCells: (Coin | null)[][][];
-  pickUp: (coin: Coin) => void;
-  place: (payload: SlotClickPayload) => void;
+  pickUp: (coin: Coin, origin: HandOrigin) => void;
+  place: (payload: SlotClickPayload | null) => void;
   discard: () => void;
   isPending: boolean;
+  /** Flip to true before calling place(payload) to tell the global window
+   *  click listener that this click was a valid placement, not an outside click. */
+  placingRef: RefObject<boolean>;
 }
 
 export const NotebookReorderContext = createContext<

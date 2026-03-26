@@ -90,13 +90,17 @@ export function useReorderCoins(): UseMutationResult<
       return await invoke<Notebook>("reorder_coins", {
         notebookId: data.notebook_id,
         coins: data.coins,
+        unassignCoinIds: data.unassign_coin_ids ?? [],
       });
     },
-    onSuccess: (notebook) => {
+    onSuccess: (notebook, variables) => {
       queryClient.setQueryData(
         [NOTEBOOKS_QUERY_KEY, "get", notebook.id],
         notebook
       );
+      if (variables.unassign_coin_ids?.length) {
+        queryClient.invalidateQueries({ queryKey: ["coins"] });
+      }
     },
   });
 }

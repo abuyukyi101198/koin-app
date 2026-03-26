@@ -1,3 +1,5 @@
+import { useRef } from "react";
+
 import { useNotebookSelection } from "@/context/notebook-selection-context.tsx";
 import { EmptyNotebooks } from "@/pages/notebooks/components/misc/empty-notebooks.tsx";
 import { NotebookAllCoins } from "@/pages/notebooks/components/sections/notebook-all-coins.tsx";
@@ -14,9 +16,10 @@ export function NotebooksView() {
 
   const { data: notebook } = useGetNotebook({ id: selectedNotebookId ?? -1 });
   const reorder = useNotebookReorder({ notebook });
+  const placingRef = useRef(false);
 
   return (
-    <NotebookReorderContext.Provider value={reorder}>
+    <NotebookReorderContext.Provider value={{ ...reorder, placingRef }}>
       <div className="h-full w-full flex border-collapse">
         {selectedNotebookId !== null ? (
           <>

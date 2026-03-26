@@ -1,26 +1,43 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { SlotCoordinates } from "@/pages/notebooks/components/misc/notebook-grid.tsx";
+import {
+  HandEntry,
+  HandOrigin,
+  SlotClickPayload,
+} from "@/pages/notebooks/types";
 import { useReorderCoins } from "@/query/commands";
 import { Coin, Notebook } from "@/query/types";
+
+export type { HandEntry, HandOrigin, SlotClickPayload };
 
 interface UseNotebookReorderProps {
   notebook: Notebook | undefined;
 }
 
-export interface SlotClickPayload {
-  coordinates: SlotCoordinates;
-  coin: Coin | null;
-}
-
 export function useNotebookReorder({ notebook }: UseNotebookReorderProps) {
   const reorderCoinsMutation = useReorderCoins();
 
-  const [hand, setHand] = useState<Coin[]>([]);
+  const [hand, setHand] = useState<HandEntry[]>([]);
 
-  // Optimistic local copy of the grid cells.
   const [localCells, setLocalCells] = useState<(Coin | null)[][][]>(
     notebook?.cells ?? []
+  );
+
+  // True while a reorder mutation is in-flight. Prevents the hand-empty
+  // sync effect from overwriting optimistic localCells with stale server
+  // state before the mutation response arrives.
+  const pendingMutationRef = useRef(false);
+
+  const mutate = useCallback(
+    (args: Parameters<typeof reorderCoinsMutation.mutate>[0]) => {
+      pendingMutationRef.current = true;
+      reorderCoinsMutation.mutate(args, {
+        onSettled: () => {
+          pendingMutationRef.current = false;
+        },
+      });
+    },
+    [reorderCoinsMutation]
   );
 
   useEffect(() => {
@@ -30,12 +47,11 @@ export function useNotebookReorder({ notebook }: UseNotebookReorderProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notebook?.id]);
 
-  // Keep localCells in sync with the server notebook whenever the hand is
-  // empty (i.e. no reorder in progress). While the hand is active, own
-  // the state locally to avoid server-response flashes.
+  // Re-sync localCells from the server only when the hand is empty AND no
+  // mutation is in flight (i.e. not an optimistic update we own).
   useEffect(() => {
     if (!notebook) return;
-    if (hand.length === 0) {
+    if (hand.length === 0 && !pendingMutationRef.current) {
       setLocalCells(notebook.cells);
     }
   }, [notebook, hand.length]);
@@ -70,44 +86,70 @@ export function useNotebookReorder({ notebook }: UseNotebookReorderProps) {
   );
 
   const pickUp = useCallback(
-    (coin: Coin) => {
+    (coin: Coin, origin: HandOrigin) => {
       if (!notebook) return;
-      // Remove the coin from localCells immediately.
-      const nextCells = localCells.map((page) =>
-        page.map((row) => row.map((c) => (c?.id === coin.id ? null : c)))
-      );
-      setLocalCells(nextCells);
-      // Optimistically update the hand.
-      setHand((prev) => [...prev, coin]);
-      // Commit: send all positions except the picked-up coin.
-      reorderCoinsMutation.mutate({
-        notebook_id: notebook.id,
-        coins: buildPositions(nextCells).filter((p) => p.coin_id !== coin.id),
-      });
+
+      let nextCells = localCells;
+      if (origin === "grid") {
+        // Remove from grid immediately
+        nextCells = localCells.map((page) =>
+          page.map((row) => row.map((c) => (c?.id === coin.id ? null : c)))
+        );
+        setLocalCells(nextCells);
+        // Commit grid state without the picked coin
+        mutate({
+          notebook_id: notebook.id,
+          coins: buildPositions(nextCells).filter((p) => p.coin_id !== coin.id),
+        });
+      }
+      // "list" origin: coin isn't in the grid, nothing to remove
+
+      setHand((prev) => [...prev, { coin, origin }]);
     },
-    [localCells, buildPositions, notebook, reorderCoinsMutation]
+    [localCells, buildPositions, notebook, mutate]
   );
 
+  /**
+   * Place the top coin into a slot, or discard it (origin-aware) when
+   * payload is null (clicked outside any valid slot).
+   */
   const place = useCallback(
-    ({ coordinates, coin: slotCoin }: SlotClickPayload) => {
+    (payload: SlotClickPayload | null) => {
       if (!notebook) return;
       if (hand.length === 0) return;
 
-      const topCoin = hand[hand.length - 1];
+      const topEntry = hand[hand.length - 1];
+      const topCoin = topEntry.coin;
       const newHand = hand.slice(0, -1);
 
-      if (slotCoin !== null) {
-        newHand.push(slotCoin);
+      // ── Discard path: null payload = clicked outside ──────────────────
+      if (payload === null) {
+        setHand(newHand);
+        if (topEntry.origin === "grid") {
+          // Unassign the coin from this notebook
+          mutate({
+            notebook_id: notebook.id,
+            coins: buildPositions(localCells),
+            unassign_coin_ids: [topCoin.id],
+          });
+        }
+        // "list" origin: coin was never in this notebook — no server call
+        return;
       }
 
-      // Build updated cells: put topCoin into the target slot, clear slotCoin.
+      // ── Place path: valid slot ─────────────────────────────────────────
+      const { coordinates, coin: slotCoin } = payload;
+
+      if (slotCoin !== null) {
+        newHand.push({ coin: slotCoin, origin: "grid" });
+      }
+
       const { pageIndex, rowIdx, colIdx } = coordinates;
       const nextCells = localCells.map((page, pi) =>
         page.map((row, ri) =>
           row.map((c, ci) => {
             if (pi === pageIndex && ri === rowIdx && ci === colIdx)
               return topCoin;
-            // If slotCoin moved into the hand, clear it from wherever it was.
             if (slotCoin && c?.id === slotCoin.id) return null;
             return c;
           })
@@ -118,7 +160,6 @@ export function useNotebookReorder({ notebook }: UseNotebookReorderProps) {
       setHand(newHand);
 
       const targetPos = toFlat(pageIndex, rowIdx, colIdx);
-
       const excludeIds = new Set<number>([topCoin.id]);
       if (slotCoin) excludeIds.add(slotCoin.id);
 
@@ -127,29 +168,36 @@ export function useNotebookReorder({ notebook }: UseNotebookReorderProps) {
       );
       positions.push({ coin_id: topCoin.id, position: targetPos });
 
-      reorderCoinsMutation.mutate({
+      mutate({
         notebook_id: notebook.id,
         coins: positions,
       });
     },
-    [hand, localCells, toFlat, buildPositions, notebook, reorderCoinsMutation]
+    [hand, localCells, toFlat, buildPositions, notebook, mutate]
   );
 
+  /** Discard the entire hand, unassigning all grid-origin coins. */
   const discard = useCallback(() => {
     if (!notebook) return;
+
+    const unassignIds = hand
+      .filter((e) => e.origin === "grid")
+      .map((e) => e.coin.id);
+
     setHand([]);
-    // Clearing the hand will trigger the useEffect above to re-sync
-    // localCells from notebook.cells (the last server state).
-    reorderCoinsMutation.mutate({
+
+    mutate({
       notebook_id: notebook.id,
       coins: buildPositions(notebook.cells),
+      unassign_coin_ids: unassignIds.length ? unassignIds : undefined,
     });
-  }, [buildPositions, notebook, reorderCoinsMutation]);
+  }, [hand, buildPositions, notebook, mutate]);
 
   return {
     hand,
     isActive,
-    topCoin: hand.length > 0 ? hand[hand.length - 1] : null,
+    topCoin: hand.length > 0 ? hand[hand.length - 1].coin : null,
+    topOrigin: hand.length > 0 ? hand[hand.length - 1].origin : null,
     localCells,
     pickUp,
     place,

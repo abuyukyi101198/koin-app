@@ -6,15 +6,13 @@ interface NotebookDraggableProps {
   coin: Coin;
   isSelected?: boolean;
   handActive?: boolean;
-  onSelect?: (coinId: number) => void;
-  onPickUp?: (coin: Coin, position: { x: number; y: number }) => void;
+  onPickUp?: (coin: Coin) => void;
 }
 
 export function NotebookDraggable({
   coin,
   isSelected = false,
   handActive = false,
-  onSelect,
   onPickUp,
 }: NotebookDraggableProps) {
   return (
@@ -25,15 +23,18 @@ export function NotebookDraggable({
         !handActive && "cursor-pointer hover:bg-muted/60"
       )}
       onClick={(e) => {
-        if (!handActive) {
-          e.stopPropagation();
-          onSelect?.(coin.id);
+        if (handActive) {
+          // Let the click bubble to the slot so it can call place()
+          return;
         }
+        // Idle: reserved for future redirect button — no-op for now
+        e.stopPropagation();
       }}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        onPickUp?.(coin, { x: e.clientX, y: e.clientY });
+        // Right-click always picks up (origin: "grid" — slot passes this)
+        onPickUp?.(coin);
       }}
     >
       <NotebookCoin coin={coin} isSelected={isSelected} />

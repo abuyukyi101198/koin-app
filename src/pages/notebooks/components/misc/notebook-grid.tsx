@@ -3,20 +3,15 @@ import { CSSProperties, useCallback, useEffect, useState } from "react";
 import { HandCoins, X } from "lucide-react";
 import { createPortal } from "react-dom";
 
-import { SlotClickPayload } from "../../hooks/use-notebook-reorder";
-
 import { Button } from "@/components/ui/button.tsx";
 import { cn } from "@/lib/utils.ts";
 import { NotebookDragOverlay } from "@/pages/notebooks/components/misc/notebook-coin-overlay.tsx";
 import { NotebookSlot } from "@/pages/notebooks/components/misc/notebook-slot.tsx";
 import { useNotebookReorderContext } from "@/pages/notebooks/context/notebook-reorder-context.tsx";
+import { SlotClickPayload, SlotCoordinates } from "@/pages/notebooks/types.ts";
 import { Coin, Notebook } from "@/query/types";
 
-export interface SlotCoordinates {
-  pageIndex: number;
-  rowIdx: number;
-  colIdx: number;
-}
+export type { SlotCoordinates };
 
 function slotId({ pageIndex, rowIdx, colIdx }: SlotCoordinates): string {
   return `${pageIndex}-${rowIdx}-${colIdx}`;
@@ -28,7 +23,6 @@ interface NotebookGridProps {
 }
 
 export function NotebookGrid({ notebook, page }: NotebookGridProps) {
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
 
   const { rows_per_page: rows, columns_per_page: cols } = notebook;
@@ -38,12 +32,19 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
     hand,
     isActive: handActive,
     topCoin,
+    topOrigin,
     localCells,
     pickUp,
     place,
     discard,
+    placingRef,
   } = useNotebookReorderContext();
 
+  // When a slot handles a valid placement it flips this ref to true so the
+  // window click listener — which fires on the same event after React's
+  // synthetic handlers — knows to skip its place(null) call.
+
+  // Track cursor position for the drag overlay
   useEffect(() => {
     if (!handActive) {
       setCursor(null);
@@ -58,22 +59,39 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
     };
   }, [handActive]);
 
-  const onSelect = useCallback((coinId: number) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      next.has(coinId) ? next.delete(coinId) : next.add(coinId);
-      return next;
-    });
-  }, []);
+  // Global left-click outside a slot → place(null) = discard top coin.
+  // Runs after React's synthetic handlers so slotHandledRef is already set.
+  useEffect(() => {
+    if (!handActive) return;
+    const onClick = (e: MouseEvent) => {
+      if (e.button !== 0) return;
+      if (placingRef.current) {
+        placingRef.current = false;
+        return;
+      }
+      place(null);
+    };
+    window.addEventListener("click", onClick);
+    return () => {
+      window.removeEventListener("click", onClick);
+    };
+  }, [handActive, place, placingRef]);
 
-  const clearSelection = useCallback(() => {
-    setSelectedIds(new Set());
-  }, []);
+  // Escape key → discard entire hand
+  useEffect(() => {
+    if (!handActive) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") discard();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [handActive, discard]);
 
   const handlePickUp = useCallback(
-    (coin: Coin, position: { x: number; y: number }) => {
-      setCursor(position);
-      pickUp(coin);
+    (coin: Coin) => {
+      pickUp(coin, "grid");
     },
     [pickUp]
   );
@@ -81,10 +99,13 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
   const handlePlace = useCallback(
     (payload: SlotClickPayload) => {
       if (!handActive) return;
+      placingRef.current = true;
       place(payload);
     },
-    [handActive, place]
+    [handActive, place, placingRef]
   );
+
+  const dropLabel = topOrigin === "grid" ? "Unassign" : "Discard";
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
@@ -102,36 +123,41 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
               </span>{" "}
               on top
             </span>
-            <Button
-              className="ml-auto h-6 gap-1 text-xs"
-              onClick={discard}
-              size="xs"
-              variant="ghost"
-            >
-              <X className="size-3" />
-              Discard
-            </Button>
-          </>
-        ) : (
-          <>
-            <span className="text-muted-foreground">
-              <span className="font-medium text-foreground">
-                {selectedIds.size}
-              </span>{" "}
-              selected
-            </span>
-            {selectedIds.size > 0 && (
+            <span className="ml-auto flex items-center gap-1">
               <Button
-                className="ml-auto h-6 gap-1 text-xs"
-                onClick={clearSelection}
+                className="h-6 gap-1 text-xs"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.nativeEvent.stopImmediatePropagation();
+                  placingRef.current = true;
+                  place(null);
+                }}
                 size="xs"
                 variant="ghost"
               >
                 <X className="size-3" />
-                Clear
+                {dropLabel} top
               </Button>
-            )}
+              <Button
+                className="h-6 gap-1 text-xs"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.nativeEvent.stopImmediatePropagation();
+                  placingRef.current = true;
+                  discard();
+                }}
+                size="xs"
+                variant="ghost"
+              >
+                <X className="size-3" />
+                Discard all
+              </Button>
+            </span>
           </>
+        ) : (
+          <span className="text-muted-foreground text-xs">
+            Right-click a coin to pick it up
+          </span>
         )}
       </div>
 
@@ -155,11 +181,10 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
                 coin={coin}
                 coordinates={coords}
                 handActive={handActive}
-                isSelected={coin !== null && selectedIds.has(coin.id)}
+                isSelected={false}
                 key={id}
                 onPickUp={handlePickUp}
                 onPlace={handlePlace}
-                onSelect={onSelect}
               />
             );
           })

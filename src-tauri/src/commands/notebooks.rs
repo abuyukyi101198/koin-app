@@ -157,6 +157,7 @@ pub fn reorder_coins(
     app_handle: tauri::AppHandle,
     notebook_id: i32,
     coins: Vec<crate::types::notebooks::CoinPosition>,
+    unassign_coin_ids: Option<Vec<i32>>,
 ) -> Result<Notebook, String> {
     let conn = get_db_connection(&app_handle)?;
 
@@ -172,6 +173,19 @@ pub fn reorder_coins(
             let _ = conn.execute("ROLLBACK", []);
             format!("Failed to update position for coin {}: {}", entry.coin_id, e)
         })?;
+    }
+
+    if let Some(ids) = unassign_coin_ids {
+        for coin_id in &ids {
+            conn.execute(
+                "UPDATE coins SET notebook_id = NULL, notebook_position = NULL WHERE id = ?1",
+                rusqlite::params![coin_id],
+            )
+            .map_err(|e| {
+                let _ = conn.execute("ROLLBACK", []);
+                format!("Failed to unassign coin {}: {}", coin_id, e)
+            })?;
+        }
     }
 
     conn.execute("COMMIT", [])

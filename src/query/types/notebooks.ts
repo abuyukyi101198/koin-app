@@ -45,4 +45,5 @@ export interface CoinPosition {
 export interface ReorderCoinsRequest {
   notebook_id: number;
   coins: CoinPosition[];
+  unassign_coin_ids?: number[];
 }

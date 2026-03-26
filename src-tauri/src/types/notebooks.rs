@@ -61,6 +61,14 @@ pub struct CoinPosition {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct ReorderCoinsRequest {
+    pub notebook_id: i32,
+    pub coins: Vec<CoinPosition>,
+    #[serde(default)]
+    pub unassign_coin_ids: Vec<i32>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct PaginatedNotebooksResponse {
     pub items: Vec<Notebook>,
     pub total: i64,

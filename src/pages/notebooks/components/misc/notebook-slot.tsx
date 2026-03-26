@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils.ts";
 import { NotebookDraggable } from "@/pages/notebooks/components/misc/notebook-draggable.tsx";
-import { SlotCoordinates } from "@/pages/notebooks/components/misc/notebook-grid.tsx";
-import { SlotClickPayload } from "@/pages/notebooks/hooks/use-notebook-reorder.tsx";
+import { SlotClickPayload, SlotCoordinates } from "@/pages/notebooks/types.ts";
 import { Coin } from "@/query/types";
 
 interface NotebookSlotProps {
@@ -9,8 +8,7 @@ interface NotebookSlotProps {
   coin: Coin | null;
   isSelected?: boolean;
   handActive?: boolean;
-  onSelect?: (coinId: number) => void;
-  onPickUp?: (coin: Coin, position: { x: number; y: number }) => void;
+  onPickUp?: (coin: Coin) => void;
   onPlace?: (payload: SlotClickPayload) => void;
 }
 
@@ -19,7 +17,6 @@ export function NotebookSlot({
   coin,
   isSelected = false,
   handActive = false,
-  onSelect,
   onPickUp,
   onPlace,
 }: NotebookSlotProps) {
@@ -28,16 +25,18 @@ export function NotebookSlot({
       className={cn(
         "relative overflow-hidden rounded-sm border bg-background transition-colors duration-150",
         {
-          // idle with coin
           "border-border hover:bg-accent/60": coin && !handActive,
-          // idle without coin
           "border-border border-dashed": !coin && !handActive,
-          // hand active: all slots are potential placement targets
-          "hover:bg-accent/60 cursor-cell": handActive,
+          "hover:bg-accent/60 cursor-cell": handActive && !coin,
+          "cursor-none": handActive && coin,
         }
       )}
-      onClick={() => {
-        if (handActive) onPlace?.({ coordinates, coin });
+      onClick={(e) => {
+        if (!handActive) return;
+        // placingRef is set by handlePlace in the grid before place() is called,
+        // so the window click listener will skip place(null) for this event.
+        e.stopPropagation();
+        onPlace?.({ coordinates, coin });
       }}
       role="gridcell"
     >
@@ -47,7 +46,6 @@ export function NotebookSlot({
           handActive={handActive}
           isSelected={isSelected}
           onPickUp={onPickUp}
-          onSelect={handActive ? undefined : onSelect}
         />
       )}
     </div>

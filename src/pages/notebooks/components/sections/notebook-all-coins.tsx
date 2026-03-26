@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { SortingState } from "@tanstack/react-table";
 
@@ -12,7 +12,8 @@ import { useListCoins } from "@/query/commands/coins.ts";
 import { Coin, ListCoinsRequest } from "@/query/types";
 
 export function NotebookAllCoins() {
-  const { hand, isActive, pickUp } = useNotebookReorderContext();
+  const { hand, isActive, pickUp, place, placingRef } =
+    useNotebookReorderContext();
 
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sorting, setSorting] = useState<SortingState>([
@@ -44,20 +45,42 @@ export function NotebookAllCoins() {
     setPage(1);
   }, [debouncedSearchQuery, setPage]);
 
-  const handIds = new Set(hand.map((c) => c.id));
+  const handIds = new Set(hand.map((e) => e.coin.id));
 
+  // --- Right-click to pick up ---
+  const tableWrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = tableWrapperRef.current;
+    if (!el) return;
+
+    const onContextMenu = (e: MouseEvent) => {
+      // Walk up from the event target to find a <tr> with a data-coin-id
+      const row = (e.target as HTMLElement).closest("tr[data-coin-id]");
+      if (!row) return;
+      e.preventDefault();
+      const coinId = parseInt((row as HTMLElement).dataset.coinId ?? "", 10);
+      if (isNaN(coinId)) return;
+      const coin = data?.items.find((c) => c.id === coinId);
+      if (!coin || handIds.has(coin.id)) return;
+      pickUp(coin, "list");
+    };
+
+    el.addEventListener("contextmenu", onContextMenu);
+    return () => {
+      el.removeEventListener("contextmenu", onContextMenu);
+    };
+  }, [data?.items, handIds, pickUp]);
+
+  // --- Left-click when hand active → place(null) = discard top coin ---
   const handleRowSelection = useCallback(
     (updaterOrValue: unknown) => {
-      const next =
-        typeof updaterOrValue === "function"
-          ? updaterOrValue({})
-          : updaterOrValue;
-      const selectedId = Object.keys(next as Record<string, boolean>)[0];
-      if (!selectedId) return;
-      const coin = data?.items.find((c) => c.id.toString() === selectedId);
-      if (coin) pickUp(coin);
+      if (!isActive) return;
+      placingRef.current = true;
+      place(null);
+      void updaterOrValue;
     },
-    [data?.items, pickUp]
+    [isActive, place, placingRef]
   );
 
   return (
@@ -71,8 +94,8 @@ export function NotebookAllCoins() {
           <h2 className="text-xl font-medium tracking-wide">All coins</h2>
           <p className="text-base font-normal italic text-muted-foreground">
             {isActive
-              ? "Click a coin to add it to your hand."
-              : "Click a coin to pick it up."}
+              ? "Right-click a coin to pick it up. Left-click to drop."
+              : "Right-click a coin to pick it up."}
           </p>
         </div>
         <div className="mt-3">
@@ -87,7 +110,10 @@ export function NotebookAllCoins() {
         </div>
       </header>
 
-      <div className="contents [&_tr[aria-selected=true]]:opacity-40 [&_tr[aria-selected=true]]:pointer-events-none">
+      <div
+        className="contents [&_tr[aria-selected=true]]:opacity-40 [&_tr[aria-selected=true]]:pointer-events-none"
+        ref={tableWrapperRef}
+      >
         <DataTable<Coin>
           columns={columns}
           data={data?.items ?? []}
