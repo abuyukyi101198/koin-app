@@ -5,7 +5,7 @@ import { useReorderCoins } from "@/query/commands";
 import { Coin, Notebook } from "@/query/types";
 
 interface UseNotebookReorderProps {
-  notebook: Notebook;
+  notebook: Notebook | undefined;
 }
 
 export interface SlotClickPayload {
@@ -20,28 +20,31 @@ export function useNotebookReorder({ notebook }: UseNotebookReorderProps) {
 
   // Optimistic local copy of the grid cells.
   const [localCells, setLocalCells] = useState<(Coin | null)[][][]>(
-    notebook.cells
+    notebook?.cells ?? []
   );
 
   useEffect(() => {
+    if (!notebook) return;
     setHand([]);
     setLocalCells(notebook.cells);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [notebook.id]);
+  }, [notebook?.id]);
 
   // Keep localCells in sync with the server notebook whenever the hand is
   // empty (i.e. no reorder in progress). While the hand is active, own
   // the state locally to avoid server-response flashes.
   useEffect(() => {
+    if (!notebook) return;
     if (hand.length === 0) {
       setLocalCells(notebook.cells);
     }
-  }, [notebook.cells, hand.length]);
+  }, [notebook, hand.length]);
 
   const isActive = hand.length > 0;
 
   const toFlat = useCallback(
     (pi: number, ri: number, ci: number) => {
+      if (!notebook) return 0;
       const { rows_per_page: rows, columns_per_page: cols } = notebook;
       return pi * (rows * cols) + ri * cols + ci;
     },
@@ -68,26 +71,26 @@ export function useNotebookReorder({ notebook }: UseNotebookReorderProps) {
 
   const pickUp = useCallback(
     (coin: Coin) => {
+      if (!notebook) return;
       // Remove the coin from localCells immediately.
       const nextCells = localCells.map((page) =>
         page.map((row) => row.map((c) => (c?.id === coin.id ? null : c)))
       );
       setLocalCells(nextCells);
-
       // Optimistically update the hand.
       setHand((prev) => [...prev, coin]);
-
       // Commit: send all positions except the picked-up coin.
       reorderCoinsMutation.mutate({
         notebook_id: notebook.id,
         coins: buildPositions(nextCells).filter((p) => p.coin_id !== coin.id),
       });
     },
-    [localCells, buildPositions, notebook.id, reorderCoinsMutation]
+    [localCells, buildPositions, notebook, reorderCoinsMutation]
   );
 
   const place = useCallback(
     ({ coordinates, coin: slotCoin }: SlotClickPayload) => {
+      if (!notebook) return;
       if (hand.length === 0) return;
 
       const topCoin = hand[hand.length - 1];
@@ -129,17 +132,11 @@ export function useNotebookReorder({ notebook }: UseNotebookReorderProps) {
         coins: positions,
       });
     },
-    [
-      hand,
-      localCells,
-      toFlat,
-      buildPositions,
-      notebook.id,
-      reorderCoinsMutation,
-    ]
+    [hand, localCells, toFlat, buildPositions, notebook, reorderCoinsMutation]
   );
 
   const discard = useCallback(() => {
+    if (!notebook) return;
     setHand([]);
     // Clearing the hand will trigger the useEffect above to re-sync
     // localCells from notebook.cells (the last server state).
@@ -147,7 +144,7 @@ export function useNotebookReorder({ notebook }: UseNotebookReorderProps) {
       notebook_id: notebook.id,
       coins: buildPositions(notebook.cells),
     });
-  }, [buildPositions, notebook.id, notebook.cells, reorderCoinsMutation]);
+  }, [buildPositions, notebook, reorderCoinsMutation]);
 
   return {
     hand,

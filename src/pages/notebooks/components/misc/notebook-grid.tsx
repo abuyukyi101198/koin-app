@@ -3,15 +3,13 @@ import { CSSProperties, useCallback, useEffect, useState } from "react";
 import { HandCoins, X } from "lucide-react";
 import { createPortal } from "react-dom";
 
-import {
-  SlotClickPayload,
-  useNotebookReorder,
-} from "../../hooks/use-notebook-reorder";
+import { SlotClickPayload } from "../../hooks/use-notebook-reorder";
 
 import { Button } from "@/components/ui/button.tsx";
 import { cn } from "@/lib/utils.ts";
 import { NotebookDragOverlay } from "@/pages/notebooks/components/misc/notebook-coin-overlay.tsx";
 import { NotebookSlot } from "@/pages/notebooks/components/misc/notebook-slot.tsx";
+import { useNotebookReorderContext } from "@/pages/notebooks/context/notebook-reorder-context.tsx";
 import { Coin, Notebook } from "@/query/types";
 
 export interface SlotCoordinates {
@@ -44,7 +42,7 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
     pickUp,
     place,
     discard,
-  } = useNotebookReorder({ notebook });
+  } = useNotebookReorderContext();
 
   useEffect(() => {
     if (!handActive) {
@@ -148,7 +146,7 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
           gridTemplateRows: `repeat(${rows}, 1fr)`,
         }}
       >
-        {localCells[pageIndex].map((row, rowIdx) =>
+        {(localCells[pageIndex] ?? []).map((row, rowIdx) =>
           row.map((coin, colIdx) => {
             const coords: SlotCoordinates = { pageIndex, rowIdx, colIdx };
             const id = slotId(coords);
