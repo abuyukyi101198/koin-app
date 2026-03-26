@@ -43,7 +43,7 @@ export interface DataTableProps<
   };
   pagination?: {
     pageIndex: number;
-    pageSize: number;
+    pageSize?: number;
     pageCount: number;
     onPaginationChange: (pageIndex: number, pageSize: number) => Promise<void>;
   };
