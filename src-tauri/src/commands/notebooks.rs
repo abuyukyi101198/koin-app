@@ -160,32 +160,13 @@ pub fn reorder_coins(
 ) -> Result<Notebook, String> {
     let conn = get_db_connection(&app_handle)?;
 
-    // Validate all coins belong to this notebook
-    for entry in &coins {
-        let belongs: bool = conn
-            .query_row(
-                "SELECT COUNT(*) FROM coins WHERE id = ?1 AND notebook_id = ?2",
-                rusqlite::params![entry.coin_id, notebook_id],
-                |row| row.get::<_, i64>(0),
-            )
-            .map(|n| n > 0)
-            .map_err(|e| format!("Failed to validate coin {}: {}", entry.coin_id, e))?;
-
-        if !belongs {
-            return Err(format!(
-                "Coin {} does not belong to notebook {}",
-                entry.coin_id, notebook_id
-            ));
-        }
-    }
-
     conn.execute("BEGIN", [])
         .map_err(|e| format!("Failed to begin transaction: {}", e))?;
 
     for entry in &coins {
         conn.execute(
-            "UPDATE coins SET notebook_position = ?1 WHERE id = ?2 AND notebook_id = ?3",
-            rusqlite::params![entry.position, entry.coin_id, notebook_id],
+            "UPDATE coins SET notebook_id = ?1, notebook_position = ?2 WHERE id = ?3",
+            rusqlite::params![notebook_id, entry.position, entry.coin_id],
         )
         .map_err(|e| {
             let _ = conn.execute("ROLLBACK", []);
