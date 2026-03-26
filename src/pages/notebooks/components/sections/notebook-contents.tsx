@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 import { DataTablePagination } from "@/components/composite/data-table-pagination.tsx";
 import usePagination from "@/hooks/use-pagination.ts";
 import { NotebookGrid } from "@/pages/notebooks/components/misc/notebook-grid.tsx";
@@ -10,6 +12,13 @@ interface NotebookContentsProps {
 export function NotebookContents({ notebookId }: NotebookContentsProps) {
   const { page, setPage } = usePagination();
   const { data: notebook, isLoading } = useGetNotebook({ id: notebookId });
+
+  useEffect(() => {
+    if (page !== 1) {
+      setPage(1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notebook]);
 
   return (
     <section
