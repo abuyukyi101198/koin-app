@@ -1,9 +1,7 @@
-import { CSSProperties, useCallback, useEffect, useState } from "react";
+import { CSSProperties, useCallback, useEffect } from "react";
 
-import { HandCoins, X } from "lucide-react";
 import { createPortal } from "react-dom";
 
-import { Button } from "@/components/ui/button.tsx";
 import { cn } from "@/lib/utils.ts";
 import { NotebookDragOverlay } from "@/pages/notebooks/components/misc/notebook-coin-overlay.tsx";
 import { NotebookSlot } from "@/pages/notebooks/components/misc/notebook-slot.tsx";
@@ -23,8 +21,6 @@ interface NotebookGridProps {
 }
 
 export function NotebookGrid({ notebook, page }: NotebookGridProps) {
-  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
-
   const { rows_per_page: rows, columns_per_page: cols } = notebook;
   const pageIndex = page - 1;
 
@@ -32,12 +28,13 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
     hand,
     isActive: handActive,
     topCoin,
-    topOrigin,
     localCells,
     pickUp,
     place,
     discard,
     placingRef,
+    cursor,
+    setCursor,
   } = useNotebookReorderContext();
 
   // When a slot handles a valid placement it flips this ref to true so the
@@ -57,7 +54,7 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
     return () => {
       window.removeEventListener("pointermove", onMove);
     };
-  }, [handActive]);
+  }, [handActive, setCursor]);
 
   // Global left-click outside a slot → place(null) = discard top coin.
   // Runs after React's synthetic handlers so slotHandledRef is already set.
@@ -90,10 +87,11 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
   }, [handActive, discard]);
 
   const handlePickUp = useCallback(
-    (coin: Coin) => {
+    (coin: Coin, pos: { x: number; y: number }) => {
+      setCursor(pos);
       pickUp(coin, "grid");
     },
-    [pickUp]
+    [pickUp, setCursor]
   );
 
   const handlePlace = useCallback(
@@ -105,62 +103,8 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
     [handActive, place, placingRef]
   );
 
-  const dropLabel = topOrigin === "grid" ? "Unassign" : "Discard";
-
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Status bar */}
-      <div className="shrink-0 h-8 flex items-center gap-2 px-6 py-2 border-b bg-muted/30 text-sm">
-        {handActive ? (
-          <>
-            <HandCoins className="size-4 shrink-0" />
-            <span className="text-muted-foreground">
-              Holding{" "}
-              <span className="font-medium text-foreground">{hand.length}</span>{" "}
-              coin{hand.length !== 1 ? "s" : ""} —{" "}
-              <span className="font-medium text-foreground">
-                {topCoin?.title ?? ""}
-              </span>{" "}
-              on top
-            </span>
-            <span className="ml-auto flex items-center gap-1">
-              <Button
-                className="h-6 gap-1 text-xs"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.nativeEvent.stopImmediatePropagation();
-                  placingRef.current = true;
-                  place(null);
-                }}
-                size="xs"
-                variant="ghost"
-              >
-                <X className="size-3" />
-                {dropLabel} top
-              </Button>
-              <Button
-                className="h-6 gap-1 text-xs"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.nativeEvent.stopImmediatePropagation();
-                  placingRef.current = true;
-                  discard();
-                }}
-                size="xs"
-                variant="ghost"
-              >
-                <X className="size-3" />
-                Discard all
-              </Button>
-            </span>
-          </>
-        ) : (
-          <span className="text-muted-foreground text-xs">
-            Right-click a coin to pick it up
-          </span>
-        )}
-      </div>
-
       <div
         className={cn(
           "flex-1 grid gap-2 p-6 pt-4 max-h-full",

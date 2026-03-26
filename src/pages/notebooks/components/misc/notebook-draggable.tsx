@@ -6,7 +6,7 @@ interface NotebookDraggableProps {
   coin: Coin;
   isSelected?: boolean;
   handActive?: boolean;
-  onPickUp?: (coin: Coin) => void;
+  onPickUp?: (coin: Coin, pos: { x: number; y: number }) => void;
 }
 
 export function NotebookDraggable({
@@ -33,8 +33,7 @@ export function NotebookDraggable({
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        // Right-click always picks up (origin: "grid" — slot passes this)
-        onPickUp?.(coin);
+        onPickUp?.(coin, { x: e.clientX, y: e.clientY });
       }}
     >
       <NotebookCoin coin={coin} isSelected={isSelected} />

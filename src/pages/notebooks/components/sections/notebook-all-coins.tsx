@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { SortingState } from "@tanstack/react-table";
 
@@ -12,7 +12,7 @@ import { useListCoins } from "@/query/commands/coins.ts";
 import { Coin, ListCoinsRequest } from "@/query/types";
 
 export function NotebookAllCoins() {
-  const { hand, isActive, pickUp, place, placingRef } =
+  const { hand, isActive, pickUp, place, placingRef, seedCursor } =
     useNotebookReorderContext();
 
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -45,7 +45,7 @@ export function NotebookAllCoins() {
     setPage(1);
   }, [debouncedSearchQuery, setPage]);
 
-  const handIds = new Set(hand.map((e) => e.coin.id));
+  const handIds = useMemo(() => new Set(hand.map((e) => e.coin.id)), [hand]);
 
   // --- Right-click to pick up ---
   const tableWrapperRef = useRef<HTMLDivElement>(null);
@@ -63,6 +63,7 @@ export function NotebookAllCoins() {
       if (isNaN(coinId)) return;
       const coin = data?.items.find((c) => c.id === coinId);
       if (!coin || handIds.has(coin.id)) return;
+      seedCursor({ x: e.clientX, y: e.clientY });
       pickUp(coin, "list");
     };
 
@@ -70,14 +71,18 @@ export function NotebookAllCoins() {
     return () => {
       el.removeEventListener("contextmenu", onContextMenu);
     };
-  }, [data?.items, handIds, pickUp]);
+  }, [data?.items, handIds, pickUp, seedCursor]);
 
   // --- Left-click when hand active → place(null) = discard top coin ---
   const handleRowSelection = useCallback(
     (updaterOrValue: unknown) => {
-      if (!isActive) return;
-      placingRef.current = true;
-      place(null);
+      // When hand is active: drop the top coin and mark as handled.
+      if (isActive) {
+        placingRef.current = true;
+        place(null);
+        return;
+      }
+      // When hand is idle: rows are display-only, no selection state changes.
       void updaterOrValue;
     },
     [isActive, place, placingRef]
@@ -87,31 +92,26 @@ export function NotebookAllCoins() {
     <section
       aria-busy={isLoading}
       aria-label="All coins"
-      className="flex flex-col h-full w-1/4 overflow-hidden"
+      className="h-full w-1/4 flex flex-col pt-3 pb-0 gap-2 overflow-hidden select-none"
     >
-      <header className="shrink-0 border-b px-6 pt-8 pb-5">
-        <div className="space-y-1">
-          <h2 className="text-xl font-medium tracking-wide">All coins</h2>
-          <p className="text-base font-normal italic text-muted-foreground">
-            {isActive
-              ? "Right-click a coin to pick it up. Left-click to drop."
-              : "Right-click a coin to pick it up."}
-          </p>
-        </div>
-        <div className="mt-3">
-          <SearchInput
-            count={data?.total}
-            onSearch={(e) => {
-              setSearchQuery(e.target.value);
-            }}
-            placeholder="Search coins..."
-            search={searchQuery}
-          />
-        </div>
+      <header className="max-w-full flex items-center pl-2 pr-5 gap-2.5">
+        <SearchInput
+          count={data?.total}
+          onSearch={(e) => {
+            setSearchQuery(e.target.value);
+          }}
+          placeholder="Search coins..."
+          search={searchQuery}
+        />
       </header>
 
       <div
-        className="contents [&_tr[aria-selected=true]]:opacity-40 [&_tr[aria-selected=true]]:pointer-events-none"
+        className="contents [&_tr[aria-selected=true]]:opacity-40"
+        onMouseDown={(e) => {
+          // Prevent text selection and focus changes from consuming the
+          // click when the hand is active, which would require a double-click.
+          if (isActive) e.preventDefault();
+        }}
         ref={tableWrapperRef}
       >
         <DataTable<Coin>

@@ -8,7 +8,7 @@ interface NotebookSlotProps {
   coin: Coin | null;
   isSelected?: boolean;
   handActive?: boolean;
-  onPickUp?: (coin: Coin) => void;
+  onPickUp?: (coin: Coin, pos: { x: number; y: number }) => void;
   onPlace?: (payload: SlotClickPayload) => void;
 }
 
