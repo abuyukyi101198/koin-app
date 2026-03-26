@@ -6,8 +6,8 @@ import { DataTable } from "@/components/composite/data-table.tsx";
 import { SearchInput } from "@/components/composite/search-input.tsx";
 import { useDebounce } from "@/hooks/use-debounce.ts";
 import usePagination from "@/hooks/use-pagination.ts";
-import { useSimilarCoinsTableColumns } from "@/pages/coins/hooks/use-similar-coins-table-columns.tsx";
 import { useNotebookReorderContext } from "@/pages/notebooks/context/notebook-reorder-context.tsx";
+import { useNotebookAllCoinsTableColumns } from "@/pages/notebooks/hooks/use-notebook-all-coins-table-columns.tsx";
 import { useListCoins } from "@/query/commands/coins.ts";
 import { Coin, ListCoinsRequest } from "@/query/types";
 
@@ -32,7 +32,7 @@ export function NotebookAllCoins() {
   };
 
   const { data, isLoading } = useListCoins(listCoinsOptions);
-  const columns = useSimilarCoinsTableColumns();
+  const columns = useNotebookAllCoinsTableColumns();
 
   const handlePaginationChange = useCallback(
     async (pageIndex: number, _pageSize: number) => {

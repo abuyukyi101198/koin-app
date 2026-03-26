@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
 
+import { COINS_QUERY_KEY } from "@/query/commands/coins.ts";
 import {
   CreateNotebookRequest,
   GetNotebookRequest,
@@ -93,14 +94,12 @@ export function useReorderCoins(): UseMutationResult<
         unassignCoinIds: data.unassign_coin_ids ?? [],
       });
     },
-    onSuccess: (notebook, variables) => {
+    onSuccess: (notebook) => {
       queryClient.setQueryData(
         [NOTEBOOKS_QUERY_KEY, "get", notebook.id],
         notebook
       );
-      if (variables.unassign_coin_ids?.length) {
-        queryClient.invalidateQueries({ queryKey: ["coins"] });
-      }
+      queryClient.invalidateQueries({ queryKey: [COINS_QUERY_KEY] });
     },
   });
 }

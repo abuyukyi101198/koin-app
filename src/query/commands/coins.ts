@@ -19,7 +19,7 @@ import {
   UpdateCoinRequest,
 } from "@/query/types";
 
-const COINS_QUERY_KEY = "coins";
+export const COINS_QUERY_KEY = "coins";
 
 export function useListCoins(
   options?: ListCoinsRequest
