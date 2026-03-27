@@ -14,7 +14,9 @@ export function asFraction(
 
   // Handle whole numbers
   if (Math.abs(decimalPart) < tolerance) {
-    return title;
+    const [first, ...rest] = title.split(" ");
+    const formatted = Number(first).toLocaleString("de-DE");
+    return rest.length ? `${formatted} ${rest.join(" ")}` : formatted;
   }
 
   let numerator, denominator;
@@ -34,7 +36,7 @@ export function asFraction(
 
   return (
     <>
-      {wholeNumber ? `${wholeNumber} ` : ""}
+      {wholeNumber ? `${wholeNumber.toLocaleString("de-DE")} ` : ""}
       <sup>{numerator}</sup>&#x2044;<sub>{denominator}</sub>
       {restOfTitle && ` ${restOfTitle}`}
     </>
