@@ -124,7 +124,7 @@ export function CoinDetails({ coinId }: CoinInfoProps) {
       {/* Notes */}
       <ScrollArea
         aria-label="Additional notes"
-        className=" border-t bg-input/30 px-6 py-0 overflow-hidden"
+        className="h-full border-t bg-input/30 px-6 py-0 overflow-hidden"
       >
         <p className="text-sm italic text-muted-foreground whitespace-pre-wrap wrap-break-word py-5 pr-4">
           {data?.notes || "No additional notes."}
