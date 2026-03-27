@@ -2,6 +2,7 @@ import { useMemo } from "react";
 
 import { ColumnDef } from "@tanstack/react-table";
 
+import { CoinPreviewImages } from "@/components/composite/coin-preview-images.tsx";
 import { DataTableColumnHeader } from "@/components/composite/data-table-column-header.tsx";
 import { DeleteCoinDialog } from "@/pages/coins/components/forms/delete-coin-dialog.tsx";
 import { UpdateCoinDialog } from "@/pages/coins/components/forms/update-coin-dialog.tsx";
@@ -24,37 +25,17 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
           },
           cell: ({
             row: {
-              original: { reverse_image, obverse_image },
+              original: { title, reverse_image, obverse_image },
             },
           }) => {
             return (
               <div className="flex gap-2">
-                <div className="h-12 aspect-square flex items-center justify-center">
-                  {reverse_image ? (
-                    <img
-                      alt="Coin reverse"
-                      className="max-w-full max-h-full object-contain rounded-full"
-                      src={reverse_image}
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
-                      R
-                    </div>
-                  )}
-                </div>
-                <div className="h-12 aspect-square flex items-center justify-center">
-                  {obverse_image ? (
-                    <img
-                      alt="Coin obverse"
-                      className="max-w-full max-h-full object-contain rounded-full"
-                      src={obverse_image}
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
-                      O
-                    </div>
-                  )}
-                </div>
+                <CoinPreviewImages
+                  obverseImage={obverse_image}
+                  reverseImage={reverse_image}
+                  size="size-12"
+                  title={title}
+                />
               </div>
             );
           },

@@ -1,5 +1,6 @@
 import { Check } from "lucide-react";
 
+import { CoinPreviewImages } from "@/components/composite/coin-preview-images.tsx";
 import { Coin } from "@/query/types";
 import { asFraction } from "@/utils/asFraction.tsx";
 
@@ -17,34 +18,11 @@ export function NotebookCoin({ coin, isSelected = false }: NotebookCoinProps) {
         </div>
       )}
       <div className="flex gap-2 mt-auto mb-auto px-2">
-        <div className="aspect-square flex flex-1 items-center justify-center">
-          {coin.reverse_image ? (
-            <img
-              alt="Coin reverse"
-              className="max-w-full max-h-full object-contain rounded-full"
-              draggable={false}
-              src={coin.reverse_image}
-            />
-          ) : (
-            <div className="w-full h-full bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
-              R
-            </div>
-          )}
-        </div>
-        <div className="aspect-square flex flex-1 items-center justify-center">
-          {coin.obverse_image ? (
-            <img
-              alt="Coin obverse"
-              className="max-w-full max-h-full object-contain rounded-full"
-              draggable={false}
-              src={coin.obverse_image}
-            />
-          ) : (
-            <div className="w-full h-full bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
-              O
-            </div>
-          )}
-        </div>
+        <CoinPreviewImages
+          obverseImage={coin.obverse_image}
+          reverseImage={coin.reverse_image}
+          title={coin.title}
+        />
       </div>
       <div className="flex gap-2 justify-end absolute bottom-0 w-full text-xs py-1 px-3 backdrop-blur-2xl">
         <img

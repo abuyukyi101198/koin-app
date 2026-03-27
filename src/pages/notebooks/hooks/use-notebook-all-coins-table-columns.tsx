@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Book } from "lucide-react";
 
+import { CoinPreviewImages } from "@/components/composite/coin-preview-images.tsx";
 import {
   Tooltip,
   TooltipContent,
@@ -25,36 +26,16 @@ export function useNotebookAllCoinsTableColumns(): ColumnDef<Coin>[] {
         meta: { size: 20 },
         cell: ({
           row: {
-            original: { reverse_image, obverse_image },
+            original: { title, reverse_image, obverse_image },
           },
         }) => (
-          <div className="flex gap-2">
-            <div className="h-8 aspect-square flex items-center justify-center">
-              {reverse_image ? (
-                <img
-                  alt="Coin reverse"
-                  className="max-w-full max-h-full object-contain rounded-full"
-                  src={reverse_image}
-                />
-              ) : (
-                <div className="w-full h-full bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
-                  R
-                </div>
-              )}
-            </div>
-            <div className="h-8 aspect-square flex items-center justify-center">
-              {obverse_image ? (
-                <img
-                  alt="Coin obverse"
-                  className="max-w-full max-h-full object-contain rounded-full"
-                  src={obverse_image}
-                />
-              ) : (
-                <div className="w-full h-full bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
-                  O
-                </div>
-              )}
-            </div>
+          <div className="flex gap-1">
+            <CoinPreviewImages
+              obverseImage={obverse_image}
+              reverseImage={reverse_image}
+              size="size-8"
+              title={title}
+            />
           </div>
         ),
       },
