@@ -6,6 +6,7 @@ import { DataTable } from "@/components/composite/data-table.tsx";
 import { SearchInput } from "@/components/composite/search-input.tsx";
 import { useDebounce } from "@/hooks/use-debounce.ts";
 import usePagination from "@/hooks/use-pagination.ts";
+import { cn } from "@/lib/utils.ts";
 import { useNotebookReorderContext } from "@/pages/notebooks/context/notebook-reorder-context.tsx";
 import { useNotebookAllCoinsTableColumns } from "@/pages/notebooks/hooks/use-notebook-all-coins-table-columns.tsx";
 import { useListCoins } from "@/query/commands/coins.ts";
@@ -106,7 +107,11 @@ export function NotebookAllCoins() {
       </header>
 
       <div
-        className="contents [&_tr[aria-selected=true]]:opacity-40"
+        className={cn(
+          "contents",
+          "[&_tr[aria-selected=true]]:opacity-40",
+          isActive ? "[&_tr]:cursor-cell" : "[&_tr]:cursor-grab"
+        )}
         onMouseDown={(e) => {
           // Prevent text selection and focus changes from consuming the
           // click when the hand is active, which would require a double-click.

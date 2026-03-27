@@ -27,8 +27,7 @@ export function NotebookSlot({
         {
           "border-border hover:bg-accent/60": coin && !handActive,
           "border-border border-dashed": !coin && !handActive,
-          "hover:bg-accent/60 cursor-cell": handActive && !coin,
-          "cursor-none": handActive && coin,
+          "hover:bg-accent/60 cursor-cell": handActive,
         }
       )}
       onClick={(e) => {

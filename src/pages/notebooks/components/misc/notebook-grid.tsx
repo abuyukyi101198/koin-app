@@ -2,7 +2,6 @@ import { CSSProperties, useCallback, useEffect } from "react";
 
 import { createPortal } from "react-dom";
 
-import { cn } from "@/lib/utils.ts";
 import { NotebookDragOverlay } from "@/pages/notebooks/components/misc/notebook-coin-overlay.tsx";
 import { NotebookSlot } from "@/pages/notebooks/components/misc/notebook-slot.tsx";
 import { useNotebookReorderContext } from "@/pages/notebooks/context/notebook-reorder-context.tsx";
@@ -31,7 +30,6 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
     localCells,
     pickUp,
     place,
-    discard,
     placingRef,
     cursor,
     setCursor,
@@ -74,18 +72,6 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
     };
   }, [handActive, place, placingRef]);
 
-  // Escape key → discard entire hand
-  useEffect(() => {
-    if (!handActive) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") discard();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [handActive, discard]);
-
   const handlePickUp = useCallback(
     (coin: Coin, pos: { x: number; y: number }) => {
       setCursor(pos);
@@ -106,10 +92,7 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <div
-        className={cn(
-          "flex-1 grid gap-2 p-6 pt-4 max-h-full",
-          handActive && "cursor-none"
-        )}
+        className="flex-1 grid gap-2 p-6 pt-4 max-h-full"
         role="grid"
         style={{
           gridTemplateColumns: `repeat(${cols}, 1fr)`,

@@ -21,14 +21,10 @@ export interface NotebookReorderContextType {
   localCells: (Coin | null)[][][];
   pickUp: (coin: Coin, origin: HandOrigin) => void;
   place: (payload: SlotClickPayload | null) => void;
-  discard: () => void;
   isPending: boolean;
-  /** Flip to true before calling place(payload) to tell the global window
-   *  click listener that this click was a valid placement, not an outside click. */
   placingRef: RefObject<boolean>;
   cursor: { x: number; y: number } | null;
   setCursor: Dispatch<SetStateAction<{ x: number; y: number } | null>>;
-  /** Seed the cursor position for the drag overlay when picking up from outside the grid. */
   seedCursor: (pos: { x: number; y: number }) => void;
 }
 

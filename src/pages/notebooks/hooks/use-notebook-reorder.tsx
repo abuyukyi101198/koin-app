@@ -23,17 +23,14 @@ export function useNotebookReorder({ notebook }: UseNotebookReorderProps) {
     notebook?.cells ?? []
   );
 
-  // True while a reorder mutation is in-flight. Prevents the hand-empty
-  // sync effect from overwriting optimistic localCells with stale server
-  // state before the mutation response arrives.
-  const pendingMutationRef = useRef(false);
+  const pendingMutationRef = useRef(0);
 
   const mutate = useCallback(
     (args: Parameters<typeof reorderCoinsMutation.mutate>[0]) => {
-      pendingMutationRef.current = true;
+      pendingMutationRef.current += 1;
       reorderCoinsMutation.mutate(args, {
         onSettled: () => {
-          pendingMutationRef.current = false;
+          pendingMutationRef.current -= 1;
         },
       });
     },
@@ -51,7 +48,7 @@ export function useNotebookReorder({ notebook }: UseNotebookReorderProps) {
   // mutation is in flight (i.e. not an optimistic update we own).
   useEffect(() => {
     if (!notebook) return;
-    if (hand.length === 0 && !pendingMutationRef.current) {
+    if (hand.length === 0 && pendingMutationRef.current === 0) {
       setLocalCells(notebook.cells);
     }
   }, [notebook, hand.length]);
@@ -89,30 +86,24 @@ export function useNotebookReorder({ notebook }: UseNotebookReorderProps) {
     (coin: Coin, origin: HandOrigin) => {
       if (!notebook) return;
 
-      let nextCells = localCells;
+      const nextCells = localCells.map((page) =>
+        page.map((row) => row.map((c) => (c?.id === coin.id ? null : c)))
+      );
+      setLocalCells(nextCells);
+
       if (origin === "grid") {
-        // Remove from grid immediately
-        nextCells = localCells.map((page) =>
-          page.map((row) => row.map((c) => (c?.id === coin.id ? null : c)))
-        );
-        setLocalCells(nextCells);
         // Commit grid state without the picked coin
         mutate({
           notebook_id: notebook.id,
           coins: buildPositions(nextCells).filter((p) => p.coin_id !== coin.id),
         });
       }
-      // "list" origin: coin isn't in the grid, nothing to remove
 
       setHand((prev) => [...prev, { coin, origin }]);
     },
     [localCells, buildPositions, notebook, mutate]
   );
 
-  /**
-   * Place the top coin into a slot, or discard it (origin-aware) when
-   * payload is null (clicked outside any valid slot).
-   */
   const place = useCallback(
     (payload: SlotClickPayload | null) => {
       if (!notebook) return;
@@ -122,7 +113,6 @@ export function useNotebookReorder({ notebook }: UseNotebookReorderProps) {
       const topCoin = topEntry.coin;
       const newHand = hand.slice(0, -1);
 
-      // ── Discard path: null payload = clicked outside ──────────────────
       if (payload === null) {
         setHand(newHand);
         if (topEntry.origin === "grid") {
@@ -133,11 +123,9 @@ export function useNotebookReorder({ notebook }: UseNotebookReorderProps) {
             unassign_coin_ids: [topCoin.id],
           });
         }
-        // "list" origin: coin was never in this notebook — no server call
         return;
       }
 
-      // ── Place path: valid slot ─────────────────────────────────────────
       const { coordinates, coin: slotCoin } = payload;
 
       if (slotCoin !== null) {
@@ -176,23 +164,6 @@ export function useNotebookReorder({ notebook }: UseNotebookReorderProps) {
     [hand, localCells, toFlat, buildPositions, notebook, mutate]
   );
 
-  /** Discard the entire hand, unassigning all grid-origin coins. */
-  const discard = useCallback(() => {
-    if (!notebook) return;
-
-    const unassignIds = hand
-      .filter((e) => e.origin === "grid")
-      .map((e) => e.coin.id);
-
-    setHand([]);
-
-    mutate({
-      notebook_id: notebook.id,
-      coins: buildPositions(notebook.cells),
-      unassign_coin_ids: unassignIds.length ? unassignIds : undefined,
-    });
-  }, [hand, buildPositions, notebook, mutate]);
-
   return {
     hand,
     isActive,
@@ -201,7 +172,6 @@ export function useNotebookReorder({ notebook }: UseNotebookReorderProps) {
     localCells,
     pickUp,
     place,
-    discard,
     isPending: reorderCoinsMutation.isPending,
   };
 }

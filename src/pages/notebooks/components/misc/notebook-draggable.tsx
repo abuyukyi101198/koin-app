@@ -20,7 +20,7 @@ export function NotebookDraggable({
       className={cn(
         "absolute inset-0 flex items-start justify-center rounded-sm",
         "transition-all duration-100",
-        !handActive && "cursor-pointer hover:bg-muted/60"
+        !handActive && "cursor-grab hover:bg-muted/60"
       )}
       onClick={(e) => {
         if (handActive) {
