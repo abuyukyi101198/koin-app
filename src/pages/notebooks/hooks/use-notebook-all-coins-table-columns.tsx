@@ -89,22 +89,26 @@ export function useNotebookAllCoinsTableColumns(): ColumnDef<Coin>[] {
 
         if (notebook_id === selectedNotebookId) {
           return (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Book className="size-4 text-foreground" />
-              </TooltipTrigger>
-              <TooltipContent side="left">In this notebook</TooltipContent>
-            </Tooltip>
+            <div className="h-8 flex justify-center">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Book className="size-3 text-foreground" />
+                </TooltipTrigger>
+                <TooltipContent side="left">In this notebook</TooltipContent>
+              </Tooltip>
+            </div>
           );
         }
 
         return (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Book className="size-4 text-muted-foreground/40" />
-            </TooltipTrigger>
-            <TooltipContent side="left">In another notebook</TooltipContent>
-          </Tooltip>
+          <div className="h-8">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Book className="size-3 text-muted-foreground/40" />
+              </TooltipTrigger>
+              <TooltipContent side="left">In another notebook</TooltipContent>
+            </Tooltip>
+          </div>
         );
       },
     }),
