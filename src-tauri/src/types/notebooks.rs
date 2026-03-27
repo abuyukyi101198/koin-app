@@ -12,6 +12,8 @@ pub struct Notebook {
     pub columns_per_page: i32,
     pub number_of_pages: i32,
     pub created_at: String,
+    /// Number of coins assigned to this notebook.
+    pub coin_count: i32,
     /// All pages: cells[page][row][col]
     pub cells: Vec<Vec<Vec<Option<Coin>>>>,
 }

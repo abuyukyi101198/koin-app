@@ -15,6 +15,7 @@ fn build_notebook_from_row(row: &rusqlite::Row) -> Result<Notebook, rusqlite::Er
         columns_per_page: row.get(4)?,
         number_of_pages: row.get(5)?,
         created_at: row.get(6)?,
+        coin_count: row.get(7)?,
         cells: vec![],
     })
 }
@@ -76,8 +77,9 @@ pub fn list_notebooks(
 
     // Get paginated notebooks
     let query = format!(
-        "SELECT id, title, description, rows_per_page, columns_per_page, number_of_pages, created_at
-         FROM notebooks
+        "SELECT n.id, n.title, n.description, n.rows_per_page, n.columns_per_page, n.number_of_pages, n.created_at,
+                (SELECT COUNT(*) FROM coins c WHERE c.notebook_id = n.id) AS coin_count
+         FROM notebooks n
          {} ORDER BY {} {} LIMIT ?1 OFFSET ?2",
         where_clause, sort_field, sort_direction
     );
@@ -101,8 +103,9 @@ pub fn get_notebook(app_handle: tauri::AppHandle, id: i32) -> Result<Notebook, S
 
     let mut notebook = conn
         .prepare(
-            "SELECT id, title, description, rows_per_page, columns_per_page, number_of_pages, created_at
-             FROM notebooks WHERE id = ?1",
+            "SELECT n.id, n.title, n.description, n.rows_per_page, n.columns_per_page, n.number_of_pages, n.created_at,
+                    (SELECT COUNT(*) FROM coins c WHERE c.notebook_id = n.id) AS coin_count
+             FROM notebooks n WHERE n.id = ?1",
         )
         .map_err(|e| format!("Failed to prepare notebook statement: {}", e))?
         .query_row([id], |row| build_notebook_from_row(row))

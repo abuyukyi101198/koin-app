@@ -8,6 +8,7 @@ export interface Notebook {
   columns_per_page: number;
   number_of_pages: number;
   created_at: string;
+  coin_count: number;
   /** All pages: cells[page][row][col] */
   cells: (Coin | null)[][][];
 }

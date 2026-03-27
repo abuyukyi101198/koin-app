@@ -70,6 +70,14 @@ export function NotebooksList({ notebookId, selection }: NotebookListProps) {
           <ul className="flex flex-col pb-2">
             {(notebooks?.items ?? []).map((notebook: Notebook) => {
               const isSelected = notebook.id === notebookId;
+              const capacity =
+                notebook.rows_per_page *
+                notebook.columns_per_page *
+                notebook.number_of_pages;
+              const fillPct =
+                capacity > 0
+                  ? Math.round((notebook.coin_count / capacity) * 100)
+                  : 0;
               const gridSpec = `${notebook.rows_per_page}×${notebook.columns_per_page}`;
               const pages = `${notebook.number_of_pages} pp`;
               const date = new Date(notebook.created_at).toLocaleDateString(
@@ -80,7 +88,7 @@ export function NotebooksList({ notebookId, selection }: NotebookListProps) {
                 <li key={notebook.id}>
                   <Button
                     aria-pressed={isSelected}
-                    className="w-full flex items-end justify-between gap-2 px-3 py-2.5 h-auto rounded-none cursor-pointer"
+                    className="w-full flex flex-col items-stretch gap-0.5 px-3 py-5 h-auto rounded-none cursor-pointer"
                     onClick={() => {
                       selection?.onRowSelectionChange({
                         [notebook.id]: true,
@@ -88,30 +96,43 @@ export function NotebooksList({ notebookId, selection }: NotebookListProps) {
                     }}
                     variant="ghost"
                   >
-                    <span className="flex flex-col items-start gap-0.5 min-w-0 flex-1">
-                      <span className="flex items-center gap-1 w-full">
-                        <span
-                          className={cn(
-                            "text-xs font-medium leading-snug truncate text-left flex-1",
-                            { "text-muted-foreground": !isSelected }
-                          )}
-                        >
-                          {notebook.title}
-                        </span>
+                    <span className="flex items-center gap-1 w-full">
+                      <span
+                        className={cn(
+                          "text-xs font-medium leading-snug truncate text-left flex-1",
+                          { "text-muted-foreground": !isSelected }
+                        )}
+                      >
+                        {notebook.title}
                       </span>
-                      <span className="text-xs italic leading-snug text-left text-muted-foreground wrap-break-word whitespace-normal w-full line-clamp-2 overflow-hidden">
+                      <span className="size-3 shrink-0 flex items-center justify-center">
+                        {isSelected && <Check className="size-3" />}
+                      </span>
+                    </span>
+                    <span className="flex items-start gap-2 w-full">
+                      <span className="text-xs italic leading-snug text-left text-muted-foreground wrap-break-word whitespace-normal flex-1 min-w-0 line-clamp-2 overflow-hidden">
                         {notebook.description?.length
                           ? notebook.description
                           : "—"}
                       </span>
-                    </span>
-                    <span className="flex flex-col justify-end items-end gap-0.5 shrink-0">
-                      {isSelected && <Check className="size-3 shrink-0" />}
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">
-                        {gridSpec} · {pages}
+                      <span className="flex flex-col items-end gap-0 shrink-0">
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          {gridSpec} · {pages}
+                        </span>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          {date}
+                        </span>
                       </span>
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">
-                        {date}
+                    </span>
+                    <span className="flex items-center gap-1.5 w-full pt-0.5">
+                      <span className="relative flex-1 h-1 rounded-full bg-muted overflow-hidden">
+                        <span
+                          className="absolute inset-y-0 left-0 rounded-full bg-foreground/40 transition-all duration-300"
+                          style={{ width: `${fillPct}%` }}
+                        />
+                      </span>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap tabular-nums">
+                        {notebook.coin_count}/{capacity}
                       </span>
                     </span>
                   </Button>
