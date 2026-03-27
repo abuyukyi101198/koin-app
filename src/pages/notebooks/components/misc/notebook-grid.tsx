@@ -55,13 +55,22 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
   }, [handActive, setCursor]);
 
   // Global left-click outside a slot → place(null) = discard top coin.
-  // Runs after React's synthetic handlers so slotHandledRef is already set.
+  // Runs after React's synthetic handlers so placingRef is already set.
   useEffect(() => {
     if (!handActive) return;
     const onClick = (e: MouseEvent) => {
       if (e.button !== 0) return;
+      // If a slot or explicit UI handler already consumed this click, skip.
       if (placingRef.current) {
         placingRef.current = false;
+        return;
+      }
+      // Do not discard when clicking interactive UI elements (buttons,
+      // inputs, pagination, etc.) — only bare canvas/empty space triggers a drop.
+      const target = e.target as HTMLElement;
+      if (
+        target.closest("button, a, input, select, textarea, [role='button']")
+      ) {
         return;
       }
       place(null);
