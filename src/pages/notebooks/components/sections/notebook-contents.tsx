@@ -27,13 +27,15 @@ export function NotebookContents({ notebookId }: NotebookContentsProps) {
       className="h-full w-7/12 flex flex-col overflow-hidden border-r"
     >
       {/* Header */}
-      <header className="shrink-0 border-b px-6 pt-8 pb-3">
-        <h2 className="h-8 text-2xl font-medium tracking-wide">
-          {notebook?.title}
-        </h2>
-        <p className="h-7 text-lg italic text-muted-foreground">
-          {notebook?.description || "—"}
-        </p>
+      <header className="w-full flex justify-between shrink-0 border-b px-6 pt-8 pb-3">
+        <div className="space-y-1">
+          <h2 className="scroll-m-20 text-2xl font-medium tracking-wide text-balance">
+            {notebook?.title}
+          </h2>
+          <p className="text-lg font-normal italic text-muted-foreground">
+            {notebook?.description || "—"}
+          </p>
+        </div>
       </header>
 
       {/* Grid */}

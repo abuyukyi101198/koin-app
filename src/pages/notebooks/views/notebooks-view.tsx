@@ -3,7 +3,6 @@ import { useCallback, useRef, useState } from "react";
 import { useNotebookSelection } from "@/context/notebook-selection-context.tsx";
 import { EmptyNotebooks } from "@/pages/notebooks/components/misc/empty-notebooks.tsx";
 import { NotebookAllCoins } from "@/pages/notebooks/components/sections/notebook-all-coins.tsx";
-import { NotebookCoinList } from "@/pages/notebooks/components/sections/notebook-coin-list.tsx";
 import { NotebookContents } from "@/pages/notebooks/components/sections/notebook-contents.tsx";
 import { NotebooksList } from "@/pages/notebooks/components/sections/notebook-list.tsx";
 import { NotebookReorderContext } from "@/pages/notebooks/context/notebook-reorder-context.tsx";
@@ -37,7 +36,6 @@ export function NotebooksView() {
                   onRowSelectionChange: setRowSelection,
                 }}
               />
-              <NotebookCoinList notebookId={selectedNotebookId} />
             </div>
             <NotebookContents notebookId={selectedNotebookId} />
             <NotebookAllCoins />

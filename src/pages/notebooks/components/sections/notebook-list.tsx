@@ -37,7 +37,7 @@ export function NotebooksList({ notebookId, selection }: NotebookListProps) {
     <section
       aria-busy={isLoading}
       aria-label="Notebooks catalogue"
-      className="h-1/4 flex flex-col pt-8 pb-0 gap-2 border-r border-b"
+      className="h-full flex flex-col pt-8 pb-0 gap-2 border-r border-b"
     >
       {/* Header */}
       <header className="max-w-full flex items-center px-2 gap-2.5">
@@ -70,11 +70,17 @@ export function NotebooksList({ notebookId, selection }: NotebookListProps) {
           <ul className="flex flex-col pb-2">
             {(notebooks?.items ?? []).map((notebook: Notebook) => {
               const isSelected = notebook.id === notebookId;
+              const gridSpec = `${notebook.rows_per_page}×${notebook.columns_per_page}`;
+              const pages = `${notebook.number_of_pages} pp`;
+              const date = new Date(notebook.created_at).toLocaleDateString(
+                "en-US",
+                { month: "short", day: "numeric", year: "numeric" }
+              );
               return (
                 <li key={notebook.id}>
                   <Button
                     aria-pressed={isSelected}
-                    className="w-full flex justify-between items-center gap-0.5 px-3 rounded-none cursor-pointer"
+                    className="w-full flex items-end justify-between gap-2 px-3 py-2.5 h-auto rounded-none cursor-pointer"
                     onClick={() => {
                       selection?.onRowSelectionChange({
                         [notebook.id]: true,
@@ -82,15 +88,32 @@ export function NotebooksList({ notebookId, selection }: NotebookListProps) {
                     }}
                     variant="ghost"
                   >
-                    <span
-                      className={cn(
-                        "text-xs leading-snug truncate w-full text-left",
-                        { "text-muted-foreground": !isSelected }
-                      )}
-                    >
-                      {notebook.title}
+                    <span className="flex flex-col items-start gap-0.5 min-w-0 flex-1">
+                      <span className="flex items-center gap-1 w-full">
+                        <span
+                          className={cn(
+                            "text-xs font-medium leading-snug truncate text-left flex-1",
+                            { "text-muted-foreground": !isSelected }
+                          )}
+                        >
+                          {notebook.title}
+                        </span>
+                      </span>
+                      <span className="text-xs italic leading-snug text-left text-muted-foreground wrap-break-word whitespace-normal w-full line-clamp-2 overflow-hidden">
+                        {notebook.description?.length
+                          ? notebook.description
+                          : "—"}
+                      </span>
                     </span>
-                    {isSelected ? <Check className="size-4" /> : null}
+                    <span className="flex flex-col justify-end items-end gap-0.5 shrink-0">
+                      {isSelected && <Check className="size-3 shrink-0" />}
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {gridSpec} · {pages}
+                      </span>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {date}
+                      </span>
+                    </span>
                   </Button>
                 </li>
               );

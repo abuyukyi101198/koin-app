@@ -93,7 +93,7 @@ export function NotebookAllCoins() {
     <section
       aria-busy={isLoading}
       aria-label="All coins"
-      className="h-full w-1/4 flex flex-col pt-3 pb-0 gap-2 overflow-hidden select-none"
+      className="h-full w-1/4 flex flex-col pt-4 pb-0 gap-2 overflow-hidden select-none"
     >
       <header className="max-w-full flex items-center pl-2 pr-5 gap-2.5">
         <SearchInput
