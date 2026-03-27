@@ -14,6 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog.tsx";
+import { useCoinSelection } from "@/context/coin-selection-context.tsx";
 import { useDeleteCoin, useGetCoin } from "@/query/commands";
 
 interface DeleteCoinDialogProps {
@@ -25,6 +26,7 @@ export function DeleteCoinDialog({
   id,
   size = "default",
 }: DeleteCoinDialogProps) {
+  const { setRowSelection } = useCoinSelection();
   const [isOpen, setIsOpen] = useState(false);
 
   const { data } = useGetCoin({ id });
@@ -40,6 +42,7 @@ export function DeleteCoinDialog({
             position: "bottom-right",
           });
           setIsOpen(false);
+          setRowSelection({});
         },
         onError: (error) => {
           const errorMessage = error?.message || "Failed to delete coin";

@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog.tsx";
+import { useCoinSelection } from "@/context/coin-selection-context.tsx";
 import { CoinForm } from "@/pages/coins/components/forms/coin-form.tsx";
 import { CoinFormData } from "@/pages/coins/schemas/coin-form-schema.ts";
 import { useGetCoin, useUpdateCoin } from "@/query/commands";
@@ -25,6 +26,7 @@ export function UpdateCoinDialog({
   id,
   size = "default",
 }: UpdateCoinDialogProps) {
+  const { setRowSelection } = useCoinSelection();
   const [isOpen, setIsOpen] = useState(false);
 
   const { data } = useGetCoin({ id });
@@ -80,6 +82,7 @@ export function UpdateCoinDialog({
           position: "bottom-right",
         });
         setIsOpen(false);
+        setRowSelection({ [coin.id]: true });
       },
       onError: (error) => {
         const errorMessage = error?.message || "Failed to update coin";
