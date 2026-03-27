@@ -45,8 +45,8 @@ export function CoinDetails({ coinId }: CoinInfoProps) {
           </p>
         </div>
         <div className="flex gap-2">
-          <UpdateCoinDialog id={coinId} />
-          <DeleteCoinDialog id={coinId} />
+          <UpdateCoinDialog id={coinId} size="sm" />
+          <DeleteCoinDialog id={coinId} size="sm" />
         </div>
       </header>
 
