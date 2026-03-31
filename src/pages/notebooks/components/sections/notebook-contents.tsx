@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 import { DataTablePagination } from "@/components/composite/data-table-pagination.tsx";
 import usePagination from "@/hooks/use-pagination.ts";
+import { DeleteNotebookDialog } from "@/pages/notebooks/components/forms/delete-notebook-dialog.tsx";
 import { NotebookGrid } from "@/pages/notebooks/components/misc/notebook-grid.tsx";
 import { useGetNotebook } from "@/query/commands/notebooks.ts";
 
@@ -33,6 +34,9 @@ export function NotebookContents({ notebookId }: NotebookContentsProps) {
           <p className="text-lg font-normal italic text-muted-foreground">
             {notebook?.description || "—"}
           </p>
+        </div>
+        <div className="flex gap-2">
+          <DeleteNotebookDialog id={notebookId} size="sm" />
         </div>
       </header>
 
