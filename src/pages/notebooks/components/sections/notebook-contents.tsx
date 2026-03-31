@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { DataTablePagination } from "@/components/composite/data-table-pagination.tsx";
 import usePagination from "@/hooks/use-pagination.ts";
 import { DeleteNotebookDialog } from "@/pages/notebooks/components/forms/delete-notebook-dialog.tsx";
+import { UpdateNotebookDialog } from "@/pages/notebooks/components/forms/update-notebook-dialog.tsx";
 import { NotebookGrid } from "@/pages/notebooks/components/misc/notebook-grid.tsx";
 import { useGetNotebook } from "@/query/commands/notebooks.ts";
 
@@ -36,6 +37,7 @@ export function NotebookContents({ notebookId }: NotebookContentsProps) {
           </p>
         </div>
         <div className="flex gap-2">
+          <UpdateNotebookDialog id={notebookId} size="sm" />
           <DeleteNotebookDialog id={notebookId} size="sm" />
         </div>
       </header>
