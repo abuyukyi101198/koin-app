@@ -117,7 +117,15 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
+  html,
+  body,
+  #root {
+    @apply h-full w-full overflow-hidden bg-background text-foreground;
   }
+}
+
+[data-tauri-drag-region] {
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
 }

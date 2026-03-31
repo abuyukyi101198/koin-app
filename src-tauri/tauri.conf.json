@@ -13,8 +13,15 @@
     "windows": [
       {
         "title": "Koin",
+        "label": "main",
         "width": 1600,
-        "height": 1080
+        "height": 1080,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true,
+        "trafficLightPosition": {
+          "x": 12,
+          "y": 20
+        }
       }
     ],
     "security": {

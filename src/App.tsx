@@ -1,12 +1,12 @@
 import "@/styles/index.css";
 import { CSSProperties } from "react";
 
-import { QueryClientProvider } from "@tanstack/react-query";
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { BookCopy, Coins, Github } from "lucide-react";
 
+import { Titlebar } from "@/components/composite/titlebar.tsx";
 import {
   Sidebar,
   SidebarContent,
@@ -40,7 +40,9 @@ function App() {
         <CoinSelectionProvider>
           <NotebookSelectionProvider>
             <TooltipProvider>
+              <Titlebar />
               <SidebarProvider
+                className="mt-12 h-[calc(100vh-3rem)]"
                 style={
                   {
                     "--sidebar-width": "3rem",
@@ -119,7 +121,7 @@ function App() {
                     </SidebarMenu>
                   </SidebarFooter>
                 </Sidebar>
-                <main className="h-screen w-screen">
+                <main className="h-full w-full overflow-hidden">
                   <Outlet />
                 </main>
               </SidebarProvider>
