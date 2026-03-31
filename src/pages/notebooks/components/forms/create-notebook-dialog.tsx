@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog.tsx";
+import { useNotebookSelection } from "@/context/notebook-selection-context.tsx";
 import { NotebookForm } from "@/pages/notebooks/components/forms/notebook-form.tsx";
 import { NotebookFormData } from "@/pages/notebooks/schemas/notebook-form-schema.ts";
 import { useCreateNotebook } from "@/query/commands/notebooks.ts";
@@ -32,6 +33,7 @@ const initialValues: NotebookFormData = {
 export function CreateNotebookDialog({
   size = "default",
 }: CreateNotebookDialogProps) {
+  const { setRowSelection } = useNotebookSelection();
   const [isOpen, setIsOpen] = useState(false);
 
   const createNotebookMutation = useCreateNotebook();
@@ -51,6 +53,7 @@ export function CreateNotebookDialog({
           position: "bottom-right",
         });
         setIsOpen(false);
+        setRowSelection({ [notebook.id]: true });
       },
       onError: (error) => {
         const errorMessage = error?.message || "Failed to add notebook";
