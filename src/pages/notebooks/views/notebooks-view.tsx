@@ -28,15 +28,13 @@ export function NotebooksView() {
       <div className="h-full w-full flex border-collapse">
         {selectedNotebookId !== null ? (
           <>
-            <div className="w-1/6 flex flex-col">
-              <NotebooksList
-                notebookId={selectedNotebookId}
-                selection={{
-                  rowSelection,
-                  onRowSelectionChange: setRowSelection,
-                }}
-              />
-            </div>
+            <NotebooksList
+              notebookId={selectedNotebookId}
+              selection={{
+                rowSelection,
+                onRowSelectionChange: setRowSelection,
+              }}
+            />
             <NotebookContents notebookId={selectedNotebookId} />
             <NotebookAllCoins />
           </>

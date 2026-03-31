@@ -30,7 +30,7 @@ export function SimilarCoins({
       aria-label="Similar coins table"
       className="flex flex-col h-full w-1/4 overflow-hidden border-b"
     >
-      <header className="shrink-0 border-b px-6 pt-8 pb-5">
+      <header className="shrink-0 border-b px-6 pt-4 pb-5">
         <div className="space-y-1">
           <h2 className="scroll-m-20 text-xl font-medium tracking-wide text-balance">
             Similar coins

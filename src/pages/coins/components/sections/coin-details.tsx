@@ -35,7 +35,7 @@ export function CoinDetails({ coinId }: CoinInfoProps) {
       className="h-full w-7/12 flex flex-col overflow-hidden border-r border-b"
     >
       {/* Header */}
-      <header className="w-full flex justify-between shrink-0 border-b px-6 pt-8 pb-3">
+      <header className="w-full flex justify-between shrink-0 border-b pl-6 pt-4 pr-4 pb-3">
         <div className="space-y-1">
           <h2 className="scroll-m-20 text-2xl font-medium tracking-wide text-balance">
             {asFraction(data?.title, data?.value)}
