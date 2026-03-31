@@ -7,5 +7,9 @@ pub fn get_db_connection(app_handle: &tauri::AppHandle) -> Result<Connection, St
         .app_data_dir()
         .map_err(|e| format!("Failed to get app data dir: {}", e))?;
     let db_path = app_dir.join("koin-app.db");
-    Connection::open(db_path).map_err(|e| format!("Failed to open database: {}", e))
+    let conn =
+        Connection::open(db_path).map_err(|e| format!("Failed to open database: {}", e))?;
+    conn.execute("PRAGMA foreign_keys = ON", [])
+        .map_err(|e| format!("Failed to enable foreign keys: {}", e))?;
+    Ok(conn)
 }

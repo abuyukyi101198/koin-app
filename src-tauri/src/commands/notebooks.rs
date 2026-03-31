@@ -228,3 +228,13 @@ pub fn create_notebook(
     // Fetch and return the created notebook
     get_notebook(app_handle, id)
 }
+
+#[tauri::command]
+pub fn delete_notebook(app_handle: tauri::AppHandle, id: i32) -> Result<(), String> {
+    let conn = get_db_connection(&app_handle)?;
+
+    conn.execute("DELETE FROM notebooks WHERE id = ?1", [id])
+        .map_err(|e| format!("Failed to delete notebook: {}", e))?;
+
+    Ok(())
+}

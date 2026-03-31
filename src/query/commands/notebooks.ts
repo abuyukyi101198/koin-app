@@ -11,6 +11,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { COINS_QUERY_KEY } from "@/query/commands/coins.ts";
 import {
   CreateNotebookRequest,
+  DeleteNotebookRequest,
   GetNotebookRequest,
   ListNotebooksRequest,
   Notebook,
@@ -100,6 +101,23 @@ export function useReorderCoins(): UseMutationResult<
         notebook
       );
       queryClient.invalidateQueries({ queryKey: [COINS_QUERY_KEY] });
+    },
+  });
+}
+
+export function useDeleteNotebook(): UseMutationResult<
+  void,
+  Error,
+  DeleteNotebookRequest
+> {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: DeleteNotebookRequest) => {
+      await invoke<void>("delete_notebook", { id: data.id });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [NOTEBOOKS_QUERY_KEY] });
     },
   });
 }

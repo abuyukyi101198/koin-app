@@ -48,3 +48,7 @@ export interface ReorderCoinsRequest {
   coins: CoinPosition[];
   unassign_coin_ids?: number[];
 }
+
+export interface DeleteNotebookRequest {
+  id: number;
+}
