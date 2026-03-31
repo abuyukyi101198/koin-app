@@ -49,6 +49,15 @@ export interface ReorderCoinsRequest {
   unassign_coin_ids?: number[];
 }
 
+export interface UpdateNotebookRequest {
+  id: number;
+  title?: string;
+  description?: string;
+  rows_per_page?: number;
+  columns_per_page?: number;
+  number_of_pages?: number;
+}
+
 export interface DeleteNotebookRequest {
   id: number;
 }

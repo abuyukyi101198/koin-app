@@ -2,7 +2,7 @@ use crate::commands::coins::build_coin_from_row;
 use crate::commands::utils::get_db_connection;
 use crate::types::coins::Coin;
 use crate::types::notebooks::{
-    CreateNotebookRequest, Notebook, PaginatedNotebooksResponse,
+    CreateNotebookRequest, Notebook, PaginatedNotebooksResponse, UpdateNotebookRequest,
 };
 use validator::Validate;
 
@@ -116,8 +116,7 @@ pub fn get_notebook(app_handle: tauri::AppHandle, id: i32) -> Result<Notebook, S
     let pages = notebook.number_of_pages as usize;
     let cells_per_page = rows * cols;
 
-    let mut cells: Vec<Vec<Vec<Option<Coin>>>> =
-        vec![vec![vec![None; cols]; rows]; pages];
+    let mut cells: Vec<Vec<Vec<Option<Coin>>>> = vec![vec![vec![None; cols]; rows]; pages];
 
     let mut stmt = conn
         .prepare(
@@ -174,7 +173,10 @@ pub fn reorder_coins(
         )
         .map_err(|e| {
             let _ = conn.execute("ROLLBACK", []);
-            format!("Failed to update position for coin {}: {}", entry.coin_id, e)
+            format!(
+                "Failed to update position for coin {}: {}",
+                entry.coin_id, e
+            )
         })?;
     }
 
@@ -227,6 +229,186 @@ pub fn create_notebook(
 
     // Fetch and return the created notebook
     get_notebook(app_handle, id)
+}
+
+#[tauri::command]
+pub fn update_notebook(
+    app_handle: tauri::AppHandle,
+    notebook: UpdateNotebookRequest,
+) -> Result<Notebook, String> {
+    notebook
+        .validate()
+        .map_err(|e| format!("Validation failed: {}", e))?;
+
+    let conn = get_db_connection(&app_handle)?;
+
+    let (old_rows, old_cols, old_pages): (i32, i32, i32) = conn
+        .query_row(
+            "SELECT rows_per_page, columns_per_page, number_of_pages
+             FROM notebooks WHERE id = ?1",
+            [notebook.id],
+            |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
+        )
+        .map_err(|e| format!("Notebook with id {} not found: {}", notebook.id, e))?;
+
+    let new_rows = notebook.rows_per_page.unwrap_or(old_rows);
+    let new_cols = notebook.columns_per_page.unwrap_or(old_cols);
+    let new_pages = notebook.number_of_pages.unwrap_or(old_pages);
+
+    let grid_changed = new_rows != old_rows || new_cols != old_cols || new_pages != old_pages;
+
+    let mut updates: Vec<String> = Vec::new();
+    let mut params: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
+
+    if let Some(title) = notebook.title {
+        updates.push("title = ?".to_string());
+        params.push(Box::new(title));
+    }
+    if let Some(description) = notebook.description {
+        updates.push("description = ?".to_string());
+        params.push(Box::new(description));
+    }
+    if new_rows != old_rows {
+        updates.push("rows_per_page = ?".to_string());
+        params.push(Box::new(new_rows));
+    }
+    if new_cols != old_cols {
+        updates.push("columns_per_page = ?".to_string());
+        params.push(Box::new(new_cols));
+    }
+    if new_pages != old_pages {
+        updates.push("number_of_pages = ?".to_string());
+        params.push(Box::new(new_pages));
+    }
+
+    if updates.is_empty() {
+        return Err("No fields to update".to_string());
+    }
+
+    conn.execute("BEGIN", [])
+        .map_err(|e| format!("Failed to begin transaction: {}", e))?;
+
+    let commit_or_rollback = |conn: &rusqlite::Connection, result: Result<(), String>| {
+        if result.is_err() {
+            let _ = conn.execute("ROLLBACK", []);
+        } else {
+            let _ = conn.execute("COMMIT", []);
+        }
+        result
+    };
+
+    if grid_changed {
+        let old_cols_per_page = (old_rows * old_cols) as usize;
+        let new_cols_per_page = (new_rows * new_cols) as usize;
+        let new_rows = new_rows as usize;
+        let new_cols = new_cols as usize;
+        let new_pages = new_pages as usize;
+        let old_cols = old_cols as usize;
+
+        // Load all assigned coins ordered by their current position so that
+        // relative order is stable when two coins share a page-slot boundary.
+        let mut stmt = conn
+            .prepare(
+                "SELECT id, notebook_position FROM coins
+                 WHERE notebook_id = ?1
+                 ORDER BY notebook_position ASC NULLS LAST",
+            )
+            .map_err(|e| {
+                let _ = conn.execute("ROLLBACK", []);
+                format!("Failed to prepare coin query: {}", e)
+            })?;
+
+        struct SlottedCoin {
+            id: i32,
+            position: Option<i32>,
+        }
+
+        let slotted: Vec<SlottedCoin> = stmt
+            .query_map([notebook.id], |row| {
+                Ok(SlottedCoin {
+                    id: row.get(0)?,
+                    position: row.get(1)?,
+                })
+            })
+            .map_err(|e| {
+                let _ = conn.execute("ROLLBACK", []);
+                format!("Failed to query coins: {}", e)
+            })?
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|e| {
+                let _ = conn.execute("ROLLBACK", []);
+                format!("Failed to collect coins: {}", e)
+            })?;
+
+        for coin in slotted {
+            // Coins with no position are already unassigned from the grid;
+            // leave them as-is (notebook_id is set but position is NULL —
+            // this shouldn't happen in practice but handle it gracefully).
+            let old_pos = match coin.position {
+                Some(p) => p as usize,
+                None => continue,
+            };
+
+            // Decode (page, row, col) using old stride.
+            let page = old_pos / old_cols_per_page;
+            let local = old_pos % old_cols_per_page;
+            let row = local / old_cols;
+            let col = local % old_cols;
+
+            // Check whether this cell exists in the new grid.
+            if page >= new_pages || row >= new_rows || col >= new_cols {
+                // Out of bounds → unassign.
+                let result = conn
+                    .execute(
+                        "UPDATE coins SET notebook_id = NULL, notebook_position = NULL
+                         WHERE id = ?1",
+                        rusqlite::params![coin.id],
+                    )
+                    .map(|_| ())
+                    .map_err(|e| format!("Failed to unassign coin {}: {}", coin.id, e));
+
+                if let Err(e) = result {
+                    let _ = conn.execute("ROLLBACK", []);
+                    return Err(e);
+                }
+            } else {
+                // Re-encode with new stride.
+                let new_pos = (page * new_cols_per_page + row * new_cols + col) as i32;
+
+                if new_pos != coin.position.unwrap_or(-1) {
+                    let result = conn
+                        .execute(
+                            "UPDATE coins SET notebook_position = ?1 WHERE id = ?2",
+                            rusqlite::params![new_pos, coin.id],
+                        )
+                        .map(|_| ())
+                        .map_err(|e| {
+                            format!(
+                                "Failed to remap coin {} to position {}: {}",
+                                coin.id, new_pos, e
+                            )
+                        });
+
+                    if let Err(e) = result {
+                        let _ = conn.execute("ROLLBACK", []);
+                        return Err(e);
+                    }
+                }
+            }
+        }
+    }
+
+    params.push(Box::new(notebook.id));
+    let query = format!("UPDATE notebooks SET {} WHERE id = ?", updates.join(", "));
+
+    let result = conn
+        .execute(&query, rusqlite::params_from_iter(params))
+        .map(|_| ())
+        .map_err(|e| format!("Failed to update notebook: {}", e));
+
+    commit_or_rollback(&conn, result)?;
+
+    get_notebook(app_handle, notebook.id)
 }
 
 #[tauri::command]
