@@ -4,7 +4,7 @@ import { CSSProperties } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { BookCopy, Coins, Github } from "lucide-react";
+import { BookCopy, Coins, Github, Settings } from "lucide-react";
 
 import { Titlebar } from "@/components/composite/titlebar.tsx";
 import {
@@ -98,6 +98,25 @@ function App() {
                   </SidebarContent>
                   <SidebarFooter>
                     <SidebarMenu>
+                      <SidebarMenuItem>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <SidebarMenuButton
+                              asChild
+                              className="text-muted-foreground hover:text-base cursor-pointer"
+                              isActive={pathname === "/settings"}
+                              size="default"
+                            >
+                              <Link to="/settings">
+                                <Settings />
+                              </Link>
+                            </SidebarMenuButton>
+                          </TooltipTrigger>
+                          <TooltipContent side="right" sideOffset={8}>
+                            Settings
+                          </TooltipContent>
+                        </Tooltip>
+                      </SidebarMenuItem>
                       <SidebarMenuItem>
                         <Tooltip>
                           <TooltipTrigger asChild>

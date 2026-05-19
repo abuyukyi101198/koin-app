@@ -8,6 +8,7 @@ import {
 import App from "@/App";
 import { CoinsView } from "@/pages/coins/views/coins-view";
 import { NotebooksView } from "@/pages/notebooks/views/notebooks-view.tsx";
+import { SettingsView } from "@/pages/settings/views/settings-view.tsx";
 
 // Root route
 const rootRoute = createRootRoute({
@@ -28,6 +29,13 @@ const notebooksRoute = createRoute({
   component: NotebooksView,
 });
 
+// settings route
+const settingsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/settings",
+  component: SettingsView,
+});
+
 // Index route - redirect to /coins
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -43,6 +51,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   coinsRoute,
   notebooksRoute,
+  settingsRoute,
 ]);
 
 export const router = new Router({ routeTree });
