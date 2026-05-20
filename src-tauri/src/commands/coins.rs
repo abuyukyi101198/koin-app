@@ -1,5 +1,7 @@
 use crate::commands::utils::get_db_connection;
-use crate::types::coins::{Coin, CreateCoinRequest, PaginatedCoinsResponse, UpdateCoinRequest};
+use crate::types::coins::{
+    Coin, CreateCoinRequest, ImageProcessingMode, PaginatedCoinsResponse, UpdateCoinRequest,
+};
 use crate::handlers::image_handler;
 use validator::Validate;
 
@@ -144,15 +146,17 @@ pub async fn create_coin(app_handle: tauri::AppHandle, coin: CreateCoinRequest) 
 
     let conn = get_db_connection(&app_handle)?;
 
-    // Process images if download_images is true
-    let obverse_image = if coin.download_images.unwrap_or(false) {
-        image_handler::process_image(coin.obverse_image.clone()).await?
+    let remove_bg = matches!(coin.image_processing, Some(ImageProcessingMode::DownloadAndRemoveBg));
+    let download   = remove_bg || matches!(coin.image_processing, Some(ImageProcessingMode::Download));
+
+    let obverse_image = if download {
+        image_handler::process_image(coin.obverse_image.clone(), remove_bg).await?
     } else {
         coin.obverse_image.clone()
     };
 
-    let reverse_image = if coin.download_images.unwrap_or(false) {
-        image_handler::process_image(coin.reverse_image.clone()).await?
+    let reverse_image = if download {
+        image_handler::process_image(coin.reverse_image.clone(), remove_bg).await?
     } else {
         coin.reverse_image.clone()
     };
@@ -197,15 +201,17 @@ pub async fn update_coin(
 
     let conn = get_db_connection(&app_handle)?;
 
-    // Process images if download_images is true
-    let obverse_image = if coin.download_images.unwrap_or(false) {
-        image_handler::process_image(coin.obverse_image.clone()).await?
+    let remove_bg = matches!(coin.image_processing, Some(ImageProcessingMode::DownloadAndRemoveBg));
+    let download   = remove_bg || matches!(coin.image_processing, Some(ImageProcessingMode::Download));
+
+    let obverse_image = if download {
+        image_handler::process_image(coin.obverse_image.clone(), remove_bg).await?
     } else {
         coin.obverse_image.clone()
     };
 
-    let reverse_image = if coin.download_images.unwrap_or(false) {
-        image_handler::process_image(coin.reverse_image.clone()).await?
+    let reverse_image = if download {
+        image_handler::process_image(coin.reverse_image.clone(), remove_bg).await?
     } else {
         coin.reverse_image.clone()
     };

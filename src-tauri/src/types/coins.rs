@@ -6,6 +6,14 @@ use crate::types::validators::{
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[serde(rename_all = "snake_case")]
+pub enum ImageProcessingMode {
+    None,
+    Download,
+    DownloadAndRemoveBg,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Coin {
     pub id: i32,
@@ -57,7 +65,7 @@ pub struct CreateCoinRequest {
     pub notes: Option<String>,
 
     /// Download and store images locally as data URLs
-    pub download_images: Option<bool>,
+    pub image_processing: Option<ImageProcessingMode>,
     // Note: title is generated internally as "{value} {currency} {year}"
 }
 
@@ -95,7 +103,7 @@ pub struct UpdateCoinRequest {
     pub notes: Option<String>,
 
     /// Download and store images locally as data URLs
-    pub download_images: Option<bool>,
+    pub image_processing: Option<ImageProcessingMode>,
     // Note: title is generated internally as "{value} {currency} {year}"
 }
 
@@ -104,4 +112,3 @@ pub struct PaginatedCoinsResponse {
     pub items: Vec<Coin>,
     pub total: i64,
 }
-
