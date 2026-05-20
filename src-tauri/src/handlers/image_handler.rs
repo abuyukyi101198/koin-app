@@ -108,6 +108,7 @@ fn remove_background_from_bytes(image_bytes: &[u8]) -> Result<Vec<u8>, String> {
     let mut coin_mask: ImageBuffer<Luma<u8>, Vec<u8>> =
         coin_area_layout_pass(width, height, &true_background);
     centrality_validation_pass(&img, width, height, &true_background, &mut coin_mask);
+    coin_mask = erode_mask(&coin_mask, width, height);
     edge_anti_aliasing(&mut img, width, height, &mut coin_mask);
 
     let mut buf = Cursor::new(Vec::new());
@@ -284,73 +285,104 @@ fn centrality_validation_pass(
     }
 }
 
+fn erode_mask(
+    mask: &ImageBuffer<Luma<u8>, Vec<u8>>,
+    width: u32,
+    height: u32,
+) -> ImageBuffer<Luma<u8>, Vec<u8>> {
+    let radius: i32 = 3;
+    let r2 = radius * radius;
+    let mut eroded = ImageBuffer::from_pixel(width, height, Luma([0u8]));
+    for y in 0..height {
+        for x in 0..width {
+            if mask.get_pixel(x, y)[0] == 0 {
+                continue;
+            }
+            let mut keep = true;
+            'check: for dy in -radius..=radius {
+                for dx in -radius..=radius {
+                    if dx * dx + dy * dy > r2 {
+                        continue;
+                    }
+                    let nx = x as i32 + dx;
+                    let ny = y as i32 + dy;
+                    if nx < 0 || nx >= width as i32 || ny < 0 || ny >= height as i32 {
+                        keep = false;
+                        break 'check;
+                    }
+                    if mask.get_pixel(nx as u32, ny as u32)[0] == 0 {
+                        keep = false;
+                        break 'check;
+                    }
+                }
+            }
+            if keep {
+                eroded.put_pixel(x, y, Luma([1u8]));
+            }
+        }
+    }
+    eroded
+}
+
 fn edge_anti_aliasing(
     img: &mut RgbaImage,
     width: u32,
     height: u32,
-    coin_mask: &mut ImageBuffer<Luma<u8>, Vec<u8>>,
+    coin_mask: &ImageBuffer<Luma<u8>, Vec<u8>>,
 ) {
-    let mut raw_alpha: ImageBuffer<Luma<u8>, Vec<u8>> =
-        ImageBuffer::from_pixel(width, height, Luma([0u8]));
+    const FEATHER_RADIUS: f32 = 2.0;
 
-    for x in 0..width {
-        for y in 0..height {
-            if coin_mask.get_pixel(x, y)[0] != 0 {
-                let mut min_dist = 99.0f32;
-                for dy in -2..=2 {
-                    for dx in -2..=2 {
-                        let nx = x as i32 + dx;
-                        let ny = y as i32 + dy;
-                        if nx >= 0 && nx < width as i32 && ny >= 0 && ny < height as i32 {
-                            if coin_mask.get_pixel(nx as u32, ny as u32)[0] == 0 {
-                                let dist = ((dx * dx + dy * dy) as f32).sqrt();
-                                if dist < min_dist {
-                                    min_dist = dist;
-                                }
+    for y in 0..height {
+        for x in 0..width {
+            let is_coin = coin_mask.get_pixel(x, y)[0] != 0;
+
+            let search_r = FEATHER_RADIUS.ceil() as i32 + 1;
+            let mut min_dist = f32::MAX;
+
+            'outer: for dy in -search_r..=search_r {
+                for dx in -search_r..=search_r {
+                    let nx = x as i32 + dx;
+                    let ny = y as i32 + dy;
+                    if nx < 0 || nx >= width as i32 || ny < 0 || ny >= height as i32 {
+                        if is_coin {
+                            let d = ((dx * dx + dy * dy) as f32).sqrt();
+                            if d < min_dist {
+                                min_dist = d;
                             }
-                        } else {
-                            min_dist = 0.0;
+                        }
+                        continue;
+                    }
+                    let neighbour_is_coin = coin_mask.get_pixel(nx as u32, ny as u32)[0] != 0;
+                    if neighbour_is_coin != is_coin {
+                        let d = ((dx * dx + dy * dy) as f32).sqrt();
+                        if d < min_dist {
+                            min_dist = d;
+                            if min_dist <= 1.0 {
+                                break 'outer;
+                            }
                         }
                     }
                 }
+            }
 
-                if min_dist <= 1.5 {
-                    raw_alpha.put_pixel(x, y, Luma([0u8]));
+            let alpha = if min_dist == f32::MAX {
+                if is_coin {
+                    255u8
                 } else {
-                    raw_alpha.put_pixel(x, y, Luma([255u8]));
+                    0u8
                 }
-            }
-        }
-    }
-
-    let mut final_alpha: ImageBuffer<Luma<u8>, Vec<u8>> =
-        ImageBuffer::from_pixel(width, height, Luma([0u8]));
-
-    let blur_r = 2;
-    for x in 0..width {
-        for y in 0..height {
-            let mut sum: u32 = 0;
-            let mut count: u32 = 0;
-
-            for dy in -blur_r..=blur_r {
-                for dx in -blur_r..=blur_r {
-                    let nx = x as i32 + dx;
-                    let ny = y as i32 + dy;
-                    if nx >= 0 && nx < width as i32 && ny >= 0 && ny < height as i32 {
-                        sum += raw_alpha.get_pixel(nx as u32, ny as u32)[0] as u32;
-                        count += 1;
-                    }
+            } else {
+                if is_coin {
+                    let t = (min_dist / FEATHER_RADIUS).min(1.0);
+                    let smooth = t * t * (3.0 - 2.0 * t);
+                    (smooth * 255.0).round() as u8
+                } else {
+                    0u8
                 }
-            }
-            final_alpha.put_pixel(x, y, Luma([(sum / count) as u8]));
-        }
-    }
+            };
 
-    for x in 0..width {
-        for y in 0..height {
-            let alpha_val = final_alpha.get_pixel(x, y)[0];
             let mut p = *img.get_pixel(x, y);
-            p[3] = alpha_val;
+            p[3] = alpha;
             img.put_pixel(x, y, p);
         }
     }
