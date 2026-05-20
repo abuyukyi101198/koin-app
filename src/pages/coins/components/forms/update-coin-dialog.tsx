@@ -122,6 +122,9 @@ export function UpdateCoinDialog({
         </DialogTrigger>
         <DialogContent
           className="sm:max-w-4xl p-8 z-50"
+          onKeyDown={(e) => {
+            e.stopPropagation();
+          }}
           showCloseButton={false}
         >
           <DialogHeader className="hidden">
