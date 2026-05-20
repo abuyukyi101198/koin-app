@@ -26,7 +26,7 @@ export function CoinPreviewImages({
           <>
             <img
               alt={`${title} reverse side`}
-              className="max-w-full max-h-full object-contain rounded-full"
+              className="max-w-full max-h-full object-contain"
               src={reverseImage}
             />
             <figcaption className="sr-only">Reverse side</figcaption>
@@ -51,7 +51,7 @@ export function CoinPreviewImages({
           <>
             <img
               alt={`${title} obverse side`}
-              className="max-w-full max-h-full object-contain rounded-full"
+              className="max-w-full max-h-full object-contain"
               src={obverseImage}
             />
             <figcaption className="sr-only">Obverse side</figcaption>

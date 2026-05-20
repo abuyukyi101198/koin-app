@@ -17,6 +17,7 @@ import {
   ListCoinsRequest,
   PaginatedCoins,
   UpdateCoinRequest,
+  ImageProcessingMode,
 } from "@/query/types";
 
 export const COINS_QUERY_KEY = "coins";
@@ -85,9 +86,13 @@ export function useCreateCoin(): UseMutationResult<
 
   return useMutation({
     mutationFn: async (data: CreateCoinRequest) => {
+      // TODO: add settings for default image storage behavior
       return await invoke<Coin>("create_coin", {
-        // TODO: add settings for default image storage behavior
-        coin: { ...data, download_images: false } as CreateCoinRequest,
+        coin: {
+          ...data,
+          image_processing: (data.image_processing ??
+            "download_and_remove_bg") satisfies ImageProcessingMode,
+        } as CreateCoinRequest,
       });
     },
     onSuccess: () => {
@@ -107,7 +112,11 @@ export function useUpdateCoin(): UseMutationResult<
     mutationFn: async (data: UpdateCoinRequest) => {
       // TODO: add settings for default image storage behavior
       return await invoke<Coin>("update_coin", {
-        coin: { ...data, download_images: false } as UpdateCoinRequest,
+        coin: {
+          ...data,
+          image_processing: (data.image_processing ??
+            "download_and_remove_bg") satisfies ImageProcessingMode,
+        } as UpdateCoinRequest,
       });
     },
     onSuccess: () => {

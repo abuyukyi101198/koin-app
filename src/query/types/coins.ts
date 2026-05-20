@@ -1,5 +1,10 @@
 import { IssuerDisplay } from "@/query/types/index.ts";
 
+export type ImageProcessingMode =
+  | "download_and_remove_bg"
+  | "download"
+  | "none";
+
 export interface Coin {
   id: number;
   title: string;
@@ -51,7 +56,7 @@ export interface CreateCoinRequest {
   quantity?: number;
   sale_value?: number;
   notes?: string;
-  download_images?: boolean;
+  image_processing?: ImageProcessingMode;
 }
 
 export interface UpdateCoinRequest {
@@ -66,7 +71,7 @@ export interface UpdateCoinRequest {
   quantity?: number;
   sale_value?: number;
   notes?: string;
-  download_images?: boolean;
+  image_processing?: ImageProcessingMode;
 }
 
 export interface DeleteCoinRequest {
