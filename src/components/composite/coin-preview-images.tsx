@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils.ts";
+import { resolveImageSrc } from "@/utils/resolveImageSrc.ts";
 
 interface CoinPreviewImagesProps {
   title: string;
@@ -27,7 +28,7 @@ export function CoinPreviewImages({
             <img
               alt={`${title} reverse side`}
               className="max-w-full max-h-full object-contain"
-              src={reverseImage}
+              src={resolveImageSrc(reverseImage)}
             />
             <figcaption className="sr-only">Reverse side</figcaption>
           </>
@@ -52,7 +53,7 @@ export function CoinPreviewImages({
             <img
               alt={`${title} obverse side`}
               className="max-w-full max-h-full object-contain"
-              src={obverseImage}
+              src={resolveImageSrc(obverseImage)}
             />
             <figcaption className="sr-only">Obverse side</figcaption>
           </>
