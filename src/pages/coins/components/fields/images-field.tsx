@@ -3,6 +3,7 @@ import { FormikProps } from "formik";
 import { ImageUploadField } from "@/components/composite/image-upload.tsx";
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field.tsx";
 import { CoinFormData } from "@/pages/coins/schemas/coin-form-schema.ts";
+import { resolveImageSrc } from "@/utils/resolveImageSrc.ts";
 
 interface ImagesFieldProps {
   value: {
@@ -29,7 +30,7 @@ export function ImagesField({
               await setFieldValue("reverseImage", url);
               await setFieldTouched("reverseImage", true, false);
             }}
-            value={value.reverseImage}
+            value={resolveImageSrc(value.reverseImage)}
           />
         </FieldContent>
       </Field>
@@ -42,7 +43,7 @@ export function ImagesField({
               await setFieldValue("obverseImage", url);
               await setFieldTouched("obverseImage", true, false);
             }}
-            value={value.obverseImage}
+            value={resolveImageSrc(value.obverseImage)}
           />
         </FieldContent>
       </Field>
