@@ -1,16 +1,23 @@
 use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
-use image::{ImageBuffer, ImageFormat, Luma, RgbaImage};
+use futures_util::StreamExt;
+use image::{DynamicImage, ImageBuffer, ImageFormat, Luma, RgbaImage};
 use std::collections::VecDeque;
 use std::io::Cursor;
-use std::time::{SystemTime, UNIX_EPOCH};
 
 const MAX_IMAGE_DIMENSION: u32 = 512;
 
-pub async fn process_image(
+/// Maximum allowed download size for remote images: 20 MB.
+const MAX_DOWNLOAD_BYTES: usize = 20 * 1024 * 1024;
+
+/// Maximum allowed dimension (width or height) before decoding.
+/// Guards against decompression bombs: a 16 000 × 16 000 RGBA image is ~1 GB.
+const MAX_SAFE_DIMENSION: u32 = 16_000;
+
+pub async fn download_and_process(
     image_source: Option<String>,
     remove_bg: bool,
-) -> Result<Option<String>, String> {
+) -> Result<Option<Vec<u8>>, String> {
     let Some(source) = image_source else {
         return Ok(None);
     };
@@ -21,83 +28,190 @@ pub async fn process_image(
         download_image(&source).await?
     };
 
-    let mut compressed = compress_image(image_bytes)?;
+    // Reject decompression bombs by reading only the image header.
+    check_dimensions(&image_bytes)?;
 
-    if remove_bg {
-        compressed = remove_background_from_bytes(&compressed)?;
+    // Decode once and keep as DynamicImage through the whole pipeline to
+    // avoid the redundant encode→decode that the old temp-file path required.
+    let img = load_and_resize(image_bytes)?;
+
+    let bytes = if remove_bg {
+        remove_background(img.to_rgba8())?
+    } else {
+        let mut cursor = Cursor::new(Vec::new());
+        img.write_to(&mut cursor, ImageFormat::Jpeg)
+            .map_err(|e| format!("Failed to encode image: {}", e))?;
+        cursor.into_inner()
+    };
+
+    Ok(Some(bytes))
+}
+
+pub fn save_to_file(bytes: &[u8], path: &std::path::Path) -> Result<(), String> {
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent)
+            .map_err(|e| format!("Failed to create image directory: {}", e))?;
+    }
+    std::fs::write(path, bytes).map_err(|e| format!("Failed to save image file: {}", e))
+}
+
+fn is_private_ip(ip: &std::net::IpAddr) -> bool {
+    match ip {
+        std::net::IpAddr::V4(v4) => {
+            v4.is_loopback()       // 127.0.0.0/8
+            || v4.is_private()     // 10/8, 172.16/12, 192.168/16
+            || v4.is_link_local()  // 169.254.0.0/16  (AWS/GCP metadata endpoint)
+            || v4.is_unspecified() // 0.0.0.0
+            || v4.is_broadcast() // 255.255.255.255
+        }
+        std::net::IpAddr::V6(v6) => {
+            let segs = v6.segments();
+            v6.is_loopback()                         // ::1
+            || v6.is_unspecified()                   // ::
+            || (segs[0] & 0xffc0) == 0xfe80          // fe80::/10  link-local
+            || (segs[0] & 0xfe00) == 0xfc00 // fc00::/7   unique local (ULA)
+        }
+    }
+}
+
+fn validate_image_url(url: &str) -> Result<(), String> {
+    let parsed = url::Url::parse(url).map_err(|e| format!("Invalid image URL: {}", e))?;
+
+    if parsed.scheme() != "https" {
+        return Err("Only HTTPS URLs are allowed for image downloads".to_string());
     }
 
-    Ok(Some(create_data_url(
-        &compressed,
-        if remove_bg {
-            ImageFormat::Png
-        } else {
-            ImageFormat::Jpeg
-        },
-    )))
+    let host = parsed
+        .host_str()
+        .ok_or_else(|| "Image URL has no host".to_string())?;
+
+    // Reject bare private IP literals immediately.
+    // DNS rebinding (public hostname → private IP at connection time) is a
+    // residual risk noted in comments; full mitigation would require resolving
+    // and re-checking the IP just before connecting.
+    if let Ok(ip) = host.parse::<std::net::IpAddr>() {
+        if is_private_ip(&ip) {
+            return Err("Image URL points to a private or restricted IP address".to_string());
+        }
+    }
+
+    Ok(())
+}
+
+async fn download_image(url: &str) -> Result<Vec<u8>, String> {
+    validate_image_url(url)?;
+
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(30))
+        .redirect(reqwest::redirect::Policy::none())
+        .build()
+        .map_err(|e| format!("Failed to build HTTP client: {}", e))?;
+    let response = client
+        .get(url)
+        .send()
+        .await
+        .map_err(|e| format!("Failed to download image: {}", e))?;
+
+    if !response.status().is_success() {
+        return Err(format!(
+            "Image download failed with status: {}",
+            response.status()
+        ));
+    }
+
+    // Reject non-image Content-Type early.
+    let content_type = response
+        .headers()
+        .get(reqwest::header::CONTENT_TYPE)
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("");
+    if !content_type.starts_with("image/") {
+        return Err(format!(
+            "URL does not point to an image (Content-Type: {})",
+            content_type
+        ));
+    }
+
+    // Reject by Content-Length before reading the body.
+    // MAX_DOWNLOAD_BYTES = 20 MB
+    if let Some(len) = response.content_length() {
+        if len > MAX_DOWNLOAD_BYTES as u64 {
+            return Err(format!(
+                "Image exceeds the {} MB download limit",
+                MAX_DOWNLOAD_BYTES / (1024 * 1024)
+            ));
+        }
+    }
+
+    // Stream the body in chunks, aborting as soon as the accumulated size
+    // exceeds MAX_DOWNLOAD_BYTES. This prevents a server from lying about
+    // Content-Length and forcing the full payload into memory.
+    // MAX_DOWNLOAD_BYTES = 20 MB
+    let mut stream = response.bytes_stream();
+    let mut bytes: Vec<u8> = Vec::new();
+    while let Some(chunk) = stream.next().await {
+        let chunk = chunk.map_err(|e| format!("Failed to read image bytes: {}", e))?;
+        if bytes.len() + chunk.len() > MAX_DOWNLOAD_BYTES {
+            return Err(format!(
+                "Image exceeds the {} MB download limit",
+                MAX_DOWNLOAD_BYTES / (1024 * 1024)
+            ));
+        }
+        bytes.extend_from_slice(&chunk);
+    }
+
+    Ok(bytes)
 }
 
 fn extract_base64_from_data_url(data_url: &str) -> Result<Vec<u8>, String> {
-    let parts: Vec<&str> = data_url.split(',').collect();
+    let parts: Vec<&str> = data_url.splitn(2, ',').collect();
     if parts.len() != 2 {
         return Err("Invalid data URL format".to_string());
+    }
+    // A base64 string encoding N bytes is ceil(N/3)*4 chars.
+    // MAX_DOWNLOAD_BYTES * 4/3 + 4 gives the maximum permissible base64 length.
+    let max_b64_len = MAX_DOWNLOAD_BYTES / 3 * 4 + 4;
+    if parts[1].len() > max_b64_len {
+        return Err(format!(
+            "Uploaded image exceeds the {} MB limit",
+            MAX_DOWNLOAD_BYTES / (1024 * 1024)
+        ));
     }
     STANDARD
         .decode(parts[1])
         .map_err(|e| format!("Failed to decode base64: {}", e))
 }
 
-async fn download_image(url: &str) -> Result<Vec<u8>, String> {
-    let response = reqwest::get(url)
-        .await
-        .map_err(|e| format!("Failed to download image: {}", e))?;
-    response
-        .bytes()
-        .await
-        .map(|b| b.to_vec())
-        .map_err(|e| format!("Failed to read image bytes: {}", e))
+fn check_dimensions(image_bytes: &[u8]) -> Result<(), String> {
+    let (w, h) = image::ImageReader::new(Cursor::new(image_bytes))
+        .with_guessed_format()
+        .map_err(|e| format!("Failed to determine image format: {}", e))?
+        .into_dimensions()
+        .map_err(|e| format!("Failed to read image dimensions: {}", e))?;
+
+    if w > MAX_SAFE_DIMENSION || h > MAX_SAFE_DIMENSION {
+        return Err(format!(
+            "Image dimensions ({}×{}) exceed the {} px per-side limit",
+            w, h, MAX_SAFE_DIMENSION
+        ));
+    }
+    Ok(())
 }
 
-fn compress_image(image_bytes: Vec<u8>) -> Result<Vec<u8>, String> {
+fn load_and_resize(image_bytes: Vec<u8>) -> Result<DynamicImage, String> {
     let img = image::load_from_memory(&image_bytes)
         .map_err(|e| format!("Failed to decode image: {}", e))?;
 
-    let resized = if img.width() > MAX_IMAGE_DIMENSION || img.height() > MAX_IMAGE_DIMENSION {
-        img.thumbnail(MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION)
-    } else {
-        img
-    };
-
-    let mut cursor = Cursor::new(Vec::new());
-    resized
-        .write_to(&mut cursor, ImageFormat::Jpeg)
-        .map_err(|e| format!("Failed to encode image: {}", e))?;
-    Ok(cursor.into_inner())
+    Ok(
+        if img.width() > MAX_IMAGE_DIMENSION || img.height() > MAX_IMAGE_DIMENSION {
+            img.thumbnail(MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION)
+        } else {
+            img
+        },
+    )
 }
 
-fn create_data_url(image_bytes: &[u8], format: ImageFormat) -> String {
-    let mime = match format {
-        ImageFormat::Png => "image/png",
-        _ => "image/jpeg",
-    };
-    let encoded = STANDARD.encode(image_bytes);
-    format!("data:{};base64,{}", mime, encoded)
-}
-
-fn remove_background_from_bytes(image_bytes: &[u8]) -> Result<Vec<u8>, String> {
-    let nanos = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map(|d| d.as_nanos())
-        .unwrap_or(0);
-    let temp_path = std::env::temp_dir().join(format!("koin_rmbg_{}.jpg", nanos));
-
-    std::fs::write(&temp_path, image_bytes)
-        .map_err(|e| format!("Failed to write temporary image: {}", e))?;
-
-    let mut img = image::open(&temp_path)
-        .map_err(|e| format!("Failed to open base image: {}", e))?
-        .to_rgba8();
-
+fn remove_background(mut img: RgbaImage) -> Result<Vec<u8>, String> {
     let (width, height) = img.dimensions();
 
     let mut true_background: ImageBuffer<Luma<u8>, Vec<u8>> =
@@ -105,18 +219,15 @@ fn remove_background_from_bytes(image_bytes: &[u8]) -> Result<Vec<u8>, String> {
     let mut bg_queue = VecDeque::new();
 
     inward_flood_fill(&img, width, height, &mut true_background, &mut bg_queue);
-    let mut coin_mask: ImageBuffer<Luma<u8>, Vec<u8>> =
-        coin_area_layout_pass(width, height, &true_background);
+    let mut coin_mask = coin_area_layout_pass(width, height, &true_background);
     centrality_validation_pass(&img, width, height, &true_background, &mut coin_mask);
     coin_mask = erode_mask(&coin_mask, width, height);
     edge_anti_aliasing(&mut img, width, height, &mut coin_mask);
 
     let mut buf = Cursor::new(Vec::new());
-    image::DynamicImage::ImageRgba8(img)
+    DynamicImage::ImageRgba8(img)
         .write_to(&mut buf, ImageFormat::Png)
         .map_err(|e| format!("Failed to encode PNG: {}", e))?;
-
-    let _ = std::fs::remove_file(&temp_path);
 
     Ok(buf.into_inner())
 }

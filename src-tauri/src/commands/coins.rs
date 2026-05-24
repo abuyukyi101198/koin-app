@@ -1,14 +1,36 @@
-use crate::commands::utils::get_db_connection;
+use crate::commands::utils::{get_db_connection, get_images_dir};
+use crate::handlers::image_handler;
 use crate::types::coins::{
     Coin, CreateCoinRequest, ImageProcessingMode, PaginatedCoinsResponse, UpdateCoinRequest,
 };
-use crate::handlers::image_handler;
 use validator::Validate;
+
+fn resolve_image_value(stored: Option<String>) -> Option<String> {
+    match stored {
+        None => None,
+        Some(ref val) if val.starts_with("http") => stored,
+        Some(ref path) => {
+            if std::path::Path::new(path).exists() {
+                stored
+            } else {
+                None
+            }
+        }
+    }
+}
+
+fn delete_image_file_if_local(val: &Option<String>) {
+    if let Some(ref path) = val {
+        if !path.starts_with("http") {
+            let _ = std::fs::remove_file(path);
+        }
+    }
+}
 
 pub fn build_coin_from_row(row: &rusqlite::Row) -> Result<Coin, rusqlite::Error> {
     use crate::types::issuers::IssuerDisplay;
 
-    Ok(Coin {
+    let coin = Coin {
         id: row.get(0)?,
         title: row.get(1)?,
         value: row.get(2)?,
@@ -30,6 +52,12 @@ pub fn build_coin_from_row(row: &rusqlite::Row) -> Result<Coin, rusqlite::Error>
         created_at: row.get(16)?,
         notebook_id: row.get(17)?,
         notebook_position: row.get(18)?,
+    };
+
+    Ok(Coin {
+        obverse_image: resolve_image_value(coin.obverse_image),
+        reverse_image: resolve_image_value(coin.reverse_image),
+        ..coin
     })
 }
 
@@ -102,7 +130,9 @@ pub fn list_coins(
 
     // Get paginated coins
     let query = format!(
-        "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.start_year, i.end_year, i.flag, c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at, c.notebook_id, c.notebook_position
+        "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.start_year, i.end_year, i.flag, \
+                c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at, \
+                c.notebook_id, c.notebook_position
          FROM coins c
          LEFT JOIN issuers i ON c.issuer_id = i.id
          {} ORDER BY {} {}, c.year {}, c.value {} LIMIT ?1 OFFSET ?2",
@@ -126,10 +156,12 @@ pub fn list_coins(
 pub fn get_coin(app_handle: tauri::AppHandle, id: i32) -> Result<Coin, String> {
     let conn = get_db_connection(&app_handle)?;
 
-    let query = "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.start_year, i.end_year, i.flag, c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at, c.notebook_id, c.notebook_position
-                FROM coins c
-                LEFT JOIN issuers i ON c.issuer_id = i.id 
-                WHERE c.id = ?1";
+    let query = "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.start_year, i.end_year, i.flag, \
+                        c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at, \
+                        c.notebook_id, c.notebook_position
+                 FROM coins c
+                 LEFT JOIN issuers i ON c.issuer_id = i.id
+                 WHERE c.id = ?1";
 
     let mut stmt = conn
         .prepare(query)
@@ -140,35 +172,56 @@ pub fn get_coin(app_handle: tauri::AppHandle, id: i32) -> Result<Coin, String> {
 }
 
 #[tauri::command]
-pub async fn create_coin(app_handle: tauri::AppHandle, coin: CreateCoinRequest) -> Result<Coin, String> {
+pub async fn create_coin(
+    app_handle: tauri::AppHandle,
+    coin: CreateCoinRequest,
+) -> Result<Coin, String> {
     coin.validate()
         .map_err(|e| format!("Validation failed: {}", e))?;
 
     let conn = get_db_connection(&app_handle)?;
+    let images_dir = get_images_dir(&app_handle)?;
 
-    let remove_bg = matches!(coin.image_processing, Some(ImageProcessingMode::DownloadAndRemoveBg));
-    let download   = remove_bg || matches!(coin.image_processing, Some(ImageProcessingMode::Download));
+    let remove_bg = matches!(
+        coin.image_processing,
+        Some(ImageProcessingMode::DownloadAndRemoveBg)
+    );
+    let download =
+        remove_bg || matches!(coin.image_processing, Some(ImageProcessingMode::Download));
 
-    let obverse_image = if download {
-        image_handler::process_image(coin.obverse_image.clone(), remove_bg).await?
+    // Data URLs (uploaded from disk) are always saved to a file even when download=false.
+    // Remote http URLs are only downloaded when download=true.
+    let obverse_is_data_url = coin.obverse_image.as_ref().map_or(false, |v| v.starts_with("data:"));
+    let reverse_is_data_url = coin.reverse_image.as_ref().map_or(false, |v| v.starts_with("data:"));
+    let save_obverse = download || obverse_is_data_url;
+    let save_reverse = download || reverse_is_data_url;
+
+    // remove_bg only applies in explicit download mode, not for plain data-URL saves.
+    let apply_bg = remove_bg && download;
+    let ext = if apply_bg { "png" } else { "jpg" };
+
+    let obverse_bytes = if save_obverse {
+        image_handler::download_and_process(coin.obverse_image.clone(), apply_bg).await?
     } else {
-        coin.obverse_image.clone()
+        None
+    };
+    let reverse_bytes = if save_reverse {
+        image_handler::download_and_process(coin.reverse_image.clone(), apply_bg).await?
+    } else {
+        None
     };
 
-    let reverse_image = if download {
-        image_handler::process_image(coin.reverse_image.clone(), remove_bg).await?
-    } else {
-        coin.reverse_image.clone()
-    };
-
-    // Generate title from value, currency, and year
     let title = format!("{} {} {}", coin.value, coin.currency, coin.year);
 
-    const INSERT_QUERY: &str = "INSERT INTO coins (title, value, currency, year, issuer_id, description, obverse_image, reverse_image, quantity, sale_value, notes)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)";
+    // Insert with NULL for images that will be saved as files (id unknown yet),
+    // or with the remote URL for images that are kept as-is.
+    let initial_obverse = if save_obverse { None } else { coin.obverse_image.clone() };
+    let initial_reverse = if save_reverse { None } else { coin.reverse_image.clone() };
 
     conn.execute(
-        INSERT_QUERY,
+        "INSERT INTO coins (title, value, currency, year, issuer_id, description, \
+                            obverse_image, reverse_image, quantity, sale_value, notes)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
         rusqlite::params![
             title,
             coin.value,
@@ -176,8 +229,8 @@ pub async fn create_coin(app_handle: tauri::AppHandle, coin: CreateCoinRequest) 
             coin.year,
             coin.issuer_id,
             coin.description,
-            obverse_image,
-            reverse_image,
+            initial_obverse,
+            initial_reverse,
             coin.quantity.unwrap_or(1),
             coin.sale_value,
             coin.notes,
@@ -187,7 +240,31 @@ pub async fn create_coin(app_handle: tauri::AppHandle, coin: CreateCoinRequest) 
 
     let id = conn.last_insert_rowid() as i32;
 
-    // Fetch and return the created coin
+    // Now that we have the coin id, save image files and update the row.
+    if save_obverse || save_reverse {
+        let new_obverse = if let Some(bytes) = obverse_bytes {
+            let file_path = images_dir.join(format!("{}_obverse.{}", id, ext));
+            image_handler::save_to_file(&bytes, &file_path)?;
+            Some(file_path.to_string_lossy().to_string())
+        } else {
+            None
+        };
+
+        let new_reverse = if let Some(bytes) = reverse_bytes {
+            let file_path = images_dir.join(format!("{}_reverse.{}", id, ext));
+            image_handler::save_to_file(&bytes, &file_path)?;
+            Some(file_path.to_string_lossy().to_string())
+        } else {
+            None
+        };
+
+        conn.execute(
+            "UPDATE coins SET obverse_image = ?1, reverse_image = ?2 WHERE id = ?3",
+            rusqlite::params![new_obverse, new_reverse, id],
+        )
+        .map_err(|e| format!("Failed to update coin images after insert: {}", e))?;
+    }
+
     get_coin(app_handle, id)
 }
 
@@ -200,23 +277,70 @@ pub async fn update_coin(
         .map_err(|e| format!("Validation failed: {}", e))?;
 
     let conn = get_db_connection(&app_handle)?;
+    let images_dir = get_images_dir(&app_handle)?;
 
-    let remove_bg = matches!(coin.image_processing, Some(ImageProcessingMode::DownloadAndRemoveBg));
-    let download   = remove_bg || matches!(coin.image_processing, Some(ImageProcessingMode::Download));
+    let remove_bg = matches!(
+        coin.image_processing,
+        Some(ImageProcessingMode::DownloadAndRemoveBg)
+    );
+    let download =
+        remove_bg || matches!(coin.image_processing, Some(ImageProcessingMode::Download));
 
-    let obverse_image = if download {
-        image_handler::process_image(coin.obverse_image.clone(), remove_bg).await?
+    // Always fetch the current coin – needed for old-file cleanup and title regeneration.
+    let current_coin = get_coin(app_handle.clone(), coin.id)?;
+
+    // Data URLs (uploaded from disk) are always saved to a file even when download=false.
+    // Remote http URLs are only downloaded when download=true.
+    let obverse_is_data_url = coin.obverse_image.as_ref().map_or(false, |v| v.starts_with("data:"));
+    let reverse_is_data_url = coin.reverse_image.as_ref().map_or(false, |v| v.starts_with("data:"));
+    let save_obverse = download || obverse_is_data_url;
+    let save_reverse = download || reverse_is_data_url;
+
+    // remove_bg only applies in explicit download mode, not for plain data-URL saves.
+    let apply_bg = remove_bg && download;
+    let ext = if apply_bg { "png" } else { "jpg" };
+
+    let obverse_bytes = if save_obverse {
+        image_handler::download_and_process(coin.obverse_image.clone(), apply_bg).await?
     } else {
-        coin.obverse_image.clone()
+        None
+    };
+    let reverse_bytes = if save_reverse {
+        image_handler::download_and_process(coin.reverse_image.clone(), apply_bg).await?
+    } else {
+        None
     };
 
-    let reverse_image = if download {
-        image_handler::process_image(coin.reverse_image.clone(), remove_bg).await?
+    // Delete old image files (safe – ignores missing files).
+    delete_image_file_if_local(&current_coin.obverse_image);
+    delete_image_file_if_local(&current_coin.reverse_image);
+
+    // Determine new stored values: file path if we saved a file, remote URL otherwise, None if cleared.
+    let new_obverse = if save_obverse {
+        if let Some(bytes) = obverse_bytes {
+            let file_path = images_dir.join(format!("{}_obverse.{}", coin.id, ext));
+            image_handler::save_to_file(&bytes, &file_path)?;
+            Some(file_path.to_string_lossy().to_string())
+        } else {
+            None
+        }
     } else {
-        coin.reverse_image.clone()
+        coin.obverse_image.clone() // remote URL or None
     };
 
-    // Build dynamic update query
+    let new_reverse = if save_reverse {
+        if let Some(bytes) = reverse_bytes {
+            let file_path = images_dir.join(format!("{}_reverse.{}", coin.id, ext));
+            image_handler::save_to_file(&bytes, &file_path)?;
+            Some(file_path.to_string_lossy().to_string())
+        } else {
+            None
+        }
+    } else {
+        coin.reverse_image.clone() // remote URL or None
+    };
+
+    // Build dynamic update query.
     let mut updates = Vec::new();
     let mut params: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
 
@@ -225,13 +349,10 @@ pub async fn update_coin(
         coin.value.is_some() || coin.currency.is_some() || coin.year.is_some();
 
     if should_update_title {
-        // Fetch current coin to get missing fields
-        let current_coin = get_coin(app_handle.clone(), coin.id)?;
         let value = coin.value.unwrap_or(current_coin.value);
         let currency = coin.currency.clone().unwrap_or(current_coin.currency);
         let year = coin.year.unwrap_or(current_coin.year);
         let new_title = format!("{} {} {}", value, currency, year);
-
         updates.push("title = ?");
         params.push(Box::new(new_title));
     }
@@ -256,13 +377,11 @@ pub async fn update_coin(
         params.push(Box::new(description));
     }
 
-    // Always update images if they are part of the request (frontend sends complete form)
-    // None/undefined means explicit removal (set to NULL)
-    // Some(value) means update with the value
+    // Images are always included (frontend sends the complete form).
     updates.push("obverse_image = ?");
-    params.push(Box::new(obverse_image));
+    params.push(Box::new(new_obverse));
     updates.push("reverse_image = ?");
-    params.push(Box::new(reverse_image));
+    params.push(Box::new(new_reverse));
 
     if let Some(quantity) = coin.quantity {
         updates.push("quantity = ?");
@@ -294,10 +413,14 @@ pub async fn update_coin(
 
 #[tauri::command]
 pub fn delete_coin(app_handle: tauri::AppHandle, id: i32) -> Result<(), String> {
-    let conn = get_db_connection(&app_handle)?;
+    let coin = get_coin(app_handle.clone(), id)?;
 
+    let conn = get_db_connection(&app_handle)?;
     conn.execute("DELETE FROM coins WHERE id = ?1", [id])
         .map_err(|e| format!("Failed to delete coin: {}", e))?;
+
+    delete_image_file_if_local(&coin.obverse_image);
+    delete_image_file_if_local(&coin.reverse_image);
 
     Ok(())
 }
@@ -315,8 +438,9 @@ pub fn get_similar_coins(
     // Fetch the target coin to compare against
     let target_coin = get_coin(app_handle.clone(), id)?;
 
-    // Query all coins except the target
-    let query = "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.start_year, i.end_year, i.flag, c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at, c.notebook_id, c.notebook_position
+    let query = "SELECT c.id, c.title, c.value, c.currency, c.year, i.id, i.name, i.start_year, i.end_year, i.flag, \
+                        c.description, c.obverse_image, c.reverse_image, c.quantity, c.sale_value, c.notes, c.created_at, \
+                        c.notebook_id, c.notebook_position
                  FROM coins c
                  LEFT JOIN issuers i ON c.issuer_id = i.id
                  WHERE c.id != ?1";
@@ -337,7 +461,7 @@ pub fn get_similar_coins(
 
                 // Issuer proximity scoring - closer issuer_ids are more similar
                 let issuer_distance = (coin.issuer.id - target_coin.issuer.id).abs();
-                let issuer_score = (30 - issuer_distance.min(30)) as i32;
+                let issuer_score = 30 - issuer_distance.min(30);
                 score += issuer_score;
 
                 // Currency exact match
@@ -347,7 +471,7 @@ pub fn get_similar_coins(
 
                 // Year proximity scoring - closer years are more similar
                 let year_distance = (coin.year - target_coin.year).abs();
-                let year_score = (25 - year_distance.min(25)) as i32;
+                let year_score = 25 - year_distance.min(25);
                 score += year_score;
 
                 // Only include coins that meet the similarity threshold
@@ -375,6 +499,8 @@ pub fn get_similar_coins(
         .map(|(coin, _)| coin)
         .collect();
 
-    Ok(PaginatedCoinsResponse { items, total: limit })
+    Ok(PaginatedCoinsResponse {
+        items,
+        total: limit,
+    })
 }
-

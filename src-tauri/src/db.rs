@@ -2,25 +2,21 @@ use rusqlite::{Connection, Result as SqliteResult};
 use std::fs;
 use std::path::Path;
 
-pub fn init_database(db_path: &Path) -> SqliteResult<()> {
-    // Check if database already exists at the target location
-    if db_path.exists() {
-        println!("Database already exists at: {}", db_path.display());
-        return Ok(());
-    }
+pub fn init_database(db_path: &Path, images_dir: &Path) -> Result<(), String> {
+    fs::create_dir_all(images_dir)
+        .map_err(|e| format!("Failed to create coin_images directory: {}", e))?;
 
-    // Fallback: Create database from scratch with migrations and data seeding
-    println!("Creating fresh database with migrations and seeding...");
-    let conn = Connection::open(db_path)?;
+    let conn = Connection::open(db_path)
+        .map_err(|e| format!("Failed to open database: {}", e))?;
 
-    // Enable foreign keys
-    conn.execute("PRAGMA foreign_keys = ON", [])?;
+    conn.execute("PRAGMA foreign_keys = ON", [])
+        .map_err(|e| format!("Failed to enable foreign keys: {}", e))?;
 
-    // Run migrations
-    run_migrations(&conn)?;
+    run_migrations(&conn).map_err(|e| format!("SQL migration failed: {}", e))?;
 
-    // Populate issuers from JSON if the table is empty
-    if is_issuers_table_empty(&conn)? {
+    if is_issuers_table_empty(&conn)
+        .map_err(|e| format!("Failed to check issuers table: {}", e))?
+    {
         populate_issuers_from_json(&conn).ok();
     }
 

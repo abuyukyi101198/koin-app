@@ -40,8 +40,10 @@ pub fn run() {
             // Create app data directory if it doesn't exist
             std::fs::create_dir_all(&app_dir).expect("failed to create app data directory");
             let db_path = app_dir.join("koin-app.db");
-            // Initialize database with migrations
-            db::init_database(&db_path).expect("failed to initialize database");
+            let images_dir = app_dir.join("coin_images");
+            // Initialize database (runs pending migrations, including image-to-file migration)
+            db::init_database(&db_path, &images_dir)
+                .expect("failed to initialize database");
             println!("Database initialized at: {}", db_path.display());
             Ok(())
         })
