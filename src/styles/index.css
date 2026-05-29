@@ -1,6 +1,47 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Local fonts */
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("../assets/fonts/PlusJakartaSans-VariableFont_wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("../assets/fonts/PlusJakartaSans-Italic-VariableFont_wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "EB Garamond";
+  src: url("../assets/fonts/EBGaramond-VariableFont_wght.ttf") format("truetype");
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "EB Garamond";
+  src: url("../assets/fonts/EBGaramond-Italic-VariableFont_wght.ttf") format("truetype");
+  font-weight: 400 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inconsolata";
+  src: url("../assets/fonts/Inconsolata-VariableFont_wdth,wght.ttf") format("truetype");
+  font-weight: 200 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -36,7 +77,7 @@
   --sidebar-accent-foreground: oklch(0.2880 0.0054 106.7310);
   --sidebar-border: oklch(0.8464 0.0148 84.5867);
   --sidebar-ring: oklch(0.5687 0.0636 79.7101);
-  --font-sans: IBM Plex Sans, ui-sans-serif, sans-serif, system-ui;
+  --font-sans: Plus Jakarta Sans, ui-sans-serif, sans-serif, system-ui;
   --font-serif: EB Garamond, ui-serif, serif;
   --font-mono: Inconsolata, ui-monospace, monospace;
   --radius: 0.5rem;
@@ -91,7 +132,7 @@
   --sidebar-accent-foreground: oklch(0.8931 0.0067 106.5353);
   --sidebar-border: oklch(0.2679 0.0036 106.6427);
   --sidebar-ring: oklch(0.6831 0.0712 80.9242);
-  --font-sans: IBM Plex Sans, ui-sans-serif, sans-serif, system-ui;
+  --font-sans: Plus Jakarta Sans, ui-sans-serif, sans-serif, system-ui;
   --font-serif: EB Garamond, ui-serif, serif;
   --font-mono: Inconsolata, ui-monospace, monospace;
   --radius: 0.5rem;
