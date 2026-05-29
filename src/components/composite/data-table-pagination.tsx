@@ -129,14 +129,14 @@ export function DataTablePagination({
           </span>
           <SelectContent align="start">
             <SelectGroup>
-              <SelectItem className="text-xs cursor-pointer" value="10">
-                10 / page
-              </SelectItem>
               <SelectItem className="text-xs cursor-pointer" value="25">
                 25 / page
               </SelectItem>
               <SelectItem className="text-xs cursor-pointer" value="50">
                 50 / page
+              </SelectItem>
+              <SelectItem className="text-xs cursor-pointer" value="100">
+                100 / page
               </SelectItem>
             </SelectGroup>
           </SelectContent>
