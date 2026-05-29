@@ -22,11 +22,10 @@ export function CoinsGallery({
   const isSelected = (id: number) =>
     selection?.rowSelection[id.toString()] ?? false;
 
-  const toggleSelection = (id: number) => {
-    if (!selection) return;
-    selection.onRowSelectionChange({
-      [id.toString()]: !isSelected(id),
-    });
+  const selectItem = (id: number) => {
+    // Never deselect — clicking the active card does nothing.
+    if (!selection || isSelected(id)) return;
+    selection.onRowSelectionChange({ [id.toString()]: true });
   };
 
   return (
@@ -47,7 +46,11 @@ export function CoinsGallery({
       role="region"
     >
       {loading ? (
-        <div className="grid grid-cols-5 gap-3 p-3">
+        <div
+          aria-label="Loading coins"
+          className="grid grid-cols-5 gap-3 p-3"
+          role="list"
+        >
           {Array.from({ length: 20 }).map((_, i) => (
             <GalleryCoin.Skeleton key={i} />
           ))}
@@ -68,7 +71,7 @@ export function CoinsGallery({
               isSelected={isSelected(coin.id)}
               key={coin.id}
               onSelect={() => {
-                toggleSelection(coin.id);
+                selectItem(coin.id);
               }}
             />
           ))}

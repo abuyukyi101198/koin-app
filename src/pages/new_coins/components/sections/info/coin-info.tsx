@@ -34,9 +34,9 @@ export function CoinInfo({ coinId, selection }: CoinInfoProps) {
     >
       <header className="shrink-0 flex flex-col">
         <div className="mb-2 flex flex-col gap-1">
-          <h1 className="scroll-m-20 text-2xl font-serif font-medium tracking-wide text-balance">
+          <h2 className="scroll-m-20 text-2xl font-serif font-medium tracking-wide text-balance">
             {asFraction(data?.title, data?.value)}
-          </h1>
+          </h2>
           <div className="mb-1 w-full flex items-start gap-2">
             <img
               alt={`${data?.issuer.name} flag`}
