@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 
 import { CoinPreviewImages } from "@/components/composite/coin-preview-images.tsx";
 import { DataTableColumnHeader } from "@/components/composite/data-table-column-header.tsx";
+import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { Coin } from "@/query/types";
 import { asFraction } from "@/utils/asFraction.tsx";
 
@@ -12,54 +13,57 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
     () =>
       [
         {
-          id: "images",
-          accessorKey: "obverse_image",
-          enableSorting: false,
-          header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Image" />
-          ),
-          meta: {
-            size: 75,
-          },
-          cell: ({
-            row: {
-              original: { title, reverse_image, obverse_image },
-            },
-          }) => {
-            return (
-              <div className="flex gap-2">
-                <CoinPreviewImages
-                  obverseImage={obverse_image}
-                  reverseImage={reverse_image}
-                  size="size-12"
-                  title={title}
-                />
-              </div>
-            );
-          },
-        },
-        {
           id: "title",
           accessorKey: "title",
           header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Title" />
+            <DataTableColumnHeader column={column} title="Coin" />
           ),
           meta: {
             size: 120,
+            skeleton: () => (
+              <div className="flex items-center gap-4">
+                <div className="flex gap-2">
+                  <Skeleton className="size-12 rounded-full shrink-0" />
+                  <Skeleton className="size-12 rounded-full shrink-0" />
+                </div>
+                <div className="flex-1 flex flex-col gap-1.5">
+                  <Skeleton className="h-3 w-3/4 rounded" />
+                  <Skeleton className="h-3 w-1/2 rounded" />
+                </div>
+              </div>
+            ),
           },
           cell: ({
             row: {
-              original: { title, value, description },
+              original: {
+                title,
+                value,
+                description,
+                reverse_image,
+                obverse_image,
+              },
             },
           }) => {
             return (
-              <div className="flex flex-col">
-                <span className="text-xs font-medium">
-                  {asFraction(title, value)}
-                </span>
-                <span className="text-muted-foreground text-xs italic truncate w-full">
-                  {description?.length ? description : "—"}
-                </span>
+              <div className="flex items-center gap-4">
+                <div className="flex gap-1">
+                  <CoinPreviewImages
+                    obverseImage={obverse_image}
+                    reverseImage={reverse_image}
+                    size="size-12"
+                    title={title}
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-serif font-medium">
+                    {asFraction(title, value)}
+                  </span>
+                  {description?.length ? (
+                    <span className="text-muted-foreground text-xs italic truncate w-full">
+                      {description}
+                    </span>
+                  ) : null}
+                </div>
               </div>
             );
           },
@@ -71,8 +75,14 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
             <DataTableColumnHeader column={column} title="Issuer" />
           ),
           meta: {
-            size: 120,
+            size: 80,
             className: "md:table-cell hidden",
+            skeleton: () => (
+              <div className="flex items-start gap-2">
+                <Skeleton className="h-3 w-4.5 shrink-0 rounded" />
+                <Skeleton className="h-3 flex-1 rounded" />
+              </div>
+            ),
           },
           cell: ({
             row: {
@@ -98,15 +108,24 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
           id: "year",
           accessorKey: "year",
           header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Year" />
+            <DataTableColumnHeader
+              align="center"
+              column={column}
+              title="Year"
+            />
           ),
           meta: {
             size: 50,
             className: "lg:table-cell hidden",
+            skeleton: () => (
+              <div className="flex justify-center">
+                <Skeleton className="h-3 w-10 rounded" />
+              </div>
+            ),
           },
           cell: ({ row }) => {
             return (
-              <div className="text-xs text-right">
+              <div className="text-xs text-center">
                 {row.getValue("year") as number}
               </div>
             );
@@ -116,29 +135,43 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
           id: "quantity",
           accessorKey: "quantity",
           header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Quantity" />
+            <DataTableColumnHeader align="center" column={column} title="Qty" />
           ),
           meta: {
             size: 50,
             className: "xl:table-cell hidden",
+            skeleton: () => (
+              <div className="flex justify-center">
+                <Skeleton className="h-3 w-6 rounded" />
+              </div>
+            ),
           },
           cell: ({
             row: {
               original: { quantity },
             },
           }) => {
-            return <div className="text-xs text-right">{quantity}</div>;
+            return <div className="text-xs text-center">{quantity}</div>;
           },
         },
         {
           id: "sale_value",
           accessorKey: "sale_value",
           header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Est. sale value" />
+            <DataTableColumnHeader
+              align="right"
+              column={column}
+              title="Est. sale value"
+            />
           ),
           meta: {
             size: 75,
             className: "2xl:table-cell hidden",
+            skeleton: () => (
+              <div className="flex justify-end">
+                <Skeleton className="h-3 w-16 rounded" />
+              </div>
+            ),
           },
           cell: ({
             row: {

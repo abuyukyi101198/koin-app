@@ -13,6 +13,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   TableBody,
   TableCell,
@@ -25,17 +26,11 @@ import { cn } from "@/lib/utils";
 declare module "@tanstack/react-table" {
   // eslint-disable-next-line unused-imports/no-unused-vars
   interface ColumnMeta<TData extends RowData, TValue = unknown> {
-    /**
-     * Relative width weight against all other columns (default: 100).
-     * A column with size 200 where all others are 100 receives twice the width.
-     */
     size?: number;
-    /** Classes applied to both the <th> and the <td> for this column. */
     className?: string;
-    /** Classes applied only to the <th> (header cell). */
     headerClassName?: string;
-    /** Classes applied only to the <td> (body cell). */
     cellClassName?: string;
+    skeleton?: () => ReactNode;
   }
 }
 
@@ -55,6 +50,8 @@ export interface DataTableProps<
   };
   empty?: ReactNode;
   showHeader?: boolean;
+  /** Number of skeleton rows shown during initial load. Defaults to 10. */
+  skeletonRowCount?: number;
 }
 
 function proportionalWidth(size: number, total: number): CSSProperties {
@@ -69,6 +66,7 @@ export function DataTable<TData extends { id: number | string }>({
   sort,
   empty,
   showHeader = true,
+  skeletonRowCount = 25,
   className,
   ...tableProps
 }: DataTableProps<TData>) {
@@ -115,7 +113,7 @@ export function DataTable<TData extends { id: number | string }>({
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow
                   aria-rowindex={1}
-                  className="hover:bg-background"
+                  className="hover:bg-background gap-12"
                   key={headerGroup.id}
                 >
                   {headerGroup.headers.map((header) => {
@@ -136,7 +134,7 @@ export function DataTable<TData extends { id: number | string }>({
                                 : undefined
                         }
                         className={cn(
-                          "pr-12 text-muted-foreground",
+                          "text-muted-foreground",
                           isSortable && "cursor-pointer select-none",
                           meta?.className,
                           meta?.headerClassName
@@ -184,7 +182,7 @@ export function DataTable<TData extends { id: number | string }>({
                 <TableRow
                   aria-rowindex={rowIndex + (showHeader ? 2 : 1)}
                   aria-selected={row.getIsSelected()}
-                  className="hover:bg-muted! data-[state=selected]:bg-accent/50! cursor-pointer"
+                  className="gap-12 group hover:bg-muted! data-[state=selected]:bg-accent/50! cursor-pointer"
                   data-state={row.getIsSelected() ? "selected" : undefined}
                   key={row.id}
                   onClick={() => {
@@ -204,16 +202,13 @@ export function DataTable<TData extends { id: number | string }>({
                     return (
                       <TableCell
                         aria-colindex={cellIndex + 1}
-                        className={cn(
-                          "pr-12",
-                          meta?.className,
-                          meta?.cellClassName,
-                          {
-                            "rounded-l-lg": cellIndex === 0,
-                            "rounded-r-lg":
-                              cellIndex === row.getVisibleCells().length - 1,
-                          }
-                        )}
+                        className={cn(meta?.className, meta?.cellClassName, {
+                          "relative overflow-hidden before:absolute before:inset-y-0 before:left-0 before:w-0.75 before:bg-transparent before:transition-colors group-data-[state=selected]:before:bg-primary":
+                            cellIndex === 0,
+                          "rounded-l-lg": cellIndex === 0,
+                          "rounded-r-lg":
+                            cellIndex === row.getVisibleCells().length - 1,
+                        })}
                         key={cell.id}
                         role="gridcell"
                         style={proportionalWidth(meta?.size ?? 100, totalSize)}
@@ -228,20 +223,45 @@ export function DataTable<TData extends { id: number | string }>({
                 </TableRow>
               ))
             ) : loading ? (
-              <TableRow className="hover:bg-background">
-                <TableCell
-                  className="h-24 text-center"
-                  colSpan={columns.length}
-                  role="gridcell"
-                >
-                  <div
-                    className="flex h-full items-center justify-center"
-                    role="status"
-                  >
-                    <p className="text-muted-foreground text-sm">Loading…</p>
-                  </div>
-                </TableCell>
-              </TableRow>
+              (() => {
+                const headers = table.getHeaderGroups()[0]?.headers ?? [];
+                return Array.from({ length: skeletonRowCount }).map(
+                  (_, rowIndex) => (
+                    <TableRow
+                      className="hover:bg-transparent"
+                      key={`skel-${rowIndex}`}
+                    >
+                      {headers.map((header, cellIndex) => {
+                        const meta = header.column.columnDef.meta;
+                        return (
+                          <TableCell
+                            className={cn(
+                              meta?.className,
+                              meta?.cellClassName,
+                              {
+                                "rounded-l-lg": cellIndex === 0,
+                                "rounded-r-lg":
+                                  cellIndex === headers.length - 1,
+                              }
+                            )}
+                            key={`skel-${rowIndex}-${header.id}`}
+                            style={proportionalWidth(
+                              meta?.size ?? 100,
+                              totalSize
+                            )}
+                          >
+                            {meta?.skeleton ? (
+                              meta.skeleton()
+                            ) : (
+                              <Skeleton className="h-4 w-full rounded" />
+                            )}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  )
+                );
+              })()
             ) : (
               <TableRow className="hover:bg-background">
                 <TableCell
