@@ -1,4 +1,5 @@
 import "@/styles/index.css";
+
 import { CSSProperties } from "react";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -55,42 +56,40 @@ function App() {
                       <SidebarGroupContent>
                         <SidebarMenu>
                           <SidebarMenuItem>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <SidebarMenuButton
-                                  asChild
-                                  className="text-muted-foreground hover:text-base cursor-pointer"
-                                  isActive={pathname === "/coins"}
-                                  size="default"
-                                >
-                                  <Link to="/coins">
-                                    <Coins />
-                                  </Link>
-                                </SidebarMenuButton>
-                              </TooltipTrigger>
-                              <TooltipContent side="right" sideOffset={8}>
-                                Coins
-                              </TooltipContent>
-                            </Tooltip>
+                            <SidebarMenuButton
+                              asChild
+                              className="text-muted-foreground hover:text-base cursor-pointer"
+                              isActive={pathname === "/new-coins"}
+                              size="default"
+                            >
+                              <Link to="/new-coins">
+                                <Coins />
+                              </Link>
+                            </SidebarMenuButton>
                           </SidebarMenuItem>
                           <SidebarMenuItem>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <SidebarMenuButton
-                                  asChild
-                                  className="text-muted-foreground hover:text-base cursor-pointer"
-                                  isActive={pathname === "/notebooks"}
-                                  size="default"
-                                >
-                                  <Link to="/notebooks">
-                                    <BookCopy />
-                                  </Link>
-                                </SidebarMenuButton>
-                              </TooltipTrigger>
-                              <TooltipContent side="right" sideOffset={8}>
-                                Notebooks
-                              </TooltipContent>
-                            </Tooltip>
+                            <SidebarMenuButton
+                              asChild
+                              className="text-muted-foreground hover:text-base cursor-pointer"
+                              isActive={pathname === "/coins"}
+                              size="default"
+                            >
+                              <Link to="/coins">
+                                <Coins />
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                          <SidebarMenuItem>
+                            <SidebarMenuButton
+                              asChild
+                              className="text-muted-foreground hover:text-base cursor-pointer"
+                              isActive={pathname === "/notebooks"}
+                              size="default"
+                            >
+                              <Link to="/notebooks">
+                                <BookCopy />
+                              </Link>
+                            </SidebarMenuButton>
                           </SidebarMenuItem>
                         </SidebarMenu>
                       </SidebarGroupContent>
