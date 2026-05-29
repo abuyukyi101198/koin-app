@@ -1,3 +1,4 @@
+import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { cn } from "@/lib/utils.ts";
 import { Coin } from "@/query/types";
 import { asFraction } from "@/utils/asFraction.tsx";
@@ -34,7 +35,6 @@ export function SimilarCoin({ coin, isSelected, onSelect }: SimilarCoinProps) {
       role="option"
       tabIndex={0}
     >
-      {/* aria-hidden: described by the li's aria-label above */}
       <figure
         aria-hidden="true"
         className="size-12 flex items-center justify-center overflow-hidden shrink-0"
@@ -72,3 +72,19 @@ export function SimilarCoin({ coin, isSelected, onSelect }: SimilarCoinProps) {
     </li>
   );
 }
+
+SimilarCoin.Skeleton = () => {
+  return (
+    <li className="flex flex-col gap-2 rounded-lg border p-1 items-center">
+      <Skeleton aria-hidden="true" className="size-12 rounded-full" />
+      <div
+        aria-hidden="true"
+        className="h-14 w-full flex flex-col items-center gap-1"
+      >
+        <Skeleton className="h-3 w-4.5 rounded" />
+        <Skeleton className="h-3 w-3/4 rounded" />
+        <Skeleton className="h-3 w-1/2 rounded" />
+      </div>
+    </li>
+  );
+};
