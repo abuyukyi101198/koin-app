@@ -22,9 +22,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCoinSelection } from "@/context/coin-selection-context.tsx";
 import { useDebounce } from "@/hooks/use-debounce.ts";
 import usePagination from "@/hooks/use-pagination.ts";
-import { CoinDetails } from "@/pages/new_coins/components/sections/coin-details.tsx";
-import { CoinsGallery } from "@/pages/new_coins/components/sections/coins-gallery.tsx";
-import { CoinsTable } from "@/pages/new_coins/components/sections/coins-table.tsx";
+import { CoinsGallery } from "@/pages/new_coins/components/sections/gallery/coins-gallery.tsx";
+import { CoinInfo } from "@/pages/new_coins/components/sections/info/coin-info.tsx";
+import { CoinsTable } from "@/pages/new_coins/components/sections/table/coins-table.tsx";
 import { useListCoins } from "@/query/commands";
 import { ListCoinsRequest } from "@/query/types";
 
@@ -208,7 +208,7 @@ export function CoinsView() {
             className="h-full pl-4 pt-4 flex flex-col"
             defaultSize="25%"
           >
-            <CoinDetails
+            <CoinInfo
               coinId={selectedCoinId}
               selection={{
                 rowSelection,
