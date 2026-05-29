@@ -22,6 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCoinSelection } from "@/context/coin-selection-context.tsx";
 import { useDebounce } from "@/hooks/use-debounce.ts";
 import usePagination from "@/hooks/use-pagination.ts";
+import { CoinDetails } from "@/pages/new_coins/components/sections/coin-details.tsx";
 import { CoinsGallery } from "@/pages/new_coins/components/sections/coins-gallery.tsx";
 import { CoinsTable } from "@/pages/new_coins/components/sections/coins-table.tsx";
 import { useListCoins } from "@/query/commands";
@@ -30,7 +31,7 @@ import { ListCoinsRequest } from "@/query/types";
 export function CoinsView() {
   const [view, setView] = useState<"gallery" | "table">("table");
 
-  const { rowSelection, setRowSelection } = useCoinSelection();
+  const { rowSelection, setRowSelection, selectedCoinId } = useCoinSelection();
   const [coinSearchQuery, setCoinSearchQuery] = useState<string>("");
 
   const [sorting, setSorting] = useState<SortingState>([
@@ -84,7 +85,7 @@ export function CoinsView() {
       </TabsList>
       <Separator className="bg-primary" />
       <TabsContent
-        className="flex flex-col overflow-hidden pl-6 pr-4 bg-background"
+        className="flex flex-col overflow-hidden pl-6 pr-1 bg-background"
         value="all-coins"
       >
         <ResizablePanelGroup
@@ -203,7 +204,18 @@ export function CoinsView() {
             />
           </ResizablePanel>
           <ResizableHandle />
-          <ResizablePanel defaultSize="25%">Two</ResizablePanel>
+          <ResizablePanel
+            className="h-full pl-4 pt-4 flex flex-col"
+            defaultSize="25%"
+          >
+            <CoinDetails
+              coinId={selectedCoinId}
+              selection={{
+                rowSelection,
+                onRowSelectionChange: setRowSelection,
+              }}
+            />
+          </ResizablePanel>
         </ResizablePanelGroup>
       </TabsContent>
     </Tabs>
