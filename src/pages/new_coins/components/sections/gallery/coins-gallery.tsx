@@ -58,7 +58,7 @@ export function CoinsGallery({
       ) : isEmpty ? (
         <div
           aria-live="polite"
-          className="flex h-full items-center justify-center"
+          className="pt-12 flex h-full items-start justify-center"
           role="status"
         >
           <EmptyCoins type={searchQuery.length ? "no match" : "no data"} />

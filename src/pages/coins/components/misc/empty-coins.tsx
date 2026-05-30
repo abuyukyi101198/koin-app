@@ -23,9 +23,9 @@ export function EmptyCoins({ type }: EmptyCoinsProps) {
     <Empty>
       <EmptyHeader>
         <EmptyMedia variant="icon">
-          <Coins />
+          <Coins className="text-primary" />
         </EmptyMedia>
-        <EmptyTitle>
+        <EmptyTitle className="font-serif text-2xl">
           {type === "no data" ? "No coins yet" : "No matching coins"}
         </EmptyTitle>
         <EmptyDescription>

@@ -78,7 +78,7 @@ export function CoinsView() {
       </TabsList>
       <Separator className="bg-primary" />
       <TabsContent
-        className="flex flex-col overflow-hidden pl-6 pr-1 bg-background"
+        className="flex flex-col overflow-hidden pl-6 bg-background"
         value="all-coins"
       >
         <ResizablePanelGroup
@@ -125,10 +125,7 @@ export function CoinsView() {
             />
           </ResizablePanel>
           <ResizableHandle />
-          <ResizablePanel
-            className="h-full pl-4 pt-4 flex flex-col"
-            defaultSize="25%"
-          >
+          <ResizablePanel className="h-full flex flex-col" defaultSize="25%">
             <CoinInfo
               coinId={selectedCoinId}
               selection={{

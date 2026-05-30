@@ -1,4 +1,5 @@
 import { CoinPreviewImages } from "@/components/composite/coin-preview-images.tsx";
+import { Empty } from "@/components/ui/empty.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { CoinDetails } from "@/pages/new_coins/components/sections/info/coin-details.tsx";
@@ -21,6 +22,10 @@ export function CoinInfo({ coinId, selection }: CoinInfoProps) {
     return <CoinInfo.Skeleton />;
   }
 
+  if (!data) {
+    return <Empty className="bg-accent/50 rounded-none" />;
+  }
+
   const isSelected = (id: number) =>
     selection?.rowSelection[id.toString()] ?? false;
 
@@ -34,7 +39,7 @@ export function CoinInfo({ coinId, selection }: CoinInfoProps) {
     <section
       aria-busy={isLoading}
       aria-label="Coin details"
-      className="h-full w-full flex flex-col overflow-hidden"
+      className="pl-4 pt-4 pr-1 h-full w-full flex flex-col overflow-hidden"
     >
       <header className="shrink-0 flex flex-col">
         <div className="mb-2 flex flex-col gap-1">
