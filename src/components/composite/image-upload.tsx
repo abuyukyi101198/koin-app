@@ -151,28 +151,28 @@ export function ImageUploadField({
               setUrlError(null);
             }}
           >
-            <LinkIcon className="h-4 w-4" />
+            <LinkIcon className="h-4 w-4 focus:text-primary" />
             Embed image URL
           </ContextMenuItem>
           <ContextMenuItem
             className="flex gap-2 cursor-pointer"
             onClick={() => fileInputRef.current?.click()}
           >
-            <Upload className="h-4 w-4" />
+            <Upload className="h-4 w-4 focus:text-primary" />
             Upload image
           </ContextMenuItem>
           {value && (
             <>
               <div className="my-1" data-slot="separator" />
               <ContextMenuItem
-                className="text-destructive focus:text-destructive cursor-pointer"
+                className="text-destructive focus:bg-secondary focus:text-destructive cursor-pointer"
                 onClick={() => {
                   onChange?.("");
                   setUploadError(null);
                   setUrlError(null);
                 }}
               >
-                <XIcon className="h-4 w-4 text-destructive focus:text-destructive" />
+                <XIcon className="h-4 w-4 text-destructive" />
                 Remove image
               </ContextMenuItem>
             </>

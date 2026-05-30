@@ -10,6 +10,7 @@ import {
   FieldTitle,
 } from "@/components/ui/field.tsx";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { CreateCoinDialog } from "@/pages/coins/components/forms/create-coin-dialog.tsx";
 
 interface CoinsViewHeaderProps {
   setView: Dispatch<SetStateAction<"gallery" | "table">>;
@@ -26,13 +27,16 @@ export function CoinsViewHeader({
 }: CoinsViewHeaderProps) {
   return (
     <header className="shrink-0 flex flex-col border-b">
-      <div className="pb-2 flex flex-row items-end gap-4 border-b">
-        <h1 className="scroll-m-20 text-2xl font-serif font-medium tracking-wide text-balance">
-          All Coins
-        </h1>
-        <p className="pb-1 font-sans text-sm text-muted-foreground">
-          {total} items
-        </p>
+      <div className="w-full flex justify-between border-b">
+        <div className="pb-2 flex flex-row items-end gap-4">
+          <h1 className="scroll-m-20 text-2xl font-serif font-medium tracking-wide text-balance">
+            All Coins
+          </h1>
+          <p className="pb-1 font-sans text-sm text-muted-foreground">
+            {total} items
+          </p>
+        </div>
+        <CreateCoinDialog size="sm" />
       </div>
       <div
         aria-label="Table controls"
