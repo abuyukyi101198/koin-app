@@ -125,7 +125,12 @@ export function CoinsView() {
             />
           </ResizablePanel>
           <ResizableHandle />
-          <ResizablePanel className="h-full flex flex-col" defaultSize="25%">
+          <ResizablePanel
+            className="h-full flex flex-col"
+            defaultSize="25%"
+            maxSize="50%"
+            minSize="25%"
+          >
             <CoinInfo
               coinId={selectedCoinId}
               selection={{
