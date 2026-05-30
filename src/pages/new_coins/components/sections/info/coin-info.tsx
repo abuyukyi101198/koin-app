@@ -2,6 +2,8 @@ import { CoinPreviewImages } from "@/components/composite/coin-preview-images.ts
 import { Empty } from "@/components/ui/empty.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
+import { DeleteCoinDialog } from "@/pages/coins/components/forms/delete-coin-dialog.tsx";
+import { UpdateCoinDialog } from "@/pages/coins/components/forms/update-coin-dialog.tsx";
 import { CoinDetails } from "@/pages/new_coins/components/sections/info/coin-details.tsx";
 import { SimilarCoin } from "@/pages/new_coins/components/sections/info/similar-coin.tsx";
 import { SimilarCoins } from "@/pages/new_coins/components/sections/info/similar-coins.tsx";
@@ -41,7 +43,7 @@ export function CoinInfo({ coinId, selection }: CoinInfoProps) {
       aria-label="Coin details"
       className="pl-4 pt-4 pr-1 h-full w-full flex flex-col overflow-hidden"
     >
-      <header className="shrink-0 flex flex-col">
+      <header className="shrink-0 flex w-full justify-between">
         <div className="mb-2 flex flex-col gap-1">
           <h2 className="scroll-m-20 text-2xl font-serif font-medium tracking-wide text-balance">
             {asFraction(data?.title, data?.value)}
@@ -57,6 +59,10 @@ export function CoinInfo({ coinId, selection }: CoinInfoProps) {
               {data?.issuer.name}
             </span>
           </div>
+        </div>
+        <div className="h-8 flex items-center gap-1 pr-4">
+          <UpdateCoinDialog id={coinId} size="sm" />
+          <DeleteCoinDialog id={coinId} size="sm" />
         </div>
       </header>
 

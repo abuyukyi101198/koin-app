@@ -86,7 +86,7 @@ export function DeleteCoinDialog({
         </DialogTrigger>
         <DialogContent className="sm:max-w-lg p-8 z-50" showCloseButton={false}>
           <DialogHeader>
-            <DialogTitle className="text-base">
+            <DialogTitle className="font-serif text-lg">
               Delete <span className="underline">{data?.title}</span>?
             </DialogTitle>
             <DialogDescription>
