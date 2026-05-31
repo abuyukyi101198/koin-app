@@ -91,11 +91,11 @@ export function CoinInfo({ coinId, selection }: CoinInfoProps) {
   );
 }
 
-CoinInfo.Skeleton = function CoinInfoSkeleton() {
+CoinInfo.Skeleton = () => {
   return (
     <section
       aria-hidden="true"
-      className="h-full w-full flex flex-col overflow-hidden"
+      className="pl-4 pt-4 pr-1 h-full w-full flex flex-col overflow-hidden"
     >
       {/* Header */}
       <div className="shrink-0 mb-2 flex flex-col gap-1">
