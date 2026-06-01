@@ -28,14 +28,9 @@ export function CoinsViewHeader({
   return (
     <header className="shrink-0 flex flex-col border-b">
       <div className="w-full flex justify-between border-b">
-        <div className="pb-2 flex flex-row items-end gap-4">
-          <h1 className="scroll-m-20 text-2xl font-serif font-medium tracking-wide text-balance">
-            All Coins
-          </h1>
-          <p className="pb-1 font-sans text-sm text-muted-foreground">
-            {total} items
-          </p>
-        </div>
+        <h1 className="pb-2 scroll-m-20 text-2xl font-serif font-medium tracking-wide text-balance">
+          All Coins
+        </h1>
         <CreateCoinDialog size="sm" />
       </div>
       <div

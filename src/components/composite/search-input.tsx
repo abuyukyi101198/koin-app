@@ -12,6 +12,7 @@ import {
 import { cn } from "@/lib/utils.ts";
 
 interface SearchInputProps {
+  animated?: boolean;
   count?: number;
   onSearch: ChangeEventHandler<HTMLInputElement, HTMLInputElement>;
   placeholder?: string;
@@ -19,12 +20,14 @@ interface SearchInputProps {
 }
 
 export function SearchInput({
+  animated = false,
   search,
   onSearch,
   placeholder,
   count,
 }: SearchInputProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const expanded = !animated || isExpanded || !!search;
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleIconClick = () => {
@@ -32,7 +35,7 @@ export function SearchInput({
   };
 
   const handleBlur = () => {
-    if (!search) {
+    if (animated && !search) {
       setIsExpanded(false);
     }
   };
@@ -63,7 +66,7 @@ export function SearchInput({
     <ButtonGroup className="w-full justify-end gap-0!">
       <ButtonGroup
         className={cn("overflow-hidden transition-all duration-300 ease-out", {
-          "w-0": isExpanded || search,
+          "w-0": expanded,
         })}
       >
         <Button
@@ -79,11 +82,16 @@ export function SearchInput({
         className={cn(
           "overflow-hidden transition-all duration-300 ease-out w-0",
           {
-            "w-full": isExpanded || search,
+            "w-full": expanded,
           }
         )}
       >
         <InputGroup className="border-l-0 border-t-0 border-r-0 rounded-none bg-background! has-[[data-slot=input-group-control]:focus-visible]:ring-0">
+          {!animated && (
+            <InputGroupAddon>
+              <Search className="h-4 mr-1" />
+            </InputGroupAddon>
+          )}
           <InputGroupInput
             onBlur={handleBlur}
             onChange={onSearch}

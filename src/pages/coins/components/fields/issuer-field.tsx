@@ -128,7 +128,7 @@ export function IssuerField({
                   src={value.flag?.length ? value.flag : undefined}
                 />
               ) : (
-                <Search className="h-4 mr-2" />
+                <Search className="h-4 mr-1" />
               )}
             </InputGroupAddon>
             <InputGroupAddon align="inline-end">
