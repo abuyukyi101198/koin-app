@@ -65,7 +65,9 @@ export function CoinForm({
               {/* Left Column */}
               <div className="space-y-4">
                 <FieldSet className="gap-2">
-                  <FieldLegend>Images</FieldLegend>
+                  <FieldLegend className="font-serif text-lg!">
+                    Images
+                  </FieldLegend>
                   <FieldDescription>
                     Photographs or scans of your coin.
                   </FieldDescription>
@@ -84,7 +86,9 @@ export function CoinForm({
               {/* Right Column */}
               <div className="flex flex-col col-span-2 space-y-4">
                 <FieldSet className="gap-2">
-                  <FieldLegend>Identification</FieldLegend>
+                  <FieldLegend className="font-serif text-lg!">
+                    Identification
+                  </FieldLegend>
                   <FieldDescription>
                     Identifying information of your coin like its face value,
                     mint year, and issuing authority.
@@ -126,7 +130,9 @@ export function CoinForm({
                 </FieldSet>
 
                 <FieldSet className="gap-2">
-                  <FieldLegend>Description</FieldLegend>
+                  <FieldLegend className="font-serif text-lg!">
+                    Description
+                  </FieldLegend>
                   <FieldDescription>
                     Additional description in case you want distinguish your
                     coin from others of its mintage such as condition or even
@@ -144,7 +150,9 @@ export function CoinForm({
                 </FieldSet>
 
                 <FieldSet className="gap-2">
-                  <FieldLegend>Inventory</FieldLegend>
+                  <FieldLegend className="font-serif text-lg!">
+                    Inventory
+                  </FieldLegend>
                   <FieldDescription>
                     Number of coins you own of this mintage, and the estimated
                     sale value of one.
@@ -168,7 +176,9 @@ export function CoinForm({
                 </FieldSet>
 
                 <FieldSet className="gap-2 flex flex-col flex-1">
-                  <FieldLegend>Notes</FieldLegend>
+                  <FieldLegend className="font-serif text-lg!">
+                    Notes
+                  </FieldLegend>
                   <FieldDescription>
                     Additional notes you want to add to your coin.
                   </FieldDescription>

@@ -198,7 +198,9 @@ export function ImageUploadField({
       >
         <DialogContent className="sm:max-w-sm" showCloseButton={false}>
           <DialogHeader>
-            <DialogTitle>Embed Image URL</DialogTitle>
+            <DialogTitle className="font-serif text-lg">
+              Embed Image URL
+            </DialogTitle>
             <DialogDescription>
               Enter the URL of the image you want to embed
             </DialogDescription>

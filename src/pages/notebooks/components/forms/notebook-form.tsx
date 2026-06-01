@@ -59,7 +59,9 @@ export function NotebookForm({
         return (
           <Form className="space-y-4 flex flex-col" noValidate>
             <FieldSet className="gap-2">
-              <FieldLegend>Notebook</FieldLegend>
+              <FieldLegend className="font-serif text-xl!">
+                Notebook
+              </FieldLegend>
               <FieldDescription>
                 Identifying and dimension information of your notebook like its
                 title and dimensions.
@@ -102,7 +104,9 @@ export function NotebookForm({
               </div>
             </FieldSet>
             <FieldSet className="gap-2">
-              <FieldLegend>Description</FieldLegend>
+              <FieldLegend className="font-serif text-lg!">
+                Description
+              </FieldLegend>
               <FieldDescription>
                 Additional description in case you want distinguish your
                 notebook with extra information.
