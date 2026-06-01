@@ -83,6 +83,18 @@ function App() {
                             <SidebarMenuButton
                               asChild
                               className="text-muted-foreground hover:text-base cursor-pointer"
+                              isActive={pathname === "/new-notebooks"}
+                              size="default"
+                            >
+                              <Link to="/new-notebooks">
+                                <BookCopy />
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                          <SidebarMenuItem>
+                            <SidebarMenuButton
+                              asChild
+                              className="text-muted-foreground hover:text-base cursor-pointer"
                               isActive={pathname === "/notebooks"}
                               size="default"
                             >
