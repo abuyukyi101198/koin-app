@@ -183,6 +183,7 @@ export function DataTable<TData extends { id: number | string }>({
                   aria-rowindex={rowIndex + (showHeader ? 2 : 1)}
                   aria-selected={row.getIsSelected()}
                   className="gap-12 group hover:bg-muted! data-[state=selected]:bg-accent/50! cursor-pointer"
+                  data-coin-id={row.id}
                   data-state={row.getIsSelected() ? "selected" : undefined}
                   key={row.id}
                   onClick={() => {
