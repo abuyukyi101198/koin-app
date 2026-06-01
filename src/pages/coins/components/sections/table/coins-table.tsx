@@ -1,11 +1,11 @@
 import { RowSelectionState, Updater } from "@tanstack/react-table";
 
-import { EmptyCoins } from "@/pages/coins/components/misc/empty-coins.tsx";
-import { useCoinsTableColumns } from "@/pages/new_coins/hooks/use-coins-table-columns.tsx";
 import {
   DataTable,
   DataTableProps,
-} from "@/pages/new_coins/views/data-table.tsx";
+} from "@/components/composite/data-table.tsx";
+import { EmptyCoins } from "@/pages/coins/components/misc/empty-coins.tsx";
+import { useCoinsTableColumns } from "@/pages/coins/hooks/use-coins-table-columns.tsx";
 import { Coin } from "@/query/types";
 
 interface CoinsTableProps {

@@ -9,7 +9,7 @@ import {
   FieldLabel,
   FieldTitle,
 } from "@/components/ui/field.tsx";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
 import { CreateCoinDialog } from "@/pages/coins/components/forms/create-coin-dialog.tsx";
 
 interface CoinsViewHeaderProps {

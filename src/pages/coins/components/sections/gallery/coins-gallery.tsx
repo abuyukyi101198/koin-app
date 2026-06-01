@@ -1,7 +1,7 @@
+import { DataTableProps } from "@/components/composite/data-table.tsx";
 import { cn } from "@/lib/utils.ts";
 import { EmptyCoins } from "@/pages/coins/components/misc/empty-coins.tsx";
-import { GalleryCoin } from "@/pages/new_coins/components/sections/gallery/gallery-coin.tsx";
-import { DataTableProps } from "@/pages/new_coins/views/data-table.tsx";
+import { GalleryCoin } from "@/pages/coins/components/sections/gallery/gallery-coin.tsx";
 import { Coin } from "@/query/types";
 
 interface CoinsGalleryProps {

@@ -3,11 +3,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SortingState } from "@tanstack/react-table";
 
 import { DataTablePagination } from "@/components/composite/data-table-pagination.tsx";
+import { DataTable } from "@/components/composite/data-table.tsx";
 import { SearchInput } from "@/components/composite/search-input.tsx";
 import { useDebounce } from "@/hooks/use-debounce.ts";
 import usePagination from "@/hooks/use-pagination.ts";
 import { cn } from "@/lib/utils.ts";
-import { DataTable } from "@/pages/new_coins/views/data-table.tsx";
 import { useNotebookAllCoinsTableColumns } from "@/pages/new_notebooks/hooks/use-notebook-all-coins-table-columns.tsx";
 import { useNotebookReorderContext } from "@/pages/notebooks/context/notebook-reorder-context.tsx";
 import { useListCoins } from "@/query/commands/coins.ts";

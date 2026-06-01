@@ -59,18 +59,6 @@ function App() {
                             <SidebarMenuButton
                               asChild
                               className="text-muted-foreground hover:text-base cursor-pointer"
-                              isActive={pathname === "/new-coins"}
-                              size="default"
-                            >
-                              <Link to="/new-coins">
-                                <Coins />
-                              </Link>
-                            </SidebarMenuButton>
-                          </SidebarMenuItem>
-                          <SidebarMenuItem>
-                            <SidebarMenuButton
-                              asChild
-                              className="text-muted-foreground hover:text-base cursor-pointer"
                               isActive={pathname === "/coins"}
                               size="default"
                             >

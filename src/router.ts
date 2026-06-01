@@ -7,7 +7,6 @@ import {
 
 import App from "@/App";
 import { CoinsView } from "@/pages/coins/views/coins-view";
-import { CoinsView as NewCoinsView } from "@/pages/new_coins/views/coins-view.tsx";
 import { NotebooksView as NewNotebooksView } from "@/pages/new_notebooks/views/notebooks-view.tsx";
 import { NotebooksView } from "@/pages/notebooks/views/notebooks-view.tsx";
 import { SettingsView } from "@/pages/settings/views/settings-view.tsx";
@@ -22,12 +21,6 @@ const coinsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/coins",
   component: CoinsView,
-});
-
-const newCoinsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/new-coins",
-  component: NewCoinsView,
 });
 
 // Notebooks route
@@ -66,7 +59,6 @@ const routeTree = rootRoute.addChildren([
   coinsRoute,
   notebooksRoute,
   settingsRoute,
-  newCoinsRoute,
   newNotebooksRoute,
 ]);
 

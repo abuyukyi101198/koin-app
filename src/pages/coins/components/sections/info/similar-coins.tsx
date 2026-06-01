@@ -1,4 +1,4 @@
-import { SimilarCoin } from "@/pages/new_coins/components/sections/info/similar-coin.tsx";
+import { SimilarCoin } from "@/pages/coins/components/sections/info/similar-coin.tsx";
 import { useGetSimilarCoins } from "@/query/commands";
 
 interface SimilarCoinsProps {

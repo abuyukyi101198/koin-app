@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button.tsx";
 import { cn } from "@/lib/utils.ts";
-import { CoinDetailField } from "@/pages/new_coins/components/sections/info/coin-detail-field.tsx";
+import { CoinDetailField } from "@/pages/coins/components/sections/info/coin-detail-field.tsx";
 import { Coin } from "@/query/types";
 
 interface CoinDetailsProps {

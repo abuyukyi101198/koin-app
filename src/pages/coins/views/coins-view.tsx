@@ -1,51 +1,146 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
+import { SortingState } from "@tanstack/react-table";
+import { Coins } from "lucide-react";
+
+import { DataTablePagination } from "@/components/composite/data-table-pagination.tsx";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable.tsx";
+import { Separator } from "@/components/ui/separator.tsx";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCoinSelection } from "@/context/coin-selection-context.tsx";
-import { EmptyCoins } from "@/pages/coins/components/misc/empty-coins.tsx";
-import { CoinDetails } from "@/pages/coins/components/sections/coin-details.tsx";
-import { CoinPreview } from "@/pages/coins/components/sections/coin-preview.tsx";
-import { CoinsTable } from "@/pages/coins/components/sections/coins-table.tsx";
-import { IssuersList } from "@/pages/coins/components/sections/issuers-list.tsx";
-import { SimilarCoins } from "@/pages/coins/components/sections/similar-coins.tsx";
+import { useDebounce } from "@/hooks/use-debounce.ts";
+import usePagination from "@/hooks/use-pagination.ts";
+import { CoinsViewHeader } from "@/pages/coins/components/misc/coins-view-header.tsx";
+import { CoinsGallery } from "@/pages/coins/components/sections/gallery/coins-gallery.tsx";
+import { CoinInfo } from "@/pages/coins/components/sections/info/coin-info.tsx";
+import { CoinsTable } from "@/pages/coins/components/sections/table/coins-table.tsx";
+import { useListCoins } from "@/query/commands";
+import { ListCoinsRequest } from "@/query/types";
 
 export function CoinsView() {
+  const [view, setView] = useState<"gallery" | "table">("table");
+
   const { rowSelection, setRowSelection, selectedCoinId } = useCoinSelection();
   const [coinSearchQuery, setCoinSearchQuery] = useState<string>("");
 
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "issuer", desc: false },
+  ]);
+  const debouncedSearchQuery = useDebounce(coinSearchQuery, 300);
+
+  const { page, size, setPage, handlePageSizeChange } = usePagination(25);
+
+  const listCoinsOptions: ListCoinsRequest = {
+    search: debouncedSearchQuery || undefined,
+    page: page - 1,
+    pageSize: size,
+    sortField: sorting.length > 0 ? sorting[0].id : "year",
+    sortDirection: sorting.length > 0 && !sorting[0].desc ? "asc" : "desc",
+  };
+
+  const { data, isLoading } = useListCoins(listCoinsOptions);
+
+  const handlePaginationChange = useCallback(
+    async (pageIndex: number, pageSize: number) => {
+      if (pageSize !== size) {
+        handlePageSizeChange(pageSize);
+        setPage(1);
+      } else {
+        setPage(pageIndex);
+      }
+    },
+    [size, handlePageSizeChange, setPage]
+  );
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearchQuery, setPage]);
+
   return (
-    <div className="h-full w-full flex flex-col border-collapse">
-      {selectedCoinId !== null ? (
-        <>
-          <div className="flex flex-1 max-h-1/2">
-            <CoinPreview coinId={selectedCoinId} />
-            <CoinDetails coinId={selectedCoinId} />
-            <SimilarCoins
+    <Tabs className="h-full w-full gap-0 bg-accent/50" defaultValue="all-coins">
+      <TabsList
+        className="ml-3 mt-2 mr-3 pb-0! gap-2 font-serif items-end border-collapse"
+        variant="line"
+      >
+        <TabsTrigger
+          className="p-2! bg-background! group-data-[orientation=horizontal]/tabs:after:inset-x-0.5px
+          group-data-[orientation=horizontal]/tabs:after:-bottom-0.5 after:bg-background
+          border-primary! border-b-0! rounded-t-md rounded-b-none cursor-pointer"
+          value="all-coins"
+        >
+          <Coins aria-hidden="true" className="size-3" />
+          All Coins
+        </TabsTrigger>
+      </TabsList>
+      <Separator className="bg-primary" />
+      <TabsContent
+        className="flex flex-col overflow-hidden pl-6 bg-background"
+        value="all-coins"
+      >
+        <ResizablePanelGroup
+          className="flex-1 min-h-0"
+          orientation="horizontal"
+        >
+          <ResizablePanel
+            className="h-full pt-4 pr-4 flex flex-col"
+            defaultSize="75%"
+          >
+            <CoinsViewHeader
+              searchQuery={coinSearchQuery}
+              setSearchQuery={setCoinSearchQuery}
+              setView={setView}
+              total={data?.total ?? 0}
+            />
+            {view === "table" ? (
+              <CoinsTable
+                data={data?.items ?? []}
+                loading={isLoading}
+                searchQuery={debouncedSearchQuery}
+                selection={{
+                  rowSelection,
+                  onRowSelectionChange: setRowSelection,
+                }}
+                sort={{ sorting, onSortingChange: setSorting }}
+              />
+            ) : (
+              <CoinsGallery
+                data={data?.items ?? []}
+                loading={isLoading}
+                searchQuery={debouncedSearchQuery}
+                selection={{
+                  rowSelection,
+                  onRowSelectionChange: setRowSelection,
+                }}
+              />
+            )}
+            <DataTablePagination
+              onPaginationChange={handlePaginationChange}
+              pageCount={Math.ceil((data?.total ?? 0) / size)}
+              pageIndex={page}
+              pageSize={size}
+            />
+          </ResizablePanel>
+          <ResizableHandle />
+          <ResizablePanel
+            className="h-full flex flex-col"
+            defaultSize="25%"
+            maxSize="50%"
+            minSize="25%"
+          >
+            <CoinInfo
               coinId={selectedCoinId}
               selection={{
                 rowSelection,
                 onRowSelectionChange: setRowSelection,
               }}
             />
-          </div>
-          <div className="flex flex-1 max-h-1/2">
-            <CoinsTable
-              onSearchQueryChange={setCoinSearchQuery}
-              searchQuery={coinSearchQuery}
-              selection={{
-                rowSelection,
-                onRowSelectionChange: setRowSelection,
-              }}
-            />
-            <IssuersList
-              onIssuerClick={(name: string) => {
-                setCoinSearchQuery(name);
-              }}
-            />
-          </div>
-        </>
-      ) : (
-        <EmptyCoins type="no data" />
-      )}
-    </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </TabsContent>
+    </Tabs>
   );
 }

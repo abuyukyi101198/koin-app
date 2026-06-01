@@ -1,13 +1,13 @@
 import { CoinPreviewImages } from "@/components/composite/coin-preview-images.tsx";
+import { DataTableProps } from "@/components/composite/data-table.tsx";
 import { Empty } from "@/components/ui/empty.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { DeleteCoinDialog } from "@/pages/coins/components/forms/delete-coin-dialog.tsx";
 import { UpdateCoinDialog } from "@/pages/coins/components/forms/update-coin-dialog.tsx";
-import { CoinDetails } from "@/pages/new_coins/components/sections/info/coin-details.tsx";
-import { SimilarCoin } from "@/pages/new_coins/components/sections/info/similar-coin.tsx";
-import { SimilarCoins } from "@/pages/new_coins/components/sections/info/similar-coins.tsx";
-import { DataTableProps } from "@/pages/new_coins/views/data-table.tsx";
+import { CoinDetails } from "@/pages/coins/components/sections/info/coin-details.tsx";
+import { SimilarCoin } from "@/pages/coins/components/sections/info/similar-coin.tsx";
+import { SimilarCoins } from "@/pages/coins/components/sections/info/similar-coins.tsx";
 import { useGetCoin } from "@/query/commands";
 import { Coin } from "@/query/types";
 import { asFraction } from "@/utils/asFraction.tsx";
