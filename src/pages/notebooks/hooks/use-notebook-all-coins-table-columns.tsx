@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Book } from "lucide-react";
 
 import { CoinPreviewImages } from "@/components/composite/coin-preview-images.tsx";
+import { Skeleton } from "@/components/ui/skeleton.tsx";
 import {
   Tooltip,
   TooltipContent,
@@ -20,52 +21,66 @@ export function useNotebookAllCoinsTableColumns(): ColumnDef<Coin>[] {
   const stableColumns = useMemo<ColumnDef<Coin>[]>(
     () => [
       {
-        id: "images",
-        accessorKey: "obverse_image",
-        enableSorting: false,
-        meta: { size: 20 },
-        cell: ({
-          row: {
-            original: { title, reverse_image, obverse_image },
-          },
-        }) => (
-          <div className="flex gap-1">
-            <CoinPreviewImages
-              obverseImage={obverse_image}
-              reverseImage={reverse_image}
-              size="size-8"
-              title={title}
-            />
-          </div>
-        ),
-      },
-      {
         id: "title",
         accessorKey: "title",
         enableSorting: false,
-        meta: { size: 60 },
+        meta: {
+          size: 60,
+          skeleton: () => (
+            <div className="flex flex-row gap-2">
+              <div className="flex gap-1">
+                <Skeleton className="size-8 rounded-full shrink-0" />
+                <Skeleton className="size-8 rounded-full shrink-0" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-start gap-2">
+                  <Skeleton className="h-3 w-4.5 shrink-0 rounded" />
+                  <Skeleton className="h-3 w-3/4 rounded" />
+                </div>
+                <Skeleton className="h-3 w-1/2 rounded" />
+              </div>
+            </div>
+          ),
+        },
         cell: ({
           row: {
-            original: { title, value, description, issuer },
+            original: {
+              title,
+              value,
+              description,
+              issuer,
+              reverse_image,
+              obverse_image,
+            },
           },
         }) => (
-          <div className="flex flex-col">
-            <div className="flex gap-2 w-fit">
-              <span className="pt-0.5">
+          <div className="flex flex-row items-center gap-2">
+            <div className="flex gap-1">
+              <CoinPreviewImages
+                obverseImage={obverse_image}
+                reverseImage={reverse_image}
+                size="size-8"
+                title={title}
+              />
+            </div>
+            <div className="flex flex-col">
+              <div className="flex items-start gap-2">
                 <img
                   alt={`${issuer.name} flag`}
-                  className="h-3 w-4.5"
+                  className="h-3 w-4.5 shrink-0 mt-0.5"
                   loading="lazy"
                   src={issuer.flag?.length ? issuer.flag : undefined}
                 />
-              </span>
-              <span className="text-xs font-medium">
-                {asFraction(title, value)}
-              </span>
+                <span className="font-serif font-medium leading-4 overflow-hidden text-wrap line-clamp-2">
+                  {asFraction(title, value)}
+                </span>
+              </div>
+              {description?.length ? (
+                <span className="text-muted-foreground text-xs italic pl-6.5 truncate w-full">
+                  {description}
+                </span>
+              ) : null}
             </div>
-            <span className="text-muted-foreground text-xs italic pl-6.5 truncate w-full">
-              {description?.length ? description : "—"}
-            </span>
           </div>
         ),
       },
@@ -79,7 +94,14 @@ export function useNotebookAllCoinsTableColumns(): ColumnDef<Coin>[] {
       id: "notebook_status",
       accessorKey: "notebook_id",
       enableSorting: false,
-      meta: { size: 20 },
+      meta: {
+        size: 20,
+        skeleton: () => (
+          <div className="pr-2 flex justify-end items-center">
+            <Skeleton className="size-3 rounded" />
+          </div>
+        ),
+      },
       cell: ({
         row: {
           original: { notebook_id },
@@ -89,7 +111,7 @@ export function useNotebookAllCoinsTableColumns(): ColumnDef<Coin>[] {
 
         if (notebook_id === selectedNotebookId) {
           return (
-            <div className="h-8 flex justify-center">
+            <div className="pr-2 h-8 flex justify-end items-center">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Book className="size-3 text-foreground" />
@@ -101,7 +123,7 @@ export function useNotebookAllCoinsTableColumns(): ColumnDef<Coin>[] {
         }
 
         return (
-          <div className="h-8">
+          <div className="pr-2 h-8 flex justify-end items-center">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Book className="size-3 text-muted-foreground/40" />

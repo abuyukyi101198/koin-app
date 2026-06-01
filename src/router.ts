@@ -7,7 +7,6 @@ import {
 
 import App from "@/App";
 import { CoinsView } from "@/pages/coins/views/coins-view";
-import { NotebooksView as NewNotebooksView } from "@/pages/new_notebooks/views/notebooks-view.tsx";
 import { NotebooksView } from "@/pages/notebooks/views/notebooks-view.tsx";
 import { SettingsView } from "@/pages/settings/views/settings-view.tsx";
 
@@ -28,12 +27,6 @@ const notebooksRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/notebooks",
   component: NotebooksView,
-});
-
-const newNotebooksRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/new-notebooks",
-  component: NewNotebooksView,
 });
 
 // settings route
@@ -59,7 +52,6 @@ const routeTree = rootRoute.addChildren([
   coinsRoute,
   notebooksRoute,
   settingsRoute,
-  newNotebooksRoute,
 ]);
 
 export const router = new Router({ routeTree });

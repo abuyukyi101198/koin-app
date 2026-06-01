@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { SortingState } from "@tanstack/react-table";
 
+import { DataTablePagination } from "@/components/composite/data-table-pagination.tsx";
 import { DataTable } from "@/components/composite/data-table.tsx";
 import { SearchInput } from "@/components/composite/search-input.tsx";
 import { useDebounce } from "@/hooks/use-debounce.ts";
@@ -93,22 +94,34 @@ export function NotebookAllCoins() {
     <section
       aria-busy={isLoading}
       aria-label="All coins"
-      className="h-full w-1/4 flex flex-col overflow-hidden select-none pt-4 pb-0 gap-2"
+      className="pl-4 pt-4 pr-4 h-full w-full flex flex-col overflow-hidden select-none"
     >
-      <header className="max-w-full flex items-center pl-2 pr-5 gap-2.5">
-        <SearchInput
-          count={data?.total}
-          onSearch={(e) => {
-            setSearchQuery(e.target.value);
-          }}
-          placeholder="Search coins..."
-          search={searchQuery}
-        />
+      <header className="shrink-0 flex flex-col border-b max-w-full items-center gap-2.5">
+        <h2 className="pb-2 w-full scroll-m-20 text-xl font-serif font-medium tracking-wide text-balance border-b">
+          All Coins
+        </h2>
+        <div
+          aria-label="Table controls"
+          className="pb-2 pr-2.5 w-full flex justify-end items-center gap-2.5"
+          role="toolbar"
+        >
+          <SearchInput
+            count={data?.total}
+            onSearch={(e) => {
+              setSearchQuery(e.target.value);
+            }}
+            placeholder="Search coins..."
+            search={searchQuery}
+          />
+          <span className="sr-only" id="search-help">
+            Search by issuer, year, or value
+          </span>
+        </div>
       </header>
 
       <div
         className={cn(
-          "contents",
+          "contents pr-4",
           "[&_tr[aria-selected=true]]:opacity-40",
           isActive ? "[&_tr]:cursor-cell" : "[&_tr]:cursor-grab"
         )}
@@ -130,23 +143,23 @@ export function NotebookAllCoins() {
                 : "No coins found."}
             </p>
           }
-          header={false}
           loading={isLoading}
-          pagination={{
-            pageIndex: page,
-            pageCount: Math.ceil((data?.total ?? 0) / size),
-            onPaginationChange: handlePaginationChange,
-          }}
           selection={{
             rowSelection: Object.fromEntries(
               [...handIds].map((id) => [id, true])
             ),
             onRowSelectionChange: handleRowSelection,
           }}
+          showHeader={false}
           sort={{
             sorting,
             onSortingChange: setSorting,
           }}
+        />
+        <DataTablePagination
+          onPaginationChange={handlePaginationChange}
+          pageCount={Math.ceil((data?.total ?? 0) / size)}
+          pageIndex={page}
         />
       </div>
     </section>
