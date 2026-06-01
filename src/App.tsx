@@ -7,13 +7,16 @@ import { Link, Outlet, useLocation } from "@tanstack/react-router";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { BookCopy, Coins, Github, Settings } from "lucide-react";
 
+import monogram from "@/assets/monogram.svg";
 import { Titlebar } from "@/components/composite/titlebar.tsx";
+import { Separator } from "@/components/ui/separator.tsx";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -21,16 +24,18 @@ import {
 } from "@/components/ui/sidebar.tsx";
 import { Toaster } from "@/components/ui/sonner.tsx";
 import { ThemeProvider } from "@/components/ui/theme-provider.tsx";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip.tsx";
+import { TooltipProvider } from "@/components/ui/tooltip.tsx";
 import { CoinSelectionProvider } from "@/context/coin-selection-context.tsx";
 import { NotebookSelectionProvider } from "@/context/notebook-selection-context.tsx";
 
 const queryClient = new QueryClient();
+
+const menuButtonClass =
+  "px-3 relative overflow-hidden text-xs text-muted-foreground cursor-pointer " +
+  "hover:bg-muted! hover:text-primary! " +
+  "data-[active=true]:bg-accent/50! data-[active=true]:text-primary! " +
+  "before:absolute before:inset-y-0 before:left-0 before:w-0.75 " +
+  "before:bg-transparent before:transition-colors data-[active=true]:before:bg-primary";
 
 function App() {
   const { pathname } = useLocation();
@@ -46,11 +51,19 @@ function App() {
                 className="mt-12 h-[calc(100vh-3rem)]"
                 style={
                   {
-                    "--sidebar-width": "3rem",
+                    "--sidebar-width": "12rem",
                   } as CSSProperties
                 }
               >
                 <Sidebar>
+                  <SidebarHeader className="flex items-center px-2 py-1">
+                    <img
+                      alt="Koin"
+                      className="h-20 my-3 w-auto"
+                      src={monogram}
+                    />
+                    <Separator />
+                  </SidebarHeader>
                   <SidebarContent>
                     <SidebarGroup>
                       <SidebarGroupContent>
@@ -58,24 +71,26 @@ function App() {
                           <SidebarMenuItem>
                             <SidebarMenuButton
                               asChild
-                              className="text-muted-foreground hover:text-base cursor-pointer"
+                              className={menuButtonClass}
                               isActive={pathname === "/coins"}
                               size="default"
                             >
                               <Link to="/coins">
                                 <Coins />
+                                Coins
                               </Link>
                             </SidebarMenuButton>
                           </SidebarMenuItem>
                           <SidebarMenuItem>
                             <SidebarMenuButton
                               asChild
-                              className="text-muted-foreground hover:text-base cursor-pointer"
+                              className={menuButtonClass}
                               isActive={pathname === "/notebooks"}
                               size="default"
                             >
                               <Link to="/notebooks">
                                 <BookCopy />
+                                Notebooks
                               </Link>
                             </SidebarMenuButton>
                           </SidebarMenuItem>
@@ -84,45 +99,29 @@ function App() {
                     </SidebarGroup>
                   </SidebarContent>
                   <SidebarFooter>
-                    <SidebarMenu>
+                    <Separator />
+                    <SidebarMenu className="flex flex-row justify-center gap-6">
                       <SidebarMenuItem>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <SidebarMenuButton
-                              asChild
-                              className="text-muted-foreground hover:text-base cursor-pointer"
-                              isActive={pathname === "/settings"}
-                              size="default"
-                            >
-                              <Link to="/settings">
-                                <Settings />
-                              </Link>
-                            </SidebarMenuButton>
-                          </TooltipTrigger>
-                          <TooltipContent side="right" sideOffset={8}>
-                            Settings
-                          </TooltipContent>
-                        </Tooltip>
+                        <SidebarMenuButton
+                          className={menuButtonClass}
+                          size="default"
+                        >
+                          <Settings />
+                        </SidebarMenuButton>
                       </SidebarMenuItem>
+                      <Separator orientation="vertical" />
                       <SidebarMenuItem>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <SidebarMenuButton
-                              className="text-muted-foreground hover:text-base cursor-pointer"
-                              onClick={async () => {
-                                await openUrl(
-                                  "https://github.com/abuyukyi101198/koin-app"
-                                );
-                              }}
-                              size="default"
-                            >
-                              <Github />
-                            </SidebarMenuButton>
-                          </TooltipTrigger>
-                          <TooltipContent side="right" sideOffset={8}>
-                            GitHub
-                          </TooltipContent>
-                        </Tooltip>
+                        <SidebarMenuButton
+                          className={menuButtonClass}
+                          onClick={async () => {
+                            await openUrl(
+                              "https://github.com/abuyukyi101198/koin-app"
+                            );
+                          }}
+                          size="default"
+                        >
+                          <Github />
+                        </SidebarMenuButton>
                       </SidebarMenuItem>
                     </SidebarMenu>
                   </SidebarFooter>
