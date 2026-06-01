@@ -20,6 +20,8 @@ import { CreateNotebookRequest } from "@/query/types/notebooks.ts";
 
 interface CreateNotebookDialogProps {
   size?: "default" | "sm";
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 const initialValues: NotebookFormData = {
@@ -32,9 +34,17 @@ const initialValues: NotebookFormData = {
 
 export function CreateNotebookDialog({
   size = "default",
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
 }: CreateNotebookDialogProps) {
   const { setRowSelection } = useNotebookSelection();
-  const [isOpen, setIsOpen] = useState(false);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+
+  const isControlled = controlledOpen !== undefined;
+  const isOpen = isControlled ? controlledOpen : uncontrolledOpen;
+  const setIsOpen = isControlled
+    ? (controlledOnOpenChange ?? (() => {}))
+    : setUncontrolledOpen;
 
   const createNotebookMutation = useCreateNotebook();
 
@@ -76,23 +86,34 @@ export function CreateNotebookDialog({
         />
       )}
       <Dialog modal={false} onOpenChange={setIsOpen} open={isOpen}>
-        <DialogTrigger asChild>
-          {size === "default" ? (
-            <Button className="cursor-pointer" variant="outline">
-              <span className="flex items-center p-0 gap-0">
+        {!isControlled && (
+          <DialogTrigger asChild>
+            {size === "default" ? (
+              <Button className="cursor-pointer" variant="outline">
+                <span className="flex items-center p-0 gap-0">
+                  <Plus className="size-3" />
+                  <Book />
+                </span>
+                Add a notebook
+              </Button>
+            ) : (
+              <Button className="cursor-pointer p-0 gap-0" variant="outline">
                 <Plus className="size-3" />
                 <Book />
-              </span>
-              Add a notebook
-            </Button>
-          ) : (
-            <Button className="cursor-pointer p-0 gap-0" variant="outline">
-              <Plus className="size-3" />
-              <Book />
-            </Button>
-          )}
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-xl p-8 z-50" showCloseButton={false}>
+              </Button>
+            )}
+          </DialogTrigger>
+        )}
+        <DialogContent
+          className="sm:max-w-xl p-8 z-50"
+          onInteractOutside={(e) => {
+            if (isControlled) e.preventDefault();
+          }}
+          onPointerDownOutside={(e) => {
+            if (isControlled) e.preventDefault();
+          }}
+          showCloseButton={false}
+        >
           <DialogHeader className="hidden">
             <DialogTitle>Add notebook</DialogTitle>
             <DialogDescription>
