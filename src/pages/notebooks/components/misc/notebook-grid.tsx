@@ -101,7 +101,7 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <div
-        className="flex-1 grid gap-2 p-6 pt-4 max-h-full"
+        className="flex-1 grid gap-2 pt-4 pb-6 max-h-full"
         role="grid"
         style={{
           gridTemplateColumns: `repeat(${cols}, 1fr)`,
