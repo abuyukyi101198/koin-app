@@ -112,6 +112,8 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
           row.map((coin, colIdx) => {
             const coords: SlotCoordinates = { pageIndex, rowIdx, colIdx };
             const id = slotId(coords);
+            const slotNumber =
+              pageIndex * rows * cols + rowIdx * cols + colIdx + 1;
             return (
               <NotebookSlot
                 coin={coin}
@@ -121,6 +123,7 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
                 key={id}
                 onPickUp={handlePickUp}
                 onPlace={handlePlace}
+                slotNumber={slotNumber}
               />
             );
           })

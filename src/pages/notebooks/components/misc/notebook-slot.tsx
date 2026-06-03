@@ -6,6 +6,7 @@ import { Coin } from "@/query/types";
 interface NotebookSlotProps {
   coordinates: SlotCoordinates;
   coin: Coin | null;
+  slotNumber: number;
   isSelected?: boolean;
   handActive?: boolean;
   onPickUp?: (coin: Coin, pos: { x: number; y: number }) => void;
@@ -15,19 +16,21 @@ interface NotebookSlotProps {
 export function NotebookSlot({
   coordinates,
   coin,
+  slotNumber,
   isSelected = false,
   handActive = false,
   onPickUp,
   onPlace,
 }: NotebookSlotProps) {
+  const label = String(slotNumber).padStart(3, "0");
+
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-sm border bg-background transition-colors duration-150",
+        "relative overflow-hidden rounded-sm border bg-background transition-colors duration-150 hover:bg-muted",
         {
-          "border-border hover:bg-accent/60": coin && !handActive,
-          "border-border border-dashed": !coin && !handActive,
-          "hover:bg-accent/60 cursor-cell": handActive,
+          "border-border": !handActive,
+          "cursor-cell": handActive,
         }
       )}
       onClick={(e) => {
@@ -39,6 +42,16 @@ export function NotebookSlot({
       }}
       role="gridcell"
     >
+      {/* Three-digit slot number */}
+      <span className="absolute top-1.5 left-1.5 z-10 text-xs text-muted-foreground leading-none select-none pointer-events-none tabular-nums">
+        {label}
+      </span>
+
+      {/* Double-border stitched effect for empty slots */}
+      {!coin && (
+        <div className="absolute inset-0.75 rounded-[2px] border border-dashed pointer-events-none" />
+      )}
+
       {coin && (
         <NotebookDraggable
           coin={coin}
