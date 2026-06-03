@@ -110,8 +110,7 @@ CoinInfo.Skeleton = () => {
       <div className="flex-1 min-h-0 pr-4 overflow-hidden flex flex-col">
         {/* Coin images */}
         <div className="my-4 flex w-full justify-between gap-2">
-          <Skeleton className="aspect-square flex-1 rounded-full" />
-          <Skeleton className="aspect-square flex-1 rounded-full" />
+          <CoinPreviewImages.Skeleton />
         </div>
 
         {/* Similar coins */}

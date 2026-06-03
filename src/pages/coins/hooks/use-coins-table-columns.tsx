@@ -22,9 +22,8 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
             size: 120,
             skeleton: () => (
               <div className="flex items-center gap-4">
-                <div className="flex gap-2">
-                  <Skeleton className="size-12 rounded-full shrink-0" />
-                  <Skeleton className="size-12 rounded-full shrink-0" />
+                <div className="flex gap-1">
+                  <CoinPreviewImages.Skeleton size="size-12" />
                 </div>
                 <div className="flex-1 flex flex-col gap-1.5">
                   <Skeleton className="h-3 w-3/4 rounded" />

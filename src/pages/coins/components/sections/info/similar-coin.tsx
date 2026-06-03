@@ -1,8 +1,8 @@
+import { CoinPreviewImages } from "@/components/composite/coin-preview-images.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { cn } from "@/lib/utils.ts";
 import { Coin } from "@/query/types";
 import { asFraction } from "@/utils/asFraction.tsx";
-import { resolveImageSrc } from "@/utils/resolveImageSrc.ts";
 
 interface SimilarCoinProps {
   coin: Coin;
@@ -35,22 +35,12 @@ export function SimilarCoin({ coin, isSelected, onSelect }: SimilarCoinProps) {
       role="option"
       tabIndex={0}
     >
-      <figure
-        aria-hidden="true"
-        className="size-12 flex items-center justify-center overflow-hidden shrink-0"
-      >
-        {coin.reverse_image ? (
-          <img
-            alt=""
-            className="max-w-full max-h-full object-contain"
-            src={resolveImageSrc(coin.reverse_image)}
-          />
-        ) : (
-          <div className="w-full aspect-square bg-muted flex items-center justify-center text-muted-foreground rounded-full text-xs">
-            R
-          </div>
-        )}
-      </figure>
+      <CoinPreviewImages
+        display="obverse"
+        obverseImage={coin.obverse_image}
+        size="size-12"
+        title={coin.title}
+      />
 
       <div
         aria-hidden="true"
@@ -76,7 +66,7 @@ export function SimilarCoin({ coin, isSelected, onSelect }: SimilarCoinProps) {
 SimilarCoin.Skeleton = () => {
   return (
     <li className="flex flex-col gap-2 rounded-lg border p-1 items-center">
-      <Skeleton aria-hidden="true" className="size-12 rounded-full" />
+      <CoinPreviewImages.Skeleton display="obverse" size="size-12" />
       <div
         aria-hidden="true"
         className="h-14 w-full flex flex-col items-center gap-1"
