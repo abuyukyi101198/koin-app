@@ -1,4 +1,4 @@
-import { CSSProperties, useCallback, useEffect } from "react";
+import { CSSProperties, useCallback, useEffect, useRef, useState } from "react";
 
 import { createPortal } from "react-dom";
 
@@ -34,6 +34,24 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
     cursor,
     setCursor,
   } = useNotebookReorderContext();
+
+  // Compute slot landscape once for the whole grid to avoid per-coin flicker on pagination.
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [isLandscape, setIsLandscape] = useState(false);
+
+  useEffect(() => {
+    const el = gridRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      // Each slot is (width / cols) × (height / rows); landscape when width/cols > 1.5 * height/rows
+      setIsLandscape(width * rows > 1.5 * height * cols);
+    });
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+    };
+  }, [rows, cols]);
 
   // When a slot handles a valid placement it flips this ref to true so the
   // window click listener — which fires on the same event after React's
@@ -102,6 +120,7 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
     <div className="flex-1 flex flex-col overflow-hidden">
       <div
         className="flex-1 grid gap-2 pt-4 pb-6 max-h-full"
+        ref={gridRef}
         role="grid"
         style={{
           gridTemplateColumns: `repeat(${cols}, 1fr)`,
@@ -119,6 +138,7 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
                 coin={coin}
                 coordinates={coords}
                 handActive={handActive}
+                isLandscape={isLandscape}
                 isSelected={false}
                 key={id}
                 onPickUp={handlePickUp}
@@ -148,6 +168,7 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
           >
             <NotebookDragOverlay
               coin={topCoin}
+              isLandscape={isLandscape}
               isSelected
               stackCount={hand.length}
             />

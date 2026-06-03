@@ -9,6 +9,7 @@ interface NotebookSlotProps {
   slotNumber: number;
   isSelected?: boolean;
   handActive?: boolean;
+  isLandscape?: boolean;
   onPickUp?: (coin: Coin, pos: { x: number; y: number }) => void;
   onPlace?: (payload: SlotClickPayload) => void;
 }
@@ -19,6 +20,7 @@ export function NotebookSlot({
   slotNumber,
   isSelected = false,
   handActive = false,
+  isLandscape = false,
   onPickUp,
   onPlace,
 }: NotebookSlotProps) {
@@ -56,6 +58,7 @@ export function NotebookSlot({
         <NotebookDraggable
           coin={coin}
           handActive={handActive}
+          isLandscape={isLandscape}
           isSelected={isSelected}
           onPickUp={onPickUp}
         />

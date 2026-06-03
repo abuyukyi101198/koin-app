@@ -6,6 +6,7 @@ interface NotebookDraggableProps {
   coin: Coin;
   isSelected?: boolean;
   handActive?: boolean;
+  isLandscape?: boolean;
   onPickUp?: (coin: Coin, pos: { x: number; y: number }) => void;
 }
 
@@ -13,6 +14,7 @@ export function NotebookDraggable({
   coin,
   isSelected = false,
   handActive = false,
+  isLandscape = false,
   onPickUp,
 }: NotebookDraggableProps) {
   return (
@@ -36,7 +38,11 @@ export function NotebookDraggable({
         onPickUp?.(coin, { x: e.clientX, y: e.clientY });
       }}
     >
-      <NotebookCoin coin={coin} isSelected={isSelected} />
+      <NotebookCoin
+        coin={coin}
+        isLandscape={isLandscape}
+        isSelected={isSelected}
+      />
     </div>
   );
 }

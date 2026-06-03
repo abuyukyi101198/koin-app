@@ -5,12 +5,14 @@ interface NotebookCoinOverlayProps {
   coin: Coin;
   stackCount: number;
   isSelected: boolean;
+  isLandscape?: boolean;
 }
 
 export function NotebookDragOverlay({
   coin,
   stackCount,
   isSelected,
+  isLandscape = false,
 }: NotebookCoinOverlayProps) {
   const depth = Math.min(stackCount - 1, 2);
   return (
@@ -27,7 +29,11 @@ export function NotebookDragOverlay({
       ))}
       <div className="absolute inset-0 overflow-hidden rounded-sm border border-border bg-background shadow-xl">
         <div className="h-full flex items-start justify-center">
-          <NotebookCoin coin={coin} isSelected={isSelected} />
+          <NotebookCoin
+            coin={coin}
+            isLandscape={isLandscape}
+            isSelected={isSelected}
+          />
         </div>
         {stackCount > 1 && (
           <div className="absolute right-1.5 top-1.5 z-10 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 pointer-events-none">
