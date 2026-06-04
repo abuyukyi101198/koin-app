@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Book, ChevronDown, Plus } from "lucide-react";
+import { Book, ChevronDown, Loader2, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button.tsx";
 import {
@@ -10,26 +10,27 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
+import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { useNotebookSelection } from "@/context/notebook-selection-context.tsx";
 import { cn } from "@/lib/utils.ts";
 import { CreateNotebookDialog } from "@/pages/notebooks/components/forms/create-notebook-dialog.tsx";
 import { DeleteNotebookDialog } from "@/pages/notebooks/components/forms/delete-notebook-dialog.tsx";
 import { UpdateNotebookDialog } from "@/pages/notebooks/components/forms/update-notebook-dialog.tsx";
-import {
-  useGetNotebook,
-  useListNotebooks,
-} from "@/query/commands/notebooks.ts";
 import { Notebook } from "@/query/types/notebooks.ts";
 
 interface NotebookContentsHeaderProps {
   notebookId: number;
+  notebook: Notebook | undefined;
+  allNotebooks: Notebook[];
+  allNotebooksLoading: boolean;
 }
 
 export function NotebookContentsHeader({
   notebookId,
+  notebook,
+  allNotebooks,
+  allNotebooksLoading,
 }: NotebookContentsHeaderProps) {
-  const { data: notebook } = useGetNotebook({ id: notebookId });
-  const { data: allNotebooks } = useListNotebooks({ pageSize: 200, page: 0 });
   const { setRowSelection } = useNotebookSelection();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -54,7 +55,10 @@ export function NotebookContentsHeader({
   return (
     <header className="shrink-0 flex flex-col border-b">
       <div className="w-full flex justify-between border-b">
-        <div className="flex items-end gap-2 pb-2">
+        <div
+          aria-busy={allNotebooksLoading}
+          className="flex items-end gap-2 pb-2"
+        >
           <DropdownMenu onOpenChange={setDropdownOpen} open={dropdownOpen}>
             <DropdownMenuTrigger asChild>
               <Button
@@ -69,59 +73,63 @@ export function NotebookContentsHeader({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-96" side="bottom">
-              {(allNotebooks?.items ?? []).map((nb: Notebook) => {
-                const nbCapacity =
-                  nb.rows_per_page * nb.columns_per_page * nb.number_of_pages;
-                const nbFillPct =
-                  nbCapacity > 0
-                    ? Math.round((nb.coin_count / nbCapacity) * 100)
-                    : 0;
-                const nbGridSpec = `${nb.rows_per_page}×${nb.columns_per_page}`;
-                const nbPages = `${nb.number_of_pages} pp`;
-                const isSelected = nb.id === notebookId;
-                return (
-                  <DropdownMenuItem
-                    className={cn(
-                      "relative overflow-hidden flex flex-col items-stretch gap-0.5 px-3 py-2 cursor-pointer hover:bg-muted!",
-                      "before:absolute before:inset-y-0 before:left-0 before:w-0.75 before:transition-colors",
-                      {
-                        "bg-accent/50 before:bg-primary": isSelected,
-                        "before:bg-transparent": !isSelected,
-                      }
-                    )}
-                    key={nb.id}
-                    onSelect={() => {
-                      setRowSelection({ [nb.id]: true });
-                      setDropdownOpen(false);
-                    }}
-                  >
-                    <span className="flex items-center gap-1 w-full">
-                      <span className="text-sm font-serif font-medium leading-snug truncate flex-1">
-                        {nb.title}
+              {!allNotebooksLoading && allNotebooks ? (
+                allNotebooks.map((nb: Notebook) => {
+                  const nbCapacity =
+                    nb.rows_per_page * nb.columns_per_page * nb.number_of_pages;
+                  const nbFillPct =
+                    nbCapacity > 0
+                      ? Math.round((nb.coin_count / nbCapacity) * 100)
+                      : 0;
+                  const nbGridSpec = `${nb.rows_per_page}×${nb.columns_per_page}`;
+                  const nbPages = `${nb.number_of_pages} pp`;
+                  const isSelected = nb.id === notebookId;
+                  return (
+                    <DropdownMenuItem
+                      className={cn(
+                        "relative overflow-hidden flex flex-col items-stretch gap-0.5 px-3 py-2 cursor-pointer hover:bg-muted!",
+                        "before:absolute before:inset-y-0 before:left-0 before:w-0.75 before:transition-colors",
+                        {
+                          "bg-accent/50 before:bg-primary": isSelected,
+                          "before:bg-transparent": !isSelected,
+                        }
+                      )}
+                      key={nb.id}
+                      onSelect={() => {
+                        setRowSelection({ [nb.id]: true });
+                        setDropdownOpen(false);
+                      }}
+                    >
+                      <span className="flex items-center gap-1 w-full">
+                        <span className="text-sm font-serif font-medium leading-snug truncate flex-1">
+                          {nb.title}
+                        </span>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">
+                          {nbGridSpec} · {nbPages}
+                        </span>
                       </span>
-                      <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">
-                        {nbGridSpec} · {nbPages}
+                      {nb.description && (
+                        <span className="text-xs italic text-muted-foreground leading-snug line-clamp-1">
+                          {nb.description}
+                        </span>
+                      )}
+                      <span className="flex items-center gap-1.5 w-full pt-0.5">
+                        <span className="relative flex-1 h-1 rounded-full bg-muted overflow-hidden">
+                          <span
+                            className="absolute inset-y-0 left-0 rounded-full bg-foreground/40 transition-all duration-300"
+                            style={{ width: `${nbFillPct}%` }}
+                          />
+                        </span>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap tabular-nums">
+                          {nb.coin_count}/{nbCapacity}
+                        </span>
                       </span>
-                    </span>
-                    {nb.description && (
-                      <span className="text-xs italic text-muted-foreground leading-snug line-clamp-1">
-                        {nb.description}
-                      </span>
-                    )}
-                    <span className="flex items-center gap-1.5 w-full pt-0.5">
-                      <span className="relative flex-1 h-1 rounded-full bg-muted overflow-hidden">
-                        <span
-                          className="absolute inset-y-0 left-0 rounded-full bg-foreground/40 transition-all duration-300"
-                          style={{ width: `${nbFillPct}%` }}
-                        />
-                      </span>
-                      <span className="text-xs text-muted-foreground whitespace-nowrap tabular-nums">
-                        {nb.coin_count}/{nbCapacity}
-                      </span>
-                    </span>
-                  </DropdownMenuItem>
-                );
-              })}
+                    </DropdownMenuItem>
+                  );
+                })
+              ) : (
+                <Loader2 className="py-2 text-muted-foreground sonner-spinner animate-spin" />
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="flex gap-2 cursor-pointer"
@@ -186,3 +194,22 @@ export function NotebookContentsHeader({
     </header>
   );
 }
+
+NotebookContentsHeader.Skeleton = () => {
+  return (
+    <header aria-hidden="true" className="shrink-0 flex flex-col border-b">
+      <div className="w-full flex justify-between border-b pb-2">
+        <Skeleton className="h-7 w-48 rounded" />
+        <div className="flex gap-1">
+          <Skeleton className="h-7 w-7 rounded" />
+          <Skeleton className="h-7 w-7 rounded" />
+        </div>
+      </div>
+      <div className="pt-2 pr-2.5 pb-2 flex items-end gap-6">
+        <Skeleton className="h-3 w-24 rounded" />
+        <Skeleton className="h-3 w-32 rounded" />
+        <Skeleton className="h-3 w-40 rounded" />
+      </div>
+    </header>
+  );
+};

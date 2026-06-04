@@ -11,12 +11,16 @@ import { NotebookAllCoins } from "@/pages/notebooks/components/sections/notebook
 import { NotebookContents } from "@/pages/notebooks/components/sections/notebook-contents.tsx";
 import { NotebookReorderContext } from "@/pages/notebooks/context/notebook-reorder-context.tsx";
 import { useNotebookReorder } from "@/pages/notebooks/hooks/use-notebook-reorder.tsx";
-import { useGetNotebook } from "@/query/commands/notebooks.ts";
+import {
+  useGetNotebook,
+  useListNotebooks,
+} from "@/query/commands/notebooks.ts";
 
 export function NotebooksView() {
   const { selectedNotebookId } = useNotebookSelection();
 
   const { data: notebook } = useGetNotebook({ id: selectedNotebookId ?? -1 });
+  const { refetch } = useListNotebooks();
   const reorder = useNotebookReorder({ notebook });
   const placingRef = useRef(false);
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
@@ -30,28 +34,29 @@ export function NotebooksView() {
     >
       <div className="pt-11 h-full w-full flex flex-col gap-0 bg-accent/50">
         <Separator className="shrink-0 bg-primary" />
-        <div className="flex-1 min-h-0 flex flex-col overflow-hidden pl-6 bg-background">
-          <ResizablePanelGroup
-            className="flex-1 min-h-0"
-            orientation="horizontal"
+        <ResizablePanelGroup
+          className="flex-1 min-h-0 flex flex-col pl-6 bg-background"
+          orientation="horizontal"
+        >
+          <ResizablePanel
+            className="h-full pt-4 pr-4 flex flex-col"
+            defaultSize="75%"
           >
-            <ResizablePanel
-              className="h-full pt-4 pr-4 flex flex-col"
-              defaultSize="75%"
-            >
-              <NotebookContents notebookId={selectedNotebookId} />
-            </ResizablePanel>
-            <ResizableHandle />
-            <ResizablePanel
-              className="h-full flex flex-col"
-              defaultSize="25%"
-              maxSize="50%"
-              minSize="25%"
-            >
-              <NotebookAllCoins />
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        </div>
+            <NotebookContents
+              notebookId={selectedNotebookId}
+              onRefresh={refetch}
+            />
+          </ResizablePanel>
+          <ResizableHandle />
+          <ResizablePanel
+            className="h-full flex flex-col"
+            defaultSize="25%"
+            maxSize="50%"
+            minSize="25%"
+          >
+            <NotebookAllCoins />
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
     </NotebookReorderContext.Provider>
   );

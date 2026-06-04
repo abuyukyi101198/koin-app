@@ -126,7 +126,7 @@ function App() {
                     </SidebarMenu>
                   </SidebarFooter>
                 </Sidebar>
-                <main className="h-full w-full overflow-hidden">
+                <main className="h-full w-full">
                   <Outlet />
                 </main>
               </SidebarProvider>

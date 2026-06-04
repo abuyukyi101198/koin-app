@@ -17,10 +17,9 @@ function slotId({ pageIndex, rowIdx, colIdx }: SlotCoordinates): string {
 interface NotebookGridProps {
   notebook: Notebook | undefined;
   page: number;
-  loading: boolean;
 }
 
-export function NotebookGrid({ notebook, page, loading }: NotebookGridProps) {
+export function NotebookGrid({ notebook, page }: NotebookGridProps) {
   const rows = notebook?.rows_per_page ?? 5;
   const cols = notebook?.columns_per_page ?? 4;
   const pageIndex = page - 1;
@@ -120,53 +119,37 @@ export function NotebookGrid({ notebook, page, loading }: NotebookGridProps) {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {loading ? (
-        <div
-          className="flex-1 grid gap-2 pt-4 pb-6 max-h-full"
-          ref={gridRef}
-          role="grid"
-          style={{
-            gridTemplateColumns: `repeat(${cols}, 1fr)`,
-            gridTemplateRows: `repeat(${rows}, 1fr)`,
-          }}
-        >
-          {Array.from({ length: rows * cols }).map((_, i) => (
-            <NotebookSlot.Skeleton isLandscape={isLandscape} key={i} />
-          ))}
-        </div>
-      ) : (
-        <div
-          className="flex-1 grid gap-2 pt-4 pb-6 max-h-full"
-          ref={gridRef}
-          role="grid"
-          style={{
-            gridTemplateColumns: `repeat(${cols}, 1fr)`,
-            gridTemplateRows: `repeat(${rows}, 1fr)`,
-          }}
-        >
-          {(localCells[pageIndex] ?? []).map((row, rowIdx) =>
-            row.map((coin, colIdx) => {
-              const coords: SlotCoordinates = { pageIndex, rowIdx, colIdx };
-              const id = slotId(coords);
-              const slotNumber =
-                pageIndex * rows * cols + rowIdx * cols + colIdx + 1;
-              return (
-                <NotebookSlot
-                  coin={coin}
-                  coordinates={coords}
-                  handActive={handActive}
-                  isLandscape={isLandscape}
-                  isSelected={false}
-                  key={id}
-                  onPickUp={handlePickUp}
-                  onPlace={handlePlace}
-                  slotNumber={slotNumber}
-                />
-              );
-            })
-          )}
-        </div>
-      )}
+      <div
+        className="flex-1 grid gap-2 pt-4 pb-6 max-h-full"
+        ref={gridRef}
+        role="grid"
+        style={{
+          gridTemplateColumns: `repeat(${cols}, 1fr)`,
+          gridTemplateRows: `repeat(${rows}, 1fr)`,
+        }}
+      >
+        {(localCells[pageIndex] ?? []).map((row, rowIdx) =>
+          row.map((coin, colIdx) => {
+            const coords: SlotCoordinates = { pageIndex, rowIdx, colIdx };
+            const id = slotId(coords);
+            const slotNumber =
+              pageIndex * rows * cols + rowIdx * cols + colIdx + 1;
+            return (
+              <NotebookSlot
+                coin={coin}
+                coordinates={coords}
+                handActive={handActive}
+                isLandscape={isLandscape}
+                isSelected={false}
+                key={id}
+                onPickUp={handlePickUp}
+                onPlace={handlePlace}
+                slotNumber={slotNumber}
+              />
+            );
+          })
+        )}
+      </div>
 
       {/* Cursor-following drag overlay */}
       {handActive &&
@@ -196,3 +179,28 @@ export function NotebookGrid({ notebook, page, loading }: NotebookGridProps) {
     </div>
   );
 }
+
+NotebookGrid.Skeleton = ({
+  rows = 5,
+  cols = 4,
+}: {
+  rows?: number;
+  cols?: number;
+}) => {
+  return (
+    <div aria-hidden="true" className="flex-1 flex flex-col overflow-hidden">
+      <div
+        className="flex-1 grid gap-2 pt-4 pb-6 max-h-full"
+        role="grid"
+        style={{
+          gridTemplateColumns: `repeat(${cols}, 1fr)`,
+          gridTemplateRows: `repeat(${rows}, 1fr)`,
+        }}
+      >
+        {Array.from({ length: rows * cols }).map((_, i) => (
+          <NotebookSlot.Skeleton key={i} />
+        ))}
+      </div>
+    </div>
+  );
+};
