@@ -77,11 +77,7 @@ export function CoinInfo({ coinId, selection }: CoinInfoProps) {
           />
         </section>
 
-        <SimilarCoins
-          coinId={coinId}
-          isSelected={isSelected}
-          onSelect={selectItem}
-        />
+        <SimilarCoins coinId={coinId} onSelect={selectItem} />
 
         {/* key resets CoinNotesField's expand state on coin change */}
         <CoinDetails data={data} key={coinId} />

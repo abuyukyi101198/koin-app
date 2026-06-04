@@ -4,15 +4,10 @@ import { useGetSimilarCoins } from "@/query/commands";
 
 interface SimilarCoinsProps {
   coinId: number;
-  isSelected: (id: number) => boolean;
   onSelect: (id: number) => void;
 }
 
-export function SimilarCoins({
-  coinId,
-  isSelected,
-  onSelect,
-}: SimilarCoinsProps) {
+export function SimilarCoins({ coinId, onSelect }: SimilarCoinsProps) {
   const { data, isLoading } = useGetSimilarCoins({ id: coinId, pageSize: 3 });
   const items = data?.items ?? [];
 
@@ -44,7 +39,6 @@ export function SimilarCoins({
           : items.map((coin) => (
               <SimilarCoin
                 coin={coin}
-                isSelected={isSelected(coin.id)}
                 key={coin.id}
                 onSelect={() => {
                   onSelect(coin.id);

@@ -6,15 +6,13 @@ import { asFraction } from "@/utils/asFraction.tsx";
 
 interface SimilarCoinProps {
   coin: Coin;
-  isSelected: boolean;
   onSelect: () => void;
 }
 
-export function SimilarCoin({ coin, isSelected, onSelect }: SimilarCoinProps) {
+export function SimilarCoin({ coin, onSelect }: SimilarCoinProps) {
   return (
     <li
       aria-label={`${asFraction(coin.title, coin.value)}, ${coin.issuer.name}, ${coin.year}`}
-      aria-selected={isSelected}
       className={cn(
         "relative flex flex-col gap-2 rounded-lg border p-1 items-center",
         "cursor-pointer transition-colors select-none",
@@ -24,7 +22,6 @@ export function SimilarCoin({ coin, isSelected, onSelect }: SimilarCoinProps) {
         "before:bg-transparent before:transition-colors",
         "data-[state=selected]:before:bg-primary"
       )}
-      data-state={isSelected ? "selected" : undefined}
       onClick={onSelect}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
