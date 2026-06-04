@@ -35,7 +35,7 @@ export function useNotebookAllCoinsTableColumns(): ColumnDef<Coin>[] {
               <div className="w-full flex flex-col gap-1.5">
                 <div className="flex items-start gap-2">
                   <Skeleton className="h-3 w-4.5 shrink-0 rounded" />
-                  <Skeleton className="h-3 w-3/4 rounded" />
+                  <Skeleton className="pb-0.5 h-3 w-3/4 rounded" />
                 </div>
                 <Skeleton className="ml-6.5 h-3 w-1/2 rounded" />
               </div>
@@ -71,7 +71,7 @@ export function useNotebookAllCoinsTableColumns(): ColumnDef<Coin>[] {
                   loading="lazy"
                   src={issuer.flag?.length ? issuer.flag : undefined}
                 />
-                <span className="font-serif font-medium leading-4 overflow-hidden text-wrap line-clamp-2">
+                <span className="pb-0.5 font-serif font-medium leading-4 overflow-hidden text-wrap line-clamp-2">
                   {asFraction(title, value)}
                 </span>
               </div>

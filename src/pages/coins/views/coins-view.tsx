@@ -121,7 +121,7 @@ export function CoinsView() {
             )}
             <DataTablePagination
               onPaginationChange={handlePaginationChange}
-              pageCount={Math.ceil((data?.total ?? 0) / size)}
+              pageCount={Math.ceil((data?.total ?? 1) / size)}
               pageIndex={page}
               pageSize={size}
             />

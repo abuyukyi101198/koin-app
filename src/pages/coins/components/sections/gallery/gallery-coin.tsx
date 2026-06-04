@@ -50,7 +50,7 @@ export function GalleryCoin({ coin, isSelected, onSelect }: GalleryCoinProps) {
           loading="lazy"
           src={coin.issuer.flag?.length ? coin.issuer.flag : undefined}
         />
-        <p className="w-full font-serif font-medium leading-4 line-clamp-2 text-center overflow-hidden">
+        <p className="pb-0.5 w-full font-serif font-medium leading-4 line-clamp-2 text-center overflow-hidden">
           {asFraction(coin.title, coin.value)}
         </p>
         <p className="h-8 w-full text-xs leading-4 line-clamp-2 text-muted-foreground text-center overflow-hidden">
@@ -69,7 +69,7 @@ GalleryCoin.Skeleton = () => {
       </div>
       <div className="h-15 flex flex-col items-center gap-1">
         <Skeleton className="h-3 w-4.5 rounded" />
-        <Skeleton className="h-4 w-3/4 rounded" />
+        <Skeleton className="pb-0.5 h-4 w-3/4 rounded" />
         <Skeleton className="h-8 w-1/2 rounded" />
       </div>
     </div>

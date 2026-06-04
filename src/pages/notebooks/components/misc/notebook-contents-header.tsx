@@ -82,7 +82,8 @@ export function NotebookContentsHeader({
                       ? Math.round((nb.coin_count / nbCapacity) * 100)
                       : 0;
                   const nbGridSpec = `${nb.rows_per_page}×${nb.columns_per_page}`;
-                  const nbPages = `${nb.number_of_pages} pp`;
+                  const nbPages = `${nb.number_of_pages} pages`;
+                  const nbPerPage = `${nb.rows_per_page * nb.columns_per_page} pp`;
                   const isSelected = nb.id === notebookId;
                   return (
                     <DropdownMenuItem
@@ -105,7 +106,7 @@ export function NotebookContentsHeader({
                           {nb.title}
                         </span>
                         <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">
-                          {nbGridSpec} · {nbPages}
+                          {nbGridSpec} · {nbPages} · {nbPerPage}
                         </span>
                       </span>
                       {nb.description && (

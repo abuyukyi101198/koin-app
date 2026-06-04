@@ -109,7 +109,7 @@ NotebookSlot.Skeleton = ({
               )}
             >
               <Skeleton className="absolute top-0 right-0 h-3 w-4.5 shrink-0 rounded" />
-              <Skeleton className="h-3 w-8 rounded" />
+              <Skeleton className="pb-0.5 h-3 w-8 rounded" />
               <Skeleton className="h-2.25 w-4 rounded" />
               <Skeleton
                 className={cn("h-4.5 rounded", isLandscape ? "w-full" : "w-12")}

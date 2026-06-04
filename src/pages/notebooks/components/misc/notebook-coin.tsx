@@ -60,7 +60,7 @@ export function NotebookCoin({
           />
           <p
             className={cn(
-              "w-full font-serif font-medium leading-4 line-clamp-1 text-center overflow-hidden",
+              "pb-0.5 w-full font-serif font-medium leading-4 line-clamp-1 text-center overflow-hidden",
               isLandscape ? "text-left" : "text-center"
             )}
           >
