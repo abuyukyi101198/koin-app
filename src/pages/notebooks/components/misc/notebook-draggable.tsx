@@ -4,7 +4,6 @@ import { Coin } from "@/query/types";
 
 interface NotebookDraggableProps {
   coin: Coin;
-  isSelected?: boolean;
   handActive?: boolean;
   isLandscape?: boolean;
   onPickUp?: (coin: Coin, pos: { x: number; y: number }) => void;
@@ -12,7 +11,6 @@ interface NotebookDraggableProps {
 
 export function NotebookDraggable({
   coin,
-  isSelected = false,
   handActive = false,
   isLandscape = false,
   onPickUp,
@@ -38,11 +36,7 @@ export function NotebookDraggable({
         onPickUp?.(coin, { x: e.clientX, y: e.clientY });
       }}
     >
-      <NotebookCoin
-        coin={coin}
-        isLandscape={isLandscape}
-        isSelected={isSelected}
-      />
+      <NotebookCoin coin={coin} isLandscape={isLandscape} />
     </div>
   );
 }

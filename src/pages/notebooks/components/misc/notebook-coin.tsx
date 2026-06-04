@@ -1,5 +1,3 @@
-import { Check } from "lucide-react";
-
 import { CoinPreviewImages } from "@/components/composite/coin-preview-images.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
 import { cn } from "@/lib/utils.ts";
@@ -8,22 +6,12 @@ import { asFraction } from "@/utils/asFraction.tsx";
 
 interface NotebookCoinProps {
   coin: Coin;
-  isSelected?: boolean;
   isLandscape?: boolean;
 }
 
-export function NotebookCoin({
-  coin,
-  isSelected = false,
-  isLandscape = false,
-}: NotebookCoinProps) {
+export function NotebookCoin({ coin, isLandscape = false }: NotebookCoinProps) {
   return (
     <div className="absolute inset-2">
-      {isSelected && (
-        <div className="absolute top-1.5 left-1.5 z-20 size-4 rounded-full bg-primary flex items-center justify-center shadow-sm pointer-events-none animate-in zoom-in-50 duration-150">
-          <Check className="size-2.5 text-primary-foreground" strokeWidth={3} />
-        </div>
-      )}
       <div
         className={cn(
           "h-full w-full flex",

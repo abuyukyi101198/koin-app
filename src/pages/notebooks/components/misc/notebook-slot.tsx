@@ -10,7 +10,6 @@ interface NotebookSlotProps {
   coordinates: SlotCoordinates;
   coin: Coin | null;
   slotNumber: number;
-  isSelected?: boolean;
   handActive?: boolean;
   isLandscape?: boolean;
   onPickUp?: (coin: Coin, pos: { x: number; y: number }) => void;
@@ -21,7 +20,6 @@ export function NotebookSlot({
   coordinates,
   coin,
   slotNumber,
-  isSelected = false,
   handActive = false,
   isLandscape = false,
   onPickUp,
@@ -62,7 +60,6 @@ export function NotebookSlot({
           coin={coin}
           handActive={handActive}
           isLandscape={isLandscape}
-          isSelected={isSelected}
           onPickUp={onPickUp}
         />
       )}

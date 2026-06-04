@@ -1,5 +1,6 @@
-import { CSSProperties, useCallback, useEffect, useRef, useState } from "react";
+import { CSSProperties, useCallback, useEffect, useRef } from "react";
 
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createPortal } from "react-dom";
 
 import { NotebookDragOverlay } from "@/pages/notebooks/components/misc/notebook-coin-overlay.tsx";
@@ -36,23 +37,49 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
     setCursor,
   } = useNotebookReorderContext();
 
+  const notebookId = notebook?.id;
+  const queryClient = useQueryClient();
+
   // Compute slot landscape once for the whole grid to avoid per-coin flicker on pagination.
   const gridRef = useRef<HTMLDivElement>(null);
-  const [isLandscape, setIsLandscape] = useState(false);
+
+  // Cache slot metrics per notebook in TanStack so values survive page
+  // navigation and are only re-derived when the notebook actually changes.
+  interface GridMetrics {
+    isLandscape: boolean;
+    slotWidth: number;
+    slotHeight: number;
+  }
+  const { data: metrics } = useQuery<GridMetrics>({
+    queryKey: ["notebook-grid-metrics", notebookId],
+    queryFn: () => ({ isLandscape: false, slotWidth: 0, slotHeight: 0 }),
+    enabled: notebookId !== undefined,
+    staleTime: Infinity,
+    gcTime: Infinity,
+    initialData: { isLandscape: false, slotWidth: 0, slotHeight: 0 },
+  });
+  const isLandscape = metrics.isLandscape;
 
   useEffect(() => {
     const el = gridRef.current;
     if (!el) return;
     const ro = new ResizeObserver(([entry]) => {
       const { width, height } = entry.contentRect;
-      // Each slot is (width / cols) × (height / rows); landscape when width/cols > 1.5 * height/rows
-      setIsLandscape(width * rows > 1.5 * height * cols);
+      const gapPx = parseFloat(getComputedStyle(el).columnGap) || 8;
+      queryClient.setQueryData<GridMetrics>(
+        ["notebook-grid-metrics", notebookId],
+        {
+          isLandscape: width * rows > 1.5 * height * cols,
+          slotWidth: (width - (cols - 1) * gapPx) / cols,
+          slotHeight: (height - (rows - 1) * gapPx) / rows,
+        }
+      );
     });
     ro.observe(el);
     return () => {
       ro.disconnect();
     };
-  }, [rows, cols]);
+  }, [rows, cols, notebookId, queryClient]);
 
   // When a slot handles a valid placement it flips this ref to true so the
   // window click listener — which fires on the same event after React's
@@ -140,7 +167,6 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
                 coordinates={coords}
                 handActive={handActive}
                 isLandscape={isLandscape}
-                isSelected={false}
                 key={id}
                 onPickUp={handlePickUp}
                 onPlace={handlePlace}
@@ -157,20 +183,19 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
         cursor &&
         createPortal(
           <div
-            className="pointer-events-none fixed -translate-x-2 -translate-y-2 z-50 h-[calc((100vh-62*var(--spacing))/var(--rows))] w-[calc((7/12*100vw-3rem-(var(--cols)-1)*2*var(--spacing))/var(--cols))] scale-90"
+            className="pointer-events-none fixed -translate-x-2 -translate-y-2 z-50 scale-95"
             style={
               {
-                "--rows": rows,
-                "--cols": cols,
                 left: cursor.x,
                 top: cursor.y,
+                width: metrics.slotWidth,
+                height: metrics.slotHeight,
               } as CSSProperties
             }
           >
             <NotebookDragOverlay
               coin={topCoin}
               isLandscape={isLandscape}
-              isSelected
               stackCount={hand.length}
             />
           </div>,
