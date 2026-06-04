@@ -63,7 +63,7 @@ export function GalleryCoin({ coin, isSelected, onSelect }: GalleryCoinProps) {
 
 GalleryCoin.Skeleton = () => {
   return (
-    <div className="flex flex-col gap-3 rounded-lg border bg-card p-3">
+    <div className="flex flex-col gap-3 rounded-lg border p-3">
       <div className="flex justify-between gap-1.5">
         <CoinPreviewImages.Skeleton />
       </div>

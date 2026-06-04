@@ -32,12 +32,12 @@ export function useNotebookAllCoinsTableColumns(): ColumnDef<Coin>[] {
                 <Skeleton className="size-8 rounded-full shrink-0" />
                 <Skeleton className="size-8 rounded-full shrink-0" />
               </div>
-              <div className="flex flex-col gap-1.5">
+              <div className="w-full flex flex-col gap-1.5">
                 <div className="flex items-start gap-2">
                   <Skeleton className="h-3 w-4.5 shrink-0 rounded" />
                   <Skeleton className="h-3 w-3/4 rounded" />
                 </div>
-                <Skeleton className="h-3 w-1/2 rounded" />
+                <Skeleton className="ml-6.5 h-3 w-1/2 rounded" />
               </div>
             </div>
           ),

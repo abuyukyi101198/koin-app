@@ -23,9 +23,9 @@ export function EmptyNotebooks({ type }: EmptyNotebooksProps) {
     <Empty>
       <EmptyHeader>
         <EmptyMedia variant="icon">
-          <BookCopy />
+          <BookCopy className="text-primary" />
         </EmptyMedia>
-        <EmptyTitle>
+        <EmptyTitle className="font-serif text-2xl">
           {type === "no data" ? "No notebooks yet" : "No matching notebooks"}
         </EmptyTitle>
         <EmptyDescription>
