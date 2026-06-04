@@ -14,6 +14,7 @@ interface CoinsTableProps {
   loading: DataTableProps<Coin>["loading"];
   selection: DataTableProps<Coin>["selection"];
   sort: DataTableProps<Coin>["sort"];
+  onRefresh?: () => void;
 }
 
 export function CoinsTable({
@@ -22,6 +23,7 @@ export function CoinsTable({
   loading,
   selection,
   sort,
+  onRefresh,
 }: CoinsTableProps) {
   const columns = useCoinsTableColumns();
 
@@ -43,7 +45,12 @@ export function CoinsTable({
     <DataTable<Coin>
       columns={columns}
       data={data}
-      empty={<EmptyCoins type={searchQuery.length ? "no match" : "no data"} />}
+      empty={
+        <EmptyCoins
+          onRefresh={onRefresh}
+          type={searchQuery.length ? "no match" : "no data"}
+        />
+      }
       loading={loading}
       selection={guardedSelection}
       sort={sort}

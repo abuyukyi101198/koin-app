@@ -1,3 +1,4 @@
+import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { SimilarCoin } from "@/pages/coins/components/sections/info/similar-coin.tsx";
 import { useGetSimilarCoins } from "@/query/commands";
 
@@ -54,3 +55,18 @@ export function SimilarCoins({
     </section>
   );
 }
+
+SimilarCoins.Skeleton = () => {
+  return (
+    <section aria-hidden="true" className="flex flex-col pb-3">
+      <div className="border-b pt-4 pb-2">
+        <Skeleton className="h-4 w-28 rounded" />
+      </div>
+      <ul className="grid grid-cols-3 gap-3 pt-3" role="list">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <SimilarCoin.Skeleton key={i} />
+        ))}
+      </ul>
+    </section>
+  );
+};

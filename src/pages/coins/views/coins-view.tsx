@@ -42,7 +42,7 @@ export function CoinsView() {
     sortDirection: sorting.length > 0 && !sorting[0].desc ? "asc" : "desc",
   };
 
-  const { data, isLoading } = useListCoins(listCoinsOptions);
+  const { data, isLoading, refetch } = useListCoins(listCoinsOptions);
 
   const handlePaginationChange = useCallback(
     async (pageIndex: number, pageSize: number) => {
@@ -99,6 +99,7 @@ export function CoinsView() {
               <CoinsTable
                 data={data?.items ?? []}
                 loading={isLoading}
+                onRefresh={refetch}
                 searchQuery={debouncedSearchQuery}
                 selection={{
                   rowSelection,
@@ -110,6 +111,7 @@ export function CoinsView() {
               <CoinsGallery
                 data={data?.items ?? []}
                 loading={isLoading}
+                onRefresh={refetch}
                 searchQuery={debouncedSearchQuery}
                 selection={{
                   rowSelection,

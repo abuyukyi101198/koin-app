@@ -9,6 +9,7 @@ interface CoinsGalleryProps {
   searchQuery: string;
   loading: DataTableProps<Coin>["loading"];
   selection: DataTableProps<Coin>["selection"];
+  onRefresh?: () => void;
 }
 
 export function CoinsGallery({
@@ -16,8 +17,9 @@ export function CoinsGallery({
   searchQuery,
   loading,
   selection,
+  onRefresh,
 }: CoinsGalleryProps) {
-  const isEmpty = !loading && data.length === 0;
+  const hasData = data.length > 0;
 
   const isSelected = (id: number) =>
     selection?.rowSelection[id.toString()] ?? false;
@@ -45,26 +47,8 @@ export function CoinsGallery({
       )}
       role="region"
     >
-      {loading ? (
-        <div
-          aria-label="Loading coins"
-          className="grid grid-cols-5 gap-3 p-3"
-          role="list"
-        >
-          {Array.from({ length: 20 }).map((_, i) => (
-            <GalleryCoin.Skeleton key={i} />
-          ))}
-        </div>
-      ) : isEmpty ? (
-        <div
-          aria-live="polite"
-          className="pt-12 flex h-full items-start justify-center"
-          role="status"
-        >
-          <EmptyCoins type={searchQuery.length ? "no match" : "no data"} />
-        </div>
-      ) : (
-        <div className="grid grid-cols-5 gap-3 p-3" role="list">
+      {hasData ? (
+        <div className="grid grid-cols-5 gap-3 p-3 pl-0" role="list">
           {data.map((coin) => (
             <GalleryCoin
               coin={coin}
@@ -75,6 +59,27 @@ export function CoinsGallery({
               }}
             />
           ))}
+        </div>
+      ) : loading ? (
+        <div
+          aria-label="Loading coins"
+          className="grid grid-cols-5 gap-3 p-3"
+          role="list"
+        >
+          {Array.from({ length: 20 }).map((_, i) => (
+            <GalleryCoin.Skeleton key={i} />
+          ))}
+        </div>
+      ) : (
+        <div
+          aria-live="polite"
+          className="pt-12 flex h-full items-start justify-center"
+          role="status"
+        >
+          <EmptyCoins
+            onRefresh={onRefresh}
+            type={searchQuery.length ? "no match" : "no data"}
+          />
         </div>
       )}
     </div>

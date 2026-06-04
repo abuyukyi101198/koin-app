@@ -6,7 +6,6 @@ import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { DeleteCoinDialog } from "@/pages/coins/components/forms/delete-coin-dialog.tsx";
 import { UpdateCoinDialog } from "@/pages/coins/components/forms/update-coin-dialog.tsx";
 import { CoinDetails } from "@/pages/coins/components/sections/info/coin-details.tsx";
-import { SimilarCoin } from "@/pages/coins/components/sections/info/similar-coin.tsx";
 import { SimilarCoins } from "@/pages/coins/components/sections/info/similar-coins.tsx";
 import { useGetCoin } from "@/query/commands";
 import { Coin } from "@/query/types";
@@ -20,12 +19,12 @@ interface CoinInfoProps {
 export function CoinInfo({ coinId, selection }: CoinInfoProps) {
   const { data, isLoading } = useGetCoin({ id: coinId ?? 0 });
 
-  if (!coinId || isLoading) {
-    return <CoinInfo.Skeleton />;
+  if (!coinId || !data) {
+    return <Empty className="bg-accent/50 rounded-none" />;
   }
 
-  if (!data) {
-    return <Empty className="bg-accent/50 rounded-none" />;
+  if (isLoading) {
+    return <CoinInfo.Skeleton />;
   }
 
   const isSelected = (id: number) =>
@@ -114,16 +113,7 @@ CoinInfo.Skeleton = () => {
         </div>
 
         {/* Similar coins */}
-        <div className="flex flex-col pb-3">
-          <div className="border-b pt-4 pb-2">
-            <Skeleton className="h-4 w-28 rounded" />
-          </div>
-          <div className="grid grid-cols-3 gap-3 pt-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <SimilarCoin.Skeleton key={i} />
-            ))}
-          </div>
-        </div>
+        <SimilarCoins.Skeleton />
 
         {/* Details fields */}
         <div className="flex flex-col">
