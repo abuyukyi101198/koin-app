@@ -6,7 +6,11 @@ import { createPortal } from "react-dom";
 import { NotebookDragOverlay } from "@/pages/notebooks/components/misc/notebook-coin-overlay.tsx";
 import { NotebookSlot } from "@/pages/notebooks/components/misc/notebook-slot.tsx";
 import { useNotebookReorderContext } from "@/pages/notebooks/context/notebook-reorder-context.tsx";
-import { SlotClickPayload, SlotCoordinates } from "@/pages/notebooks/types.ts";
+import {
+  GridMetrics,
+  SlotClickPayload,
+  SlotCoordinates,
+} from "@/pages/notebooks/types.ts";
 import { Coin, Notebook } from "@/query/types";
 
 export type { SlotCoordinates };
@@ -45,11 +49,6 @@ export function NotebookGrid({ notebook, page }: NotebookGridProps) {
 
   // Cache slot metrics per notebook in TanStack so values survive page
   // navigation and are only re-derived when the notebook actually changes.
-  interface GridMetrics {
-    isLandscape: boolean;
-    slotWidth: number;
-    slotHeight: number;
-  }
   const { data: metrics } = useQuery<GridMetrics>({
     queryKey: ["notebook-grid-metrics", notebookId],
     queryFn: () => ({ isLandscape: false, slotWidth: 0, slotHeight: 0 }),
