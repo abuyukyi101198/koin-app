@@ -31,17 +31,19 @@ export function NotebookSelectionProvider({
   children,
 }: NotebookSelectionProviderProps) {
   const { data, isSuccess } = useListNotebooks({
-    sortField: "issuer",
+    sortField: "id",
     sortDirection: "asc",
   });
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const selectedNotebookId = useMemo(() => {
-    const coinSelectionIds = Object.keys(rowSelection).map((k) => Number(k));
-    return coinSelectionIds.length ? coinSelectionIds[0] : null;
+    const notebookSelectionIds = Object.keys(rowSelection).map((k) =>
+      Number(k)
+    );
+    return notebookSelectionIds.length ? notebookSelectionIds[0] : null;
   }, [rowSelection]);
 
-  // Auto-select first coin when data loads
+  // Auto-select first notebook when data loads
   useEffect(() => {
     if (isSuccess && data?.items && data.total && selectedNotebookId === null) {
       setRowSelection({ [data.items[0].id]: true });
