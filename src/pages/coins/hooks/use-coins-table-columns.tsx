@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 
 import { CoinPreviewImages } from "@/components/composite/coin-preview-images.tsx";
 import { DataTableColumnHeader } from "@/components/composite/data-table-column-header.tsx";
+import { IssuerFlag } from "@/components/composite/issuer-flag.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { Coin } from "@/query/types";
 import { asFraction } from "@/utils/asFraction.tsx";
@@ -78,7 +79,7 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
             className: "md:table-cell hidden",
             skeleton: () => (
               <div className="flex items-start gap-2">
-                <Skeleton className="h-3 w-4.5 shrink-0 rounded" />
+                <IssuerFlag.Skeleton className="h-3 w-4.5 shrink-0 rounded" />
                 <Skeleton className="h-3 flex-1 rounded" />
               </div>
             ),
@@ -90,11 +91,10 @@ export function useCoinsTableColumns(): ColumnDef<Coin>[] {
           }) => {
             return (
               <div className="w-full flex items-start gap-2">
-                <img
-                  alt={`${issuer.name} flag`}
+                <IssuerFlag
                   className="h-3 w-4.5 shrink-0 mt-0.5"
-                  loading="lazy"
-                  src={issuer.flag?.length ? issuer.flag : undefined}
+                  flag={issuer.flag}
+                  name={issuer.name}
                 />
                 <span className="text-xs leading-4 overflow-hidden text-wrap line-clamp-2">
                   {issuer.name}

@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { FormikProps } from "formik";
 import { Search } from "lucide-react";
 
+import { IssuerFlag } from "@/components/composite/issuer-flag.tsx";
 import {
   Combobox,
   ComboboxClear,
@@ -34,11 +35,10 @@ const IssuerItemContent = ({
 }) => (
   <div className="w-full flex justify-between">
     <div className="flex items-start gap-2 pt-0.5">
-      <img
-        alt={`${issuer.name} flag`}
+      <IssuerFlag
         className="h-4 w-6 mt-0.5"
-        loading="lazy"
-        src={issuer.flag?.length ? issuer.flag : undefined}
+        flag={issuer.flag}
+        name={issuer.name}
       />
       <span className="truncate text-sm">{issuer.name}</span>
     </div>
@@ -121,11 +121,10 @@ export function IssuerField({
           >
             <InputGroupAddon>
               {value ? (
-                <img
-                  alt={`${value.name} flag`}
+                <IssuerFlag
                   className="h-4 w-6"
-                  loading="lazy"
-                  src={value.flag?.length ? value.flag : undefined}
+                  flag={value.flag}
+                  name={value.name}
                 />
               ) : (
                 <Search className="h-4 mr-1" />

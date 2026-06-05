@@ -1,5 +1,6 @@
 import { CoinPreviewImages } from "@/components/composite/coin-preview-images.tsx";
 import { DataTableProps } from "@/components/composite/data-table.tsx";
+import { IssuerFlag } from "@/components/composite/issuer-flag.tsx";
 import { Empty } from "@/components/ui/empty.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
@@ -48,11 +49,10 @@ export function CoinInfo({ coinId, selection }: CoinInfoProps) {
             {asFraction(data?.title, data?.value)}
           </h2>
           <div className="mb-1 w-full flex items-start gap-2">
-            <img
-              alt={`${data?.issuer.name} flag`}
+            <IssuerFlag
               className="h-3 w-4.5 shrink-0 mt-0.5"
-              loading="lazy"
-              src={data?.issuer.flag?.length ? data?.issuer.flag : undefined}
+              flag={data.issuer.flag}
+              name={data.issuer.name}
             />
             <span className="pb-0.5 leading-4 overflow-hidden text-wrap line-clamp-2 font-sans text-sm text-muted-foreground">
               {data?.issuer.name}
@@ -96,7 +96,7 @@ CoinInfo.Skeleton = () => {
       <div className="shrink-0 mb-2 flex flex-col gap-1">
         <Skeleton className="h-7 w-3/4 rounded" />
         <div className="mb-1 flex items-center gap-2">
-          <Skeleton className="h-3 w-4.5 shrink-0 rounded" />
+          <IssuerFlag.Skeleton className="h-3 w-4.5 shrink-0 rounded" />
           <Skeleton className="h-3 w-1/2 rounded" />
         </div>
       </div>

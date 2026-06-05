@@ -1,4 +1,5 @@
 import { CoinPreviewImages } from "@/components/composite/coin-preview-images.tsx";
+import { IssuerFlag } from "@/components/composite/issuer-flag.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
 import { cn } from "@/lib/utils.ts";
 import { Coin } from "@/query/types";
@@ -39,12 +40,10 @@ export function NotebookCoin({ coin, isLandscape = false }: NotebookCoinProps) {
               : "items-center w-full gap-0"
           )}
         >
-          <img
-            alt={`${coin.issuer.name} flag`}
+          <IssuerFlag
             className="absolute top-0 right-0 h-3 w-4.5"
-            draggable={false}
-            loading="lazy"
-            src={coin.issuer.flag?.length ? coin.issuer.flag : undefined}
+            flag={coin.issuer.flag}
+            name={coin.issuer.name}
           />
           <p
             className={cn(

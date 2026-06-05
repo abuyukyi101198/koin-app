@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Book } from "lucide-react";
 
 import { CoinPreviewImages } from "@/components/composite/coin-preview-images.tsx";
+import { IssuerFlag } from "@/components/composite/issuer-flag.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import {
   Tooltip,
@@ -34,7 +35,7 @@ export function useNotebookAllCoinsTableColumns(): ColumnDef<Coin>[] {
               </div>
               <div className="w-full flex flex-col gap-1.5">
                 <div className="flex items-start gap-2">
-                  <Skeleton className="h-3 w-4.5 shrink-0 rounded" />
+                  <IssuerFlag.Skeleton className="h-3 w-4.5 shrink-0 rounded" />
                   <Skeleton className="pb-0.5 h-3 w-3/4 rounded" />
                 </div>
                 <Skeleton className="ml-6.5 h-3 w-1/2 rounded" />
@@ -65,11 +66,10 @@ export function useNotebookAllCoinsTableColumns(): ColumnDef<Coin>[] {
             </div>
             <div className="flex flex-col">
               <div className="flex items-start gap-2">
-                <img
-                  alt={`${issuer.name} flag`}
+                <IssuerFlag
                   className="h-3 w-4.5 shrink-0 mt-0.5"
-                  loading="lazy"
-                  src={issuer.flag?.length ? issuer.flag : undefined}
+                  flag={issuer.flag}
+                  name={issuer.name}
                 />
                 <span className="pb-0.5 font-serif font-medium leading-4 overflow-hidden text-wrap line-clamp-2">
                   {asFraction(title, value)}

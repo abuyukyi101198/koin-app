@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ChevronRightIcon } from "lucide-react";
 
 import { DataTableColumnHeader } from "@/components/composite/data-table-column-header.tsx";
+import { IssuerFlag } from "@/components/composite/issuer-flag.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { cn } from "@/lib/utils.ts";
 import { Issuer } from "@/query/types";
@@ -24,7 +25,7 @@ export function useIssuersTableColumns(): ColumnDef<Issuer>[] {
             skeleton: () => (
               <div className="flex items-center gap-2 ml-2">
                 <Skeleton className="size-3 shrink-0 rounded" />
-                <Skeleton className="h-4 w-6.5 shrink-0 rounded" />
+                <IssuerFlag.Skeleton className="h-4 w-6.5 shrink-0 rounded" />
                 <Skeleton className="h-3 flex-1 rounded" />
               </div>
             ),
@@ -56,11 +57,10 @@ export function useIssuersTableColumns(): ColumnDef<Issuer>[] {
                     ) : (
                       <span aria-hidden="true" className="size-3 shrink-0" />
                     )}
-                    <img
-                      alt={`${name} flag`}
+                    <IssuerFlag
                       className="h-4 w-6.5 shrink-0 mt-0.5"
-                      loading="lazy"
-                      src={flag?.length ? flag : undefined}
+                      flag={flag}
+                      name={name}
                     />
                     <span className="font-serif font-medium">{name}</span>
                   </div>

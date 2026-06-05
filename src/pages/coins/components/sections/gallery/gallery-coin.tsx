@@ -1,4 +1,5 @@
 import { CoinPreviewImages } from "@/components/composite/coin-preview-images.tsx";
+import { IssuerFlag } from "@/components/composite/issuer-flag.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { cn } from "@/lib/utils.ts";
 import { Coin } from "@/query/types";
@@ -44,11 +45,10 @@ export function GalleryCoin({ coin, isSelected, onSelect }: GalleryCoinProps) {
 
       {/* Details — fixed-height text rows so all cards are the same height */}
       <div className="w-full flex flex-col items-center gap-1">
-        <img
-          alt={`${coin.issuer.name} flag`}
+        <IssuerFlag
           className="h-3 w-4.5 shrink-0"
-          loading="lazy"
-          src={coin.issuer.flag?.length ? coin.issuer.flag : undefined}
+          flag={coin.issuer.flag}
+          name={coin.issuer.name}
         />
         <p className="pb-0.5 w-full font-serif font-medium leading-4 line-clamp-2 text-center overflow-hidden">
           {asFraction(coin.title, coin.value)}
@@ -68,7 +68,7 @@ GalleryCoin.Skeleton = () => {
         <CoinPreviewImages.Skeleton />
       </div>
       <div className="h-15 flex flex-col items-center gap-1">
-        <Skeleton className="h-3 w-4.5 rounded" />
+        <IssuerFlag.Skeleton className="h-3 w-4.5 rounded" />
         <Skeleton className="pb-0.5 h-4 w-3/4 rounded" />
         <Skeleton className="h-8 w-1/2 rounded" />
       </div>
