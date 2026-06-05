@@ -2,6 +2,7 @@ import { CSSProperties, ComponentProps, ReactNode, useState } from "react";
 
 import {
   ColumnDef,
+  ExpandedState,
   RowData,
   RowSelectionState,
   SortingState,
@@ -9,6 +10,7 @@ import {
   VisibilityState,
   flexRender,
   getCoreRowModel,
+  getExpandedRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
@@ -51,6 +53,8 @@ export interface DataTableProps<
   empty?: ReactNode;
   showHeader?: boolean;
   skeletonRowCount?: number;
+  getSubRows?: (row: TData) => TData[] | undefined;
+  defaultExpanded?: ExpandedState;
 }
 
 function proportionalWidth(size: number, total: number): CSSProperties {
@@ -67,9 +71,14 @@ export function DataTable<TData extends { id: number | string }>({
   showHeader = true,
   skeletonRowCount = 25,
   className,
+  getSubRows,
+  defaultExpanded,
   ...tableProps
 }: DataTableProps<TData>) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [expanded, setExpanded] = useState<ExpandedState>(
+    defaultExpanded ?? {}
+  );
 
   const totalSize = columns.reduce(
     (sum, col) => sum + (col.meta?.size ?? 100),
@@ -81,15 +90,19 @@ export function DataTable<TData extends { id: number | string }>({
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: sort ? getSortedRowModel() : undefined,
+    getExpandedRowModel: getSubRows ? getExpandedRowModel() : undefined,
+    getSubRows: getSubRows,
     getRowId: (row) => row.id.toString(),
     onSortingChange: sort?.onSortingChange,
     onRowSelectionChange: selection?.onRowSelectionChange,
     onColumnVisibilityChange: setColumnVisibility,
+    onExpandedChange: setExpanded,
     manualSorting: true,
     state: {
       sorting: sort?.sorting ?? [],
       columnVisibility,
       rowSelection: selection?.rowSelection ?? {},
+      expanded,
     },
   });
 
@@ -186,11 +199,17 @@ export function DataTable<TData extends { id: number | string }>({
                   data-state={row.getIsSelected() ? "selected" : undefined}
                   key={row.id}
                   onClick={() => {
+                    if (row.getCanExpand() && row.getIsSelected()) {
+                      row.toggleExpanded();
+                    }
                     table.setRowSelection({ [row.id]: !row.getIsSelected() });
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
+                      if (row.getCanExpand() && row.getIsSelected()) {
+                        row.toggleExpanded();
+                      }
                       table.setRowSelection({ [row.id]: !row.getIsSelected() });
                     }
                   }}
