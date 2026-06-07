@@ -10,6 +10,10 @@ pub struct Issuer {
     pub flag: String,
     #[serde(default)]
     pub predecessors: Option<Vec<Issuer>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub descendants: Option<Vec<Issuer>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub issued_coins: Option<Vec<crate::types::coins::Coin>>,
     pub created_at: String,
 }
 

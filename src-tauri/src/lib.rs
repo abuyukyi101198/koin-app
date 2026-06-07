@@ -5,7 +5,7 @@ mod types;
 use crate::commands::coins::{
     create_coin, delete_coin, get_coin, get_similar_coins, list_coins, update_coin,
 };
-use crate::commands::issuers::list_issuers;
+use crate::commands::issuers::{get_issuer, list_issuers};
 use crate::commands::notebooks::{
     create_notebook, delete_notebook, get_notebook, list_notebooks, reorder_coins, update_notebook,
 };
@@ -24,6 +24,7 @@ pub fn run() {
             update_coin,
             delete_coin,
             list_issuers,
+            get_issuer,
             list_notebooks,
             get_notebook,
             create_notebook,

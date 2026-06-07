@@ -1,3 +1,5 @@
+import { Coin } from "@/query/types/coins.ts";
+
 export interface Issuer {
   id: number;
   name: string;
@@ -5,7 +7,9 @@ export interface Issuer {
   start_year: number;
   end_year: number | null;
   flag: string;
-  predecessors: Omit<Issuer, "predecessors">[];
+  predecessors?: Issuer[];
+  descendants?: Issuer[];
+  issued_coins?: Coin[];
   created_at: string;
 }
 
@@ -26,4 +30,9 @@ export interface ListIssuersRequest {
   page?: number;
   pageSize?: number;
   search?: string | null;
+}
+
+export interface GetIssuerRequest {
+  id: number;
+  limit?: number;
 }
