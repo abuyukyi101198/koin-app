@@ -19,7 +19,9 @@ export function IssuersViewHeader({
         <h1 className="pb-2 scroll-m-20 text-2xl font-serif font-medium tracking-wide text-balance">
           All Issuers
         </h1>
-        <p className="text-muted-foreground text-xs">Issuers are readonly.</p>
+        <p className="italic text-muted-foreground text-xs">
+          Issuers are readonly.
+        </p>
       </div>
       <div
         aria-label="Table controls"

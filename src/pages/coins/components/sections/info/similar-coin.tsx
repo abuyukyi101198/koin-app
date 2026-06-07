@@ -16,11 +16,7 @@ export function SimilarCoin({ coin, onSelect }: SimilarCoinProps) {
       className={cn(
         "relative flex flex-col gap-2 rounded-lg border p-1 items-center",
         "cursor-pointer transition-colors select-none",
-        "hover:bg-muted!",
-        "data-[state=selected]:bg-accent/50!",
-        "overflow-hidden before:absolute before:inset-y-0 before:left-0 before:w-0.75",
-        "before:bg-transparent before:transition-colors",
-        "data-[state=selected]:before:bg-primary"
+        "hover:bg-muted!"
       )}
       onClick={onSelect}
       onKeyDown={(e) => {

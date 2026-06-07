@@ -94,9 +94,9 @@ export function NotebookAllCoins() {
     <section
       aria-busy={isLoading}
       aria-label="All coins"
-      className="pl-4 pt-4 pr-4 h-full w-full flex flex-col overflow-hidden select-none"
+      className="pl-4 pt-4 pr-1 h-full w-full flex flex-col overflow-hidden select-none"
     >
-      <header className="shrink-0 flex flex-col border-b max-w-full items-center gap-2.5">
+      <header className="mr-3 shrink-0 flex flex-col border-b max-w-full items-center gap-2.5">
         <h2 className="pb-2 w-full scroll-m-20 text-xl font-serif font-medium tracking-wide text-balance border-b">
           All Coins
         </h2>
@@ -156,11 +156,13 @@ export function NotebookAllCoins() {
             onSortingChange: setSorting,
           }}
         />
-        <DataTablePagination
-          onPaginationChange={handlePaginationChange}
-          pageCount={Math.ceil((data?.total ?? 1) / size)}
-          pageIndex={page}
-        />
+        <div className="pr-3">
+          <DataTablePagination
+            onPaginationChange={handlePaginationChange}
+            pageCount={Math.ceil((data?.total ?? 1) / size)}
+            pageIndex={page}
+          />
+        </div>
       </div>
     </section>
   );
