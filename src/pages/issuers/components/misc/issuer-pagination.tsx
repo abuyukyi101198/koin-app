@@ -24,7 +24,7 @@ export function IssuerPagination({
         <Button
           aria-pressed={activeLetter === null}
           className={cn(
-            "h-7 min-w-7 px-1.5 text-xs cursor-pointer text-muted-foreground",
+            "h-6 min-w-6 px-1.5 text-xs cursor-pointer text-muted-foreground",
             activeLetter === null && "font-bold underline text-primary"
           )}
           onClick={() => {
@@ -35,25 +35,48 @@ export function IssuerPagination({
         >
           All
         </Button>
-        {ALPHABET.map((letter) => (
-          <Fragment key={letter}>
-            <Separator className="h-7!" orientation={"vertical"} />
-            <Button
-              aria-pressed={activeLetter === letter}
-              className={cn(
-                "size-7 text-xs cursor-pointer text-muted-foreground",
-                activeLetter === letter && "font-bold underline text-primary"
-              )}
-              onClick={() => {
-                onLetterChange(activeLetter === letter ? null : letter);
-              }}
-              size="icon"
-              variant="link"
-            >
-              {letter}
-            </Button>
-          </Fragment>
-        ))}
+        <div className="flex justify-center items-center">
+          {ALPHABET.slice(0, ALPHABET.length / 2).map((letter) => (
+            <Fragment key={letter}>
+              <Separator className="h-6!" orientation={"vertical"} />
+              <Button
+                aria-pressed={activeLetter === letter}
+                className={cn(
+                  "size-6 text-xs cursor-pointer text-muted-foreground",
+                  activeLetter === letter && "font-bold underline text-primary"
+                )}
+                onClick={() => {
+                  onLetterChange(activeLetter === letter ? null : letter);
+                }}
+                size="icon"
+                variant="link"
+              >
+                {letter}
+              </Button>
+            </Fragment>
+          ))}
+        </div>
+        <div className="flex justify-center items-center">
+          {ALPHABET.slice(ALPHABET.length / 2).map((letter) => (
+            <Fragment key={letter}>
+              <Separator className="h-6!" orientation={"vertical"} />
+              <Button
+                aria-pressed={activeLetter === letter}
+                className={cn(
+                  "size-6 text-xs cursor-pointer text-muted-foreground",
+                  activeLetter === letter && "font-bold underline text-primary"
+                )}
+                onClick={() => {
+                  onLetterChange(activeLetter === letter ? null : letter);
+                }}
+                size="icon"
+                variant="link"
+              >
+                {letter}
+              </Button>
+            </Fragment>
+          ))}
+        </div>
       </div>
     </nav>
   );
