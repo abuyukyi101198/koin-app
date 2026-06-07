@@ -11,14 +11,16 @@ import { Separator } from "@/components/ui/separator.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useIssuerSelection } from "@/context/issuer-selection-context.tsx";
 import { useDebounce } from "@/hooks/use-debounce.ts";
-import { IssuerPagination } from "@/pages/issuers/components/misc/issuer-pagination.tsx";
 import { IssuersViewHeader } from "@/pages/issuers/components/misc/issuers-view-header.tsx";
-import { IssuersTable } from "@/pages/issuers/components/sections/issuers-table.tsx";
+import { IssuerInfo } from "@/pages/issuers/components/sections/info/issuer-info.tsx";
+import { IssuerPagination } from "@/pages/issuers/components/sections/table/issuer-pagination.tsx";
+import { IssuersTable } from "@/pages/issuers/components/sections/table/issuers-table.tsx";
 import { useListIssuers } from "@/query/commands";
 import { ListIssuersRequest } from "@/query/types";
 
 export function IssuersView() {
-  const { rowSelection, setRowSelection } = useIssuerSelection();
+  const { rowSelection, setRowSelection, selectedIssuerId } =
+    useIssuerSelection();
   const [issuerSearchQuery, setIssuerSearchQuery] = useState<string>("");
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const [isFilterPending, startFilterTransition] = useTransition();
@@ -99,13 +101,13 @@ export function IssuersView() {
             maxSize="50%"
             minSize="25%"
           >
-            {/*<IssuerInfo*/}
-            {/*  issuerId={selectedIssuerId}*/}
-            {/*  selection={{*/}
-            {/*    rowSelection,*/}
-            {/*    onRowSelectionChange: setRowSelection,*/}
-            {/*  }}*/}
-            {/*/>*/}
+            <IssuerInfo
+              issuerId={selectedIssuerId}
+              selection={{
+                rowSelection,
+                onRowSelectionChange: setRowSelection,
+              }}
+            />
           </ResizablePanel>
         </ResizablePanelGroup>
       </TabsContent>
