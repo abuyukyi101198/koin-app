@@ -1,4 +1,5 @@
 import { CoinPreviewImages } from "@/components/composite/coin-preview-images.tsx";
+import { IssuerFlag } from "@/components/composite/issuer-flag.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { cn } from "@/lib/utils.ts";
 import { Coin } from "@/query/types";
@@ -39,11 +40,10 @@ export function SimilarCoin({ coin, onSelect }: SimilarCoinProps) {
         aria-hidden="true"
         className="w-full flex flex-col items-center gap-1"
       >
-        <img
-          alt=""
+        <IssuerFlag
           className="h-3 w-4.5 shrink-0"
-          loading="lazy"
-          src={coin.issuer.flag?.length ? coin.issuer.flag : undefined}
+          flag={coin.issuer.flag}
+          name={coin.issuer.name}
         />
         <p className="w-full font-serif font-medium leading-4 line-clamp-1 text-xs text-center overflow-hidden">
           {asFraction(coin.title, coin.value)}
@@ -64,7 +64,7 @@ SimilarCoin.Skeleton = () => {
         aria-hidden="true"
         className="h-14 w-full flex flex-col items-center gap-1"
       >
-        <Skeleton className="h-3 w-4.5 rounded" />
+        <IssuerFlag.Skeleton className="h-3 w-4.5 rounded" />
         <Skeleton className="h-3 w-3/4 rounded" />
         <Skeleton className="h-3 w-1/2 rounded" />
       </div>
