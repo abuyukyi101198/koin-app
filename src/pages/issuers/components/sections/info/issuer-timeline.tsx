@@ -44,12 +44,13 @@ export function IssuerTimeline({
     })),
   ];
 
-  if (nodes.length <= 1) return null;
-
   const selectedIndex = nodes.findIndex((n) => n.variant === "current");
 
   return (
-    <section aria-labelledby="timeline-heading" className="flex flex-col pb-3">
+    <section
+      aria-labelledby="timeline-heading"
+      className="h-64 flex flex-col pb-3 contain-[inline-size]"
+    >
       <header className="shrink-0 border-b pt-4 pb-2">
         <h3
           className="scroll-m-20 font-serif font-medium tracking-wide"
@@ -58,7 +59,7 @@ export function IssuerTimeline({
           Timeline
         </h3>
       </header>
-      <div className="my-4 flex w-full justify-between items-center gap-2 flex-1 min-h-0 overflow-x-scroll [&::-webkit-scrollbar]:h-2.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-thumb]:bg-clip-content">
+      <div className="mt-4 w-full min-w-0 flex-1 min-h-0 overflow-x-auto [&::-webkit-scrollbar]:h-2.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-thumb]:bg-clip-content">
         <ol
           aria-labelledby="timeline-heading"
           className="min-w-full flex justify-between items-start py-1"

@@ -3,6 +3,7 @@ import { IssuerFlag } from "@/components/composite/issuer-flag.tsx";
 import { Empty } from "@/components/ui/empty.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
+import { IssuerCoins } from "@/pages/issuers/components/sections/info/issuer-coins.tsx";
 import { IssuerTimeline } from "@/pages/issuers/components/sections/info/issuer-timeline.tsx";
 import { useGetIssuer } from "@/query/commands";
 import { Issuer } from "@/query/types";
@@ -31,16 +32,13 @@ export function IssuerInfo({ issuerId, selection }: IssuerInfoProps) {
     selection.onRowSelectionChange({ [id.toString()]: true });
   };
 
-  const hasTimeline =
-    (data.predecessors?.length ?? 0) > 0 || (data.descendants?.length ?? 0) > 0;
-
   return (
     <section
       aria-busy={isLoading}
       aria-label="Issuer details"
       className="pl-4 pt-4 pr-1 h-full w-full flex flex-col overflow-hidden"
     >
-      <header className="pr-3 shrink-0 flex w-full justify-between">
+      <header className="pr-3 shrink-0 flex h-24 w-full justify-between">
         <div className="mb-2 flex flex-col gap-1">
           <div className="flex gap-3">
             <IssuerFlag
@@ -64,14 +62,13 @@ export function IssuerInfo({ issuerId, selection }: IssuerInfoProps) {
       </header>
 
       <ScrollArea className="flex-1 min-h-0 pr-4">
-        {hasTimeline && (
-          <IssuerTimeline
-            descendants={data.descendants}
-            issuer={data}
-            onSelect={selectItem}
-            predecessors={data.predecessors}
-          />
-        )}
+        <IssuerTimeline
+          descendants={data.descendants}
+          issuer={data}
+          onSelect={selectItem}
+          predecessors={data.predecessors}
+        />
+        <IssuerCoins coins={data.issued_coins} onSelect={() => {}} />
       </ScrollArea>
     </section>
   );

@@ -96,7 +96,7 @@ export function TimelineIssuer({
         />
         <p
           className={cn(
-            "h-16 font-serif font-medium leading-4 line-clamp-4 text-xs text-center overflow-hidden",
+            "font-serif font-medium leading-4 text-xs text-center overflow-hidden",
             isCurrent && "font-semibold text-primary",
             isPredecessor && "text-foreground",
             isDescendant && "text-muted-foreground"
