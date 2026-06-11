@@ -221,7 +221,7 @@ pub fn get_issuer(
     use crate::commands::coins::build_coin_from_row;
 
     let conn = get_db_connection(&app_handle)?;
-    let issued_coins_limit = limit.unwrap_or(3);
+    let issued_coins_limit = limit.unwrap_or(6);
 
     // Step 1: Fetch the requested issuer's own fields + resolve the base id.
     let (requested, base_id): (Issuer, i32) = conn
