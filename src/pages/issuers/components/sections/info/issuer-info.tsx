@@ -1,8 +1,11 @@
+import { useNavigate } from "@tanstack/react-router";
+
 import { DataTableProps } from "@/components/composite/data-table.tsx";
 import { IssuerFlag } from "@/components/composite/issuer-flag.tsx";
 import { Empty } from "@/components/ui/empty.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
+import { useCoinSelection } from "@/context/coin-selection-context.tsx";
 import { IssuerCoins } from "@/pages/issuers/components/sections/info/issuer-coins.tsx";
 import { IssuerTimeline } from "@/pages/issuers/components/sections/info/issuer-timeline.tsx";
 import { useGetIssuer } from "@/query/commands";
@@ -14,6 +17,8 @@ interface IssuerInfoProps {
 }
 
 export function IssuerInfo({ issuerId, selection }: IssuerInfoProps) {
+  const { setRowSelection } = useCoinSelection();
+  const navigate = useNavigate();
   const { data, isLoading } = useGetIssuer({ id: issuerId ?? 0 });
 
   if (!issuerId || !data) {
@@ -68,7 +73,13 @@ export function IssuerInfo({ issuerId, selection }: IssuerInfoProps) {
           onSelect={selectItem}
           predecessors={data.predecessors}
         />
-        <IssuerCoins coins={data.issued_coins} onSelect={() => {}} />
+        <IssuerCoins
+          coins={data.issued_coins}
+          onSelect={(id: number) => {
+            setRowSelection({ [id.toString()]: true });
+            void navigate({ to: "/coins" });
+          }}
+        />
       </ScrollArea>
     </section>
   );

@@ -1,5 +1,7 @@
 import { Fragment } from "react";
 
+import { ArrowUpRightIcon } from "lucide-react";
+
 import { CoinPreviewImages } from "@/components/composite/coin-preview-images.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { cn } from "@/lib/utils.ts";
@@ -17,7 +19,7 @@ export function IssuerCoin({ coin, onSelect }: IssuerCoinProps) {
     <li
       aria-label={`${asFraction(coin.title, coin.value)}, ${coin.year}`}
       className={cn(
-        "relative flex flex-col gap-2 rounded-lg border p-1 items-center",
+        "group relative flex flex-col gap-2 rounded-lg border p-1 items-center",
         "cursor-pointer transition-colors select-none",
         "hover:bg-muted!"
       )}
@@ -31,6 +33,13 @@ export function IssuerCoin({ coin, onSelect }: IssuerCoinProps) {
       role="option"
       tabIndex={0}
     >
+      {/* Hover overlay */}
+      <div
+        aria-hidden="true"
+        className="absolute z-10 inset-0 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-muted"
+      >
+        <ArrowUpRightIcon className="size-5 text-foreground drop-shadow-sm" />
+      </div>
       {coin.quantity > 1 && (
         <span className="absolute top-1 right-1 text-[9px] font-medium leading-none bg-primary text-primary-foreground rounded px-1 py-0.5">
           ×{coin.quantity}
