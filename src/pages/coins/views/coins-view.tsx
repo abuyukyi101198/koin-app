@@ -24,13 +24,18 @@ import { ListCoinsRequest } from "@/query/types";
 export function CoinsView() {
   const [view, setView] = useState<"gallery" | "table">("table");
 
-  const { rowSelection, setRowSelection, selectedCoinId } = useCoinSelection();
-  const [coinSearchQuery, setCoinSearchQuery] = useState<string>("");
+  const {
+    rowSelection,
+    setRowSelection,
+    selectedCoinId,
+    searchQuery,
+    setSearchQuery,
+  } = useCoinSelection();
 
   const [sorting, setSorting] = useState<SortingState>([
     { id: "issuer", desc: false },
   ]);
-  const debouncedSearchQuery = useDebounce(coinSearchQuery, 300);
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   const { page, size, setPage, handlePageSizeChange } = usePagination(25);
 
@@ -90,8 +95,8 @@ export function CoinsView() {
             defaultSize="75%"
           >
             <CoinsViewHeader
-              searchQuery={coinSearchQuery}
-              setSearchQuery={setCoinSearchQuery}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
               setView={setView}
               total={data?.total ?? 0}
             />

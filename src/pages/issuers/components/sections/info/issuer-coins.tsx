@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { EmptyIssuedCoins } from "@/pages/issuers/components/misc/empty-issued-coins.tsx";
 import { IssuerCoin } from "@/pages/issuers/components/sections/info/issuer-coin.tsx";
@@ -6,21 +7,31 @@ import { Coin } from "@/query/types";
 interface IssuerCoinsProps {
   coins: Coin[] | undefined;
   onSelect: (id: number) => void;
+  onViewMore: (id?: number) => void;
 }
 
-export function IssuerCoins({ coins, onSelect }: IssuerCoinsProps) {
+export function IssuerCoins({ coins, onSelect, onViewMore }: IssuerCoinsProps) {
   return (
     <section
       aria-labelledby="issuer-coins-heading"
       className="flex flex-col pb-3"
     >
-      <header className="shrink-0 border-b pt-4 pb-2">
+      <header className="w-full flex justify-between border-b pt-4 pb-2">
         <h3
           className="scroll-m-20 font-serif font-medium tracking-wide"
           id="issuer-coins-heading"
         >
           Issued coins
         </h3>
+        <Button
+          className="p-0 h-min self-center text-xs text-primary hover:underline cursor-pointer"
+          onClick={() => {
+            onViewMore(coins && coins.length ? coins[0].id : undefined);
+          }}
+          variant="link"
+        >
+          View all
+        </Button>
       </header>
       {!coins || coins.length === 0 ? (
         <EmptyIssuedCoins />

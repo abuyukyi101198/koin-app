@@ -356,7 +356,7 @@ pub fn get_issuer(
              FROM coins c
              LEFT JOIN issuers i ON c.issuer_id = i.id
              WHERE c.issuer_id = ?1
-             ORDER BY c.year DESC, c.created_at DESC
+             ORDER BY c.year ASC
              LIMIT ?2",
         )
         .map_err(|e| format!("Failed to prepare issued coins statement: {}", e))?;

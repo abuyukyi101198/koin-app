@@ -17,6 +17,8 @@ interface CoinSelectionContextType {
   rowSelection: RowSelectionState;
   setRowSelection: Dispatch<SetStateAction<RowSelectionState>>;
   selectedCoinId: number | null;
+  searchQuery: string;
+  setSearchQuery: Dispatch<SetStateAction<string>>;
 }
 
 export const CoinSelectionContext = createContext<
@@ -35,6 +37,7 @@ export function CoinSelectionProvider({
     sortDirection: "asc",
   });
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const selectedCoinId = useMemo(() => {
     const coinSelectionIds = Object.keys(rowSelection).map((k) => Number(k));
@@ -55,8 +58,10 @@ export function CoinSelectionProvider({
       rowSelection,
       setRowSelection,
       selectedCoinId,
+      searchQuery,
+      setSearchQuery,
     }),
-    [rowSelection, selectedCoinId]
+    [rowSelection, searchQuery, selectedCoinId]
   );
 
   return (

@@ -17,7 +17,7 @@ interface IssuerInfoProps {
 }
 
 export function IssuerInfo({ issuerId, selection }: IssuerInfoProps) {
-  const { setRowSelection } = useCoinSelection();
+  const { setRowSelection, setSearchQuery } = useCoinSelection();
   const navigate = useNavigate();
   const { data, isLoading } = useGetIssuer({ id: issuerId ?? 0 });
 
@@ -77,6 +77,13 @@ export function IssuerInfo({ issuerId, selection }: IssuerInfoProps) {
           coins={data.issued_coins}
           onSelect={(id: number) => {
             setRowSelection({ [id.toString()]: true });
+            void navigate({ to: "/coins" });
+          }}
+          onViewMore={(id?: number) => {
+            setSearchQuery(data.name);
+            if (id !== undefined) {
+              setRowSelection({ [id.toString()]: true });
+            }
             void navigate({ to: "/coins" });
           }}
         />
