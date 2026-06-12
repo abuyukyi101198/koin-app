@@ -11,6 +11,7 @@ import {
 
 import { RowSelectionState } from "@tanstack/react-table";
 
+import { useDebounce } from "@/hooks/use-debounce.ts";
 import { useListCoins } from "@/query/commands";
 
 interface CoinSelectionContextType {
@@ -19,6 +20,11 @@ interface CoinSelectionContextType {
   selectedCoinId: number | null;
   searchQuery: string;
   setSearchQuery: Dispatch<SetStateAction<string>>;
+  debouncedSearchQuery: string;
+  page: number;
+  setPage: Dispatch<SetStateAction<number>>;
+  size: number;
+  handlePageSizeChange: (newSize: number) => void;
 }
 
 export const CoinSelectionContext = createContext<
@@ -38,11 +44,24 @@ export function CoinSelectionProvider({
   });
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(25);
+
+  const handlePageSizeChange = (newSize: number) => {
+    setSize(newSize);
+    setPage(1);
+  };
 
   const selectedCoinId = useMemo(() => {
     const coinSelectionIds = Object.keys(rowSelection).map((k) => Number(k));
     return coinSelectionIds.length ? coinSelectionIds[0] : null;
   }, [rowSelection]);
+
+  // Reset to first page when search changes
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearchQuery]);
 
   // Auto-select first coin when data loads
   useEffect(() => {
@@ -60,8 +79,20 @@ export function CoinSelectionProvider({
       selectedCoinId,
       searchQuery,
       setSearchQuery,
+      debouncedSearchQuery,
+      page,
+      setPage,
+      size,
+      handlePageSizeChange,
     }),
-    [rowSelection, searchQuery, selectedCoinId]
+    [
+      rowSelection,
+      searchQuery,
+      debouncedSearchQuery,
+      selectedCoinId,
+      page,
+      size,
+    ]
   );
 
   return (

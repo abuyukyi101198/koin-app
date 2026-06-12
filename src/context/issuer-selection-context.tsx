@@ -17,6 +17,10 @@ interface IssuerSelectionContextType {
   rowSelection: RowSelectionState;
   setRowSelection: Dispatch<SetStateAction<RowSelectionState>>;
   selectedIssuerId: number | null;
+  issuerSearchQuery: string;
+  setIssuerSearchQuery: Dispatch<SetStateAction<string>>;
+  activeLetter: string | null;
+  setActiveLetter: Dispatch<SetStateAction<string | null>>;
 }
 
 export const IssuerSelectionContext = createContext<
@@ -32,6 +36,8 @@ export function IssuerSelectionProvider({
 }: IssuerSelectionProviderProps) {
   const { data, isSuccess } = useListIssuers();
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [issuerSearchQuery, setIssuerSearchQuery] = useState<string>("");
+  const [activeLetter, setActiveLetter] = useState<string | null>(null);
 
   const selectedIssuerId = useMemo(() => {
     const issuerSelectionIds = Object.keys(rowSelection).map((k) => Number(k));
@@ -52,8 +58,12 @@ export function IssuerSelectionProvider({
       rowSelection,
       setRowSelection,
       selectedIssuerId,
+      issuerSearchQuery,
+      setIssuerSearchQuery,
+      activeLetter,
+      setActiveLetter,
     }),
-    [rowSelection, selectedIssuerId]
+    [rowSelection, selectedIssuerId, issuerSearchQuery, activeLetter]
   );
 
   return (

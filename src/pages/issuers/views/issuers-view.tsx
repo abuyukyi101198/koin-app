@@ -1,4 +1,4 @@
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useTransition } from "react";
 
 import { Coins } from "lucide-react";
 import { useDefaultLayout } from "react-resizable-panels";
@@ -20,15 +20,20 @@ import { useListIssuers } from "@/query/commands";
 import { ListIssuersRequest } from "@/query/types";
 
 export function IssuersView() {
-  const { rowSelection, setRowSelection, selectedIssuerId } =
-    useIssuerSelection();
+  const {
+    rowSelection,
+    setRowSelection,
+    selectedIssuerId,
+    issuerSearchQuery,
+    setIssuerSearchQuery,
+    activeLetter,
+    setActiveLetter,
+  } = useIssuerSelection();
 
   const { defaultLayout, onLayoutChanged } = useDefaultLayout({
     id: "resizable-panels",
     storage: localStorage,
   });
-  const [issuerSearchQuery, setIssuerSearchQuery] = useState<string>("");
-  const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const [isFilterPending, startFilterTransition] = useTransition();
 
   const debouncedSearchQuery = useDebounce(issuerSearchQuery, 300);

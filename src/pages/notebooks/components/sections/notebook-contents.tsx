@@ -1,7 +1,5 @@
-import { useEffect } from "react";
-
 import { DataTablePagination } from "@/components/composite/data-table-pagination.tsx";
-import usePagination from "@/hooks/use-pagination.ts";
+import { useNotebookSelection } from "@/context/notebook-selection-context.tsx";
 import { EmptyNotebooks } from "@/pages/notebooks/components/misc/empty-notebooks.tsx";
 import { NotebookContentsHeader } from "@/pages/notebooks/components/misc/notebook-contents-header.tsx";
 import { NotebookGrid } from "@/pages/notebooks/components/misc/notebook-grid.tsx";
@@ -19,17 +17,13 @@ export function NotebookContents({
   notebookId,
   onRefresh,
 }: NotebookContentsProps) {
-  const { page, setPage } = usePagination();
+  const { contentsPage: page, setContentsPage: setPage } =
+    useNotebookSelection();
   const { data: notebook, isLoading: notebookIsLoading } = useGetNotebook({
     id: notebookId ?? -1,
   });
   const { data: allNotebooks, isLoading: allNotebooksIsLoading } =
     useListNotebooks({ pageSize: 5, page: 0 });
-
-  useEffect(() => {
-    setPage(1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [notebookId]);
 
   return (
     <section

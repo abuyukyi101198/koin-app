@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { SortingState } from "@tanstack/react-table";
 import { Coins } from "lucide-react";
@@ -13,8 +13,6 @@ import {
 import { Separator } from "@/components/ui/separator.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCoinSelection } from "@/context/coin-selection-context.tsx";
-import { useDebounce } from "@/hooks/use-debounce.ts";
-import usePagination from "@/hooks/use-pagination.ts";
 import { CoinsViewHeader } from "@/pages/coins/components/misc/coins-view-header.tsx";
 import { CoinsGallery } from "@/pages/coins/components/sections/gallery/coins-gallery.tsx";
 import { CoinInfo } from "@/pages/coins/components/sections/info/coin-info.tsx";
@@ -36,14 +34,16 @@ export function CoinsView() {
     selectedCoinId,
     searchQuery,
     setSearchQuery,
+    debouncedSearchQuery,
+    page,
+    setPage,
+    size,
+    handlePageSizeChange,
   } = useCoinSelection();
 
   const [sorting, setSorting] = useState<SortingState>([
     { id: "issuer", desc: false },
   ]);
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
-
-  const { page, size, setPage, handlePageSizeChange } = usePagination(25);
 
   const listCoinsOptions: ListCoinsRequest = {
     search: debouncedSearchQuery || undefined,
@@ -66,10 +66,6 @@ export function CoinsView() {
     },
     [size, handlePageSizeChange, setPage]
   );
-
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearchQuery, setPage]);
 
   return (
     <Tabs className="h-full w-full gap-0 bg-accent/50" defaultValue="all-coins">

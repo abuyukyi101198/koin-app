@@ -5,25 +5,31 @@ import { SortingState } from "@tanstack/react-table";
 import { DataTablePagination } from "@/components/composite/data-table-pagination.tsx";
 import { DataTable } from "@/components/composite/data-table.tsx";
 import { SearchInput } from "@/components/composite/search-input.tsx";
-import { useDebounce } from "@/hooks/use-debounce.ts";
-import usePagination from "@/hooks/use-pagination.ts";
+import { useNotebookSelection } from "@/context/notebook-selection-context.tsx";
 import { cn } from "@/lib/utils.ts";
 import { useNotebookReorderContext } from "@/pages/notebooks/context/notebook-reorder-context.tsx";
 import { useNotebookAllCoinsTableColumns } from "@/pages/notebooks/hooks/use-notebook-all-coins-table-columns.tsx";
 import { useListCoins } from "@/query/commands/coins.ts";
 import { Coin, ListCoinsRequest } from "@/query/types";
 
+const ALL_COINS_PAGE_SIZE = 50;
+
 export function NotebookAllCoins() {
   const { hand, isActive, pickUp, place, placingRef, seedCursor } =
     useNotebookReorderContext();
+  const {
+    allCoinsPage: page,
+    setAllCoinsPage: setPage,
+    allCoinsSearchQuery: searchQuery,
+    setAllCoinsSearchQuery: setSearchQuery,
+    debouncedAllCoinsSearchQuery: debouncedSearchQuery,
+  } = useNotebookSelection();
 
-  const [searchQuery, setSearchQuery] = useState<string>("");
   const [sorting, setSorting] = useState<SortingState>([
     { id: "issuer", desc: false },
   ]);
 
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
-  const { page, size, setPage } = usePagination(50);
+  const size = ALL_COINS_PAGE_SIZE;
 
   const listCoinsOptions: ListCoinsRequest = {
     search: debouncedSearchQuery || undefined,
@@ -42,10 +48,6 @@ export function NotebookAllCoins() {
     },
     [setPage]
   );
-
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearchQuery, setPage]);
 
   const handIds = useMemo(() => new Set(hand.map((e) => e.coin.id)), [hand]);
 
