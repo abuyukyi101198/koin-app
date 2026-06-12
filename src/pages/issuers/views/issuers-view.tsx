@@ -1,6 +1,7 @@
 import { useMemo, useState, useTransition } from "react";
 
 import { Coins } from "lucide-react";
+import { useDefaultLayout } from "react-resizable-panels";
 
 import {
   ResizableHandle,
@@ -21,6 +22,11 @@ import { ListIssuersRequest } from "@/query/types";
 export function IssuersView() {
   const { rowSelection, setRowSelection, selectedIssuerId } =
     useIssuerSelection();
+
+  const { defaultLayout, onLayoutChanged } = useDefaultLayout({
+    id: "resizable-panels",
+    storage: localStorage,
+  });
   const [issuerSearchQuery, setIssuerSearchQuery] = useState<string>("");
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const [isFilterPending, startFilterTransition] = useTransition();
@@ -64,11 +70,15 @@ export function IssuersView() {
       >
         <ResizablePanelGroup
           className="flex-1 min-h-0"
+          defaultLayout={defaultLayout}
+          id="resizable-panels"
+          onLayoutChanged={onLayoutChanged}
           orientation="horizontal"
         >
           <ResizablePanel
             className="h-full pt-4 pr-4 flex flex-col"
             defaultSize="75%"
+            id="main"
           >
             <IssuersViewHeader
               searchQuery={issuerSearchQuery}
@@ -98,6 +108,7 @@ export function IssuersView() {
           <ResizablePanel
             className="h-full flex flex-col"
             defaultSize="25%"
+            id="side"
             maxSize="50%"
             minSize="25%"
           >

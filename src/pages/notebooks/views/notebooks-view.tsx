@@ -1,5 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 
+import { useDefaultLayout } from "react-resizable-panels";
+
 import {
   ResizableHandle,
   ResizablePanel,
@@ -19,6 +21,11 @@ import {
 export function NotebooksView() {
   const { selectedNotebookId } = useNotebookSelection();
 
+  const { defaultLayout, onLayoutChanged } = useDefaultLayout({
+    id: "resizable-panels",
+    storage: localStorage,
+  });
+
   const { data: notebook } = useGetNotebook({ id: selectedNotebookId ?? -1 });
   const { refetch } = useListNotebooks();
   const reorder = useNotebookReorder({ notebook });
@@ -36,11 +43,15 @@ export function NotebooksView() {
         <Separator className="shrink-0 bg-primary" />
         <ResizablePanelGroup
           className="flex-1 min-h-0 flex flex-col pl-6 bg-background"
+          defaultLayout={defaultLayout}
+          id="resizable-panels"
+          onLayoutChanged={onLayoutChanged}
           orientation="horizontal"
         >
           <ResizablePanel
             className="h-full pt-4 pr-4 flex flex-col"
             defaultSize="75%"
+            id="main"
           >
             <NotebookContents
               notebookId={selectedNotebookId}
@@ -51,6 +62,7 @@ export function NotebooksView() {
           <ResizablePanel
             className="h-full flex flex-col"
             defaultSize="25%"
+            id="side"
             maxSize="50%"
             minSize="25%"
           >

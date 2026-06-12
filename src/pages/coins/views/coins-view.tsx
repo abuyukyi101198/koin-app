@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { SortingState } from "@tanstack/react-table";
 import { Coins } from "lucide-react";
+import { useDefaultLayout } from "react-resizable-panels";
 
 import { DataTablePagination } from "@/components/composite/data-table-pagination.tsx";
 import {
@@ -23,6 +24,11 @@ import { ListCoinsRequest } from "@/query/types";
 
 export function CoinsView() {
   const [view, setView] = useState<"gallery" | "table">("table");
+
+  const { defaultLayout, onLayoutChanged } = useDefaultLayout({
+    id: "resizable-panels",
+    storage: localStorage,
+  });
 
   const {
     rowSelection,
@@ -88,11 +94,15 @@ export function CoinsView() {
       >
         <ResizablePanelGroup
           className="flex-1 min-h-0"
+          defaultLayout={defaultLayout}
+          id="resizable-panels"
+          onLayoutChanged={onLayoutChanged}
           orientation="horizontal"
         >
           <ResizablePanel
             className="h-full pt-4 pr-4 flex flex-col"
             defaultSize="75%"
+            id="main"
           >
             <CoinsViewHeader
               searchQuery={searchQuery}
@@ -135,6 +145,7 @@ export function CoinsView() {
           <ResizablePanel
             className="h-full flex flex-col"
             defaultSize="25%"
+            id="side"
             maxSize="50%"
             minSize="25%"
           >
