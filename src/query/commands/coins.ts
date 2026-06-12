@@ -17,7 +17,6 @@ import {
   ListCoinsRequest,
   PaginatedCoins,
   UpdateCoinRequest,
-  ImageProcessingMode,
 } from "@/query/types";
 
 export const COINS_QUERY_KEY = "coins";
@@ -86,14 +85,7 @@ export function useCreateCoin(): UseMutationResult<
 
   return useMutation({
     mutationFn: async (data: CreateCoinRequest) => {
-      // TODO: add settings for default image storage behavior
-      return await invoke<Coin>("create_coin", {
-        coin: {
-          ...data,
-          image_processing: (data.image_processing ??
-            "download_and_remove_bg") satisfies ImageProcessingMode,
-        } as CreateCoinRequest,
-      });
+      return await invoke<Coin>("create_coin", { coin: data });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [COINS_QUERY_KEY] });
@@ -110,14 +102,7 @@ export function useUpdateCoin(): UseMutationResult<
 
   return useMutation({
     mutationFn: async (data: UpdateCoinRequest) => {
-      // TODO: add settings for default image storage behavior
-      return await invoke<Coin>("update_coin", {
-        coin: {
-          ...data,
-          image_processing: (data.image_processing ??
-            "download_and_remove_bg") satisfies ImageProcessingMode,
-        } as UpdateCoinRequest,
-      });
+      return await invoke<Coin>("update_coin", { coin: data });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [COINS_QUERY_KEY] });
