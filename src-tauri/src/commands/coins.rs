@@ -1,4 +1,4 @@
-use crate::commands::utils::{get_db_connection, get_images_dir};
+use crate::commands::utils::{get_db_connection, get_image_processing_default, get_images_dir};
 use crate::handlers::image_handler;
 use crate::types::coins::{
     Coin, CreateCoinRequest, ImageProcessingMode, PaginatedCoinsResponse, UpdateCoinRequest,
@@ -182,12 +182,13 @@ pub async fn create_coin(
     let conn = get_db_connection(&app_handle)?;
     let images_dir = get_images_dir(&app_handle)?;
 
-    let remove_bg = matches!(
-        coin.image_processing,
-        Some(ImageProcessingMode::DownloadAndRemoveBg)
-    );
-    let download =
-        remove_bg || matches!(coin.image_processing, Some(ImageProcessingMode::Download));
+    let processing_mode = coin
+        .image_processing
+        .clone()
+        .unwrap_or_else(|| get_image_processing_default(&conn));
+
+    let remove_bg = matches!(processing_mode, ImageProcessingMode::DownloadAndRemoveBg);
+    let download = remove_bg || matches!(processing_mode, ImageProcessingMode::Download);
 
     // Data URLs (uploaded from disk) are always saved to a file even when download=false.
     // Remote http URLs are only downloaded when download=true.
@@ -279,12 +280,13 @@ pub async fn update_coin(
     let conn = get_db_connection(&app_handle)?;
     let images_dir = get_images_dir(&app_handle)?;
 
-    let remove_bg = matches!(
-        coin.image_processing,
-        Some(ImageProcessingMode::DownloadAndRemoveBg)
-    );
-    let download =
-        remove_bg || matches!(coin.image_processing, Some(ImageProcessingMode::Download));
+    let processing_mode = coin
+        .image_processing
+        .clone()
+        .unwrap_or_else(|| get_image_processing_default(&conn));
+
+    let remove_bg = matches!(processing_mode, ImageProcessingMode::DownloadAndRemoveBg);
+    let download = remove_bg || matches!(processing_mode, ImageProcessingMode::Download);
 
     // Always fetch the current coin – needed for old-file cleanup and title regeneration.
     let current_coin = get_coin(app_handle.clone(), coin.id)?;

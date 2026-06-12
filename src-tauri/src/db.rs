@@ -109,6 +109,23 @@ fn run_migrations(conn: &Connection) -> SqliteResult<()> {
         "#,
     )?;
 
+    // Migration 4: Create settings table with a single-row design (id = 1 always).
+    apply_migration(
+        conn,
+        "004_create_settings_table",
+        r#"
+            CREATE TABLE settings (
+                id INTEGER PRIMARY KEY CHECK (id = 1),
+                image_processing_default TEXT NOT NULL DEFAULT 'none',
+                theme_name TEXT NOT NULL DEFAULT 'lira',
+                theme_mode TEXT NOT NULL DEFAULT 'dark'
+            );
+
+            INSERT INTO settings (id, image_processing_default, theme_name, theme_mode)
+            VALUES (1, 'none', 'lira', 'dark');
+        "#,
+    )?;
+
     Ok(())
 }
 

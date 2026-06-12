@@ -1,3 +1,4 @@
+use crate::types::coins::ImageProcessingMode;
 use rusqlite::Connection;
 use std::path::PathBuf;
 use tauri::Manager;
@@ -23,4 +24,19 @@ pub fn get_images_dir(app_handle: &tauri::AppHandle) -> Result<PathBuf, String> 
     std::fs::create_dir_all(&images_dir)
         .map_err(|e| format!("Failed to create coin_images directory: {}", e))?;
     Ok(images_dir)
+}
+
+pub fn get_image_processing_default(conn: &Connection) -> ImageProcessingMode {
+    conn.query_row(
+        "SELECT image_processing_default FROM settings WHERE id = 1",
+        [],
+        |row| row.get::<_, String>(0),
+    )
+    .ok()
+    .map(|v| match v.as_str() {
+        "download" => ImageProcessingMode::Download,
+        "download_and_remove_bg" => ImageProcessingMode::DownloadAndRemoveBg,
+        _ => ImageProcessingMode::None,
+    })
+    .unwrap_or(ImageProcessingMode::None)
 }

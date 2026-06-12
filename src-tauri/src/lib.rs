@@ -9,6 +9,7 @@ use crate::commands::issuers::{get_issuer, list_issuers};
 use crate::commands::notebooks::{
     create_notebook, delete_notebook, get_notebook, list_notebooks, reorder_coins, update_notebook,
 };
+use crate::commands::settings::{get_settings, update_settings};
 use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -31,6 +32,8 @@ pub fn run() {
             update_notebook,
             delete_notebook,
             reorder_coins,
+            get_settings,
+            update_settings,
         ])
         .setup(|app| {
             // Initialize database on app startup
