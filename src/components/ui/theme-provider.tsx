@@ -1,63 +1,108 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-type Theme = "dark" | "light" | "system";
+import { ThemeMode, ThemeName } from "@/query/types";
+
+export const THEME_NAMES: ThemeName[] = [
+  "lira",
+  "quarter",
+  "mark",
+  "peso",
+  "franc",
+  "dinar",
+];
+
+const STORAGE_KEY = "koin-theme";
+
+interface StoredTheme {
+  name: ThemeName;
+  mode: ThemeMode;
+}
+
+function readStorage(): StoredTheme {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw) as StoredTheme;
+  } catch {
+    // ignore
+  }
+  return { name: "lira", mode: "dark" };
+}
+
+function writeStorage(theme: StoredTheme) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(theme));
+}
 
 type ThemeProviderProps = {
   children: React.ReactNode;
-  defaultTheme?: Theme;
-  storageKey?: string;
+  defaultName?: ThemeName;
+  defaultMode?: ThemeMode;
 };
 
 type ThemeProviderState = {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
+  themeName: ThemeName;
+  themeMode: ThemeMode;
+  setThemeName: (name: ThemeName) => void;
+  setThemeMode: (mode: ThemeMode) => void;
+  setTheme: (name: ThemeName, mode: ThemeMode) => void;
 };
 
 const initialState: ThemeProviderState = {
-  theme: "system",
+  themeName: "lira",
+  themeMode: "dark",
+  setThemeName: () => null,
+  setThemeMode: () => null,
   setTheme: () => null,
 };
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
+function applyTheme(name: ThemeName, mode: ThemeMode) {
+  const root = window.document.documentElement;
+  root.setAttribute("data-theme", name);
+  root.classList.remove("light", "dark");
+  root.classList.add(mode);
+}
+
 export function ThemeProvider({
   children,
-  defaultTheme = "system",
-  storageKey = "vite-ui-theme",
+  defaultName,
+  defaultMode,
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+  const stored = readStorage();
+
+  const [themeName, setThemeNameState] = useState<ThemeName>(
+    defaultName ?? stored.name
+  );
+  const [themeMode, setThemeModeState] = useState<ThemeMode>(
+    defaultMode ?? stored.mode
   );
 
   useEffect(() => {
-    const root = window.document.documentElement;
+    applyTheme(themeName, themeMode);
+  }, [themeName, themeMode]);
 
-    root.classList.remove("light", "dark");
+  const setThemeName = (name: ThemeName) => {
+    writeStorage({ name, mode: themeMode });
+    setThemeNameState(name);
+  };
 
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light";
+  const setThemeMode = (mode: ThemeMode) => {
+    writeStorage({ name: themeName, mode });
+    setThemeModeState(mode);
+  };
 
-      root.classList.add(systemTheme);
-      return;
-    }
-
-    root.classList.add(theme);
-  }, [theme]);
-
-  const value = {
-    theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
-      setTheme(theme);
-    },
+  const setTheme = (name: ThemeName, mode: ThemeMode) => {
+    writeStorage({ name, mode });
+    setThemeNameState(name);
+    setThemeModeState(mode);
   };
 
   return (
-    <ThemeProviderContext.Provider {...props} value={value}>
+    <ThemeProviderContext.Provider
+      {...props}
+      value={{ themeName, themeMode, setThemeName, setThemeMode, setTheme }}
+    >
       {children}
     </ThemeProviderContext.Provider>
   );
@@ -65,9 +110,7 @@ export function ThemeProvider({
 
 export const useTheme = () => {
   const context = useContext(ThemeProviderContext);
-
   if (context === undefined)
     throw new Error("useTheme must be used within a ThemeProvider");
-
   return context;
 };

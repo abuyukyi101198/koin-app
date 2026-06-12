@@ -1,11 +1,11 @@
 import "@/styles/index.css";
 
-import { CSSProperties } from "react";
+import { CSSProperties, useEffect } from "react";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { BookCopy, Coins, Flag, Github, Settings } from "lucide-react";
+import { BookCopy, Coins, Flag, Github } from "lucide-react";
 
 import monogram from "@/assets/monogram.svg";
 import { Titlebar } from "@/components/composite/titlebar.tsx";
@@ -23,11 +23,13 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar.tsx";
 import { Toaster } from "@/components/ui/sonner.tsx";
-import { ThemeProvider } from "@/components/ui/theme-provider.tsx";
+import { ThemeProvider, useTheme } from "@/components/ui/theme-provider.tsx";
 import { TooltipProvider } from "@/components/ui/tooltip.tsx";
 import { CoinSelectionProvider } from "@/context/coin-selection-context.tsx";
 import { IssuerSelectionProvider } from "@/context/issuer-selection-context.tsx";
 import { NotebookSelectionProvider } from "@/context/notebook-selection-context.tsx";
+import { SettingsSidebarDialog } from "@/pages/settings/settings-sidebar-dialog.tsx";
+import { useGetSettings } from "@/query/commands";
 
 const queryClient = new QueryClient();
 
@@ -38,12 +40,27 @@ const menuButtonClass =
   "before:absolute before:inset-y-0 before:left-0 before:w-0.75 " +
   "before:bg-transparent before:transition-colors data-[active=true]:before:bg-primary";
 
+/** Reads the persisted theme from the DB and syncs it into the ThemeProvider. */
+function SettingsSync() {
+  const { setTheme } = useTheme();
+  const { data: settings } = useGetSettings();
+
+  useEffect(() => {
+    if (settings) {
+      setTheme(settings.theme_name, settings.theme_mode);
+    }
+  }, [settings, setTheme]);
+
+  return null;
+}
+
 function App() {
   const { pathname } = useLocation();
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <ThemeProvider>
+        <SettingsSync />
         <CoinSelectionProvider>
           <NotebookSelectionProvider>
             <IssuerSelectionProvider>
@@ -117,12 +134,7 @@ function App() {
                       <Separator />
                       <SidebarMenu className="flex flex-row justify-center gap-6">
                         <SidebarMenuItem>
-                          <SidebarMenuButton
-                            className={menuButtonClass}
-                            size="default"
-                          >
-                            <Settings />
-                          </SidebarMenuButton>
+                          <SettingsSidebarDialog />
                         </SidebarMenuItem>
                         <Separator orientation="vertical" />
                         <SidebarMenuItem>
