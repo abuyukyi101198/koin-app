@@ -123,7 +123,7 @@ export function ImageUploadField({
           <div
             className={cn(
               "relative rounded-none border border-input border-l-0 border-t-0 border-r-0 transition-colors overflow-hidden aspect-square cursor-context-menu",
-              "placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-transparent shadow-xs transition-[color,box-shadow] outline-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-0",
+              "placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-transparent transition-[color,box-shadow] outline-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-0",
               value && "bg-transparent rounded-lg",
               uploadError && "border-destructive/50 bg-destructive/5"
             )}
