@@ -71,7 +71,7 @@ export function IssuerField({
   }, [data?.items]);
 
   const filterIssuers = (itemValue: Issuer, query: string) => {
-    return (
+    return Boolean(
       itemValue.name.toLowerCase().includes(query.toLowerCase()) ||
       (value && itemValue.id === value.id) ||
       ("predecessors" in itemValue &&
