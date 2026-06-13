@@ -16,10 +16,12 @@ export interface Settings {
   image_processing_default: ImageProcessingMode;
   theme_name: ThemeName;
   theme_mode: ThemeMode;
+  export_directory?: string;
 }
 
 export interface UpdateSettingsRequest {
   image_processing_default?: ImageProcessingMode;
   theme_name?: ThemeName;
   theme_mode?: ThemeMode;
+  export_directory?: string;
 }
