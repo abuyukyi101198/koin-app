@@ -28,6 +28,8 @@ pub struct Settings {
     pub theme_name: ThemeName,
     /// Whether the UI is shown in light or dark mode.
     pub theme_mode: ThemeMode,
+    /// Directory path where exports should be saved. Defaults to Downloads folder.
+    pub export_directory: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -35,4 +37,5 @@ pub struct UpdateSettingsRequest {
     pub image_processing_default: Option<ImageProcessingMode>,
     pub theme_name: Option<ThemeName>,
     pub theme_mode: Option<ThemeMode>,
+    pub export_directory: Option<String>,
 }

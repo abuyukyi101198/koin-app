@@ -126,6 +126,15 @@ fn run_migrations(conn: &Connection) -> SqliteResult<()> {
         "#,
     )?;
 
+    // Migration 5: Add export_directory column to settings table
+    apply_migration(
+        conn,
+        "005_add_export_directory_to_settings",
+        r#"
+            ALTER TABLE settings ADD COLUMN export_directory TEXT;
+        "#,
+    )?;
+
     Ok(())
 }
 

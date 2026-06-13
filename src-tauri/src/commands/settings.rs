@@ -1,4 +1,4 @@
-use crate::commands::utils::get_db_connection;
+use crate::commands::utils::{get_db_connection, get_default_export_dir};
 use crate::types::coins::ImageProcessingMode;
 use crate::types::settings::{Settings, ThemeMode, ThemeName, UpdateSettingsRequest};
 
@@ -58,11 +58,11 @@ fn theme_mode_to_str(mode: &ThemeMode) -> &'static str {
 pub fn get_settings(app_handle: tauri::AppHandle) -> Result<Settings, String> {
     let conn = get_db_connection(&app_handle)?;
 
-    let (image_processing_default, theme_name, theme_mode): (String, String, String) = conn
+    let (image_processing_default, theme_name, theme_mode, export_directory): (String, String, String, Option<String>) = conn
         .query_row(
-            "SELECT image_processing_default, theme_name, theme_mode FROM settings WHERE id = 1",
+            "SELECT image_processing_default, theme_name, theme_mode, export_directory FROM settings WHERE id = 1",
             [],
-            |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
+            |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?)),
         )
         .map_err(|e| format!("Failed to load settings: {}", e))?;
 
@@ -70,6 +70,7 @@ pub fn get_settings(app_handle: tauri::AppHandle) -> Result<Settings, String> {
         image_processing_default: parse_image_processing_mode(&image_processing_default),
         theme_name: parse_theme_name(&theme_name),
         theme_mode: parse_theme_mode(&theme_mode),
+        export_directory: export_directory.or_else(|| Some(get_default_export_dir())),
     })
 }
 
@@ -94,6 +95,10 @@ pub fn update_settings(
     if let Some(ref mode) = settings.theme_mode {
         updates.push("theme_mode = ?");
         params.push(Box::new(theme_mode_to_str(mode).to_string()));
+    }
+    if let Some(ref dir) = settings.export_directory {
+        updates.push("export_directory = ?");
+        params.push(Box::new(dir.clone()));
     }
 
     if !updates.is_empty() {
