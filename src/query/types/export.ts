@@ -9,5 +9,3 @@ export interface ExportResponse {
   message: string;
   filePath?: string;
 }
-
-
