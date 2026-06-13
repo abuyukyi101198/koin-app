@@ -6,9 +6,6 @@ import {
 } from "@tanstack/react-router";
 
 import App from "@/App";
-import { CoinsView } from "@/pages/coins/views/coins-view";
-import { IssuersView } from "@/pages/issuers/views/issuers-view.tsx";
-import { NotebooksView } from "@/pages/notebooks/views/notebooks-view.tsx";
 
 // Root route
 const rootRoute = createRootRoute({
@@ -19,21 +16,18 @@ const rootRoute = createRootRoute({
 const coinsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/coins",
-  component: CoinsView,
 });
 
 // Notebooks route
 const notebooksRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/notebooks",
-  component: NotebooksView,
 });
 
 // Issuers route
 const issuersRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/issuers",
-  component: IssuersView,
 });
 
 // Index route - redirect to /coins
