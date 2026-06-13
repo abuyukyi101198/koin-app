@@ -7,7 +7,7 @@ import { Link, Outlet, useLocation } from "@tanstack/react-router";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { BookCopy, Coins, Flag, Github } from "lucide-react";
 
-import monogram from "@/assets/monogram.svg";
+import { Logo } from "@/components/composite/logo.tsx";
 import { Titlebar } from "@/components/composite/titlebar.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
 import {
@@ -76,11 +76,7 @@ function App() {
                 >
                   <Sidebar>
                     <SidebarHeader className="flex items-center px-2 py-1">
-                      <img
-                        alt="Koin"
-                        className="h-20 my-3 w-auto"
-                        src={monogram}
-                      />
+                      <Logo />
                       <Separator />
                     </SidebarHeader>
                     <SidebarContent>
