@@ -37,13 +37,13 @@ import {
   ThemeName,
 } from "@/query/types/settings.ts";
 
-const THEME_NAMES: { value: ThemeName; label: string; color: string }[] = [
-  { value: "lira", label: "Lira", color: "#9B8650" },
-  { value: "quarter", label: "Quarter", color: "#718096" },
-  { value: "mark", label: "Mark", color: "#4A7C9E" },
-  { value: "peso", label: "Peso", color: "#5A9E6F" },
-  { value: "franc", label: "Franc", color: "#9E5A6F" },
-  { value: "dinar", label: "Dinar", color: "#5A6F9E" },
+const THEME_NAMES: { value: ThemeName; label: string }[] = [
+  { value: "lira", label: "Lira" },
+  { value: "quarter", label: "Quarter" },
+  { value: "mark", label: "Mark" },
+  { value: "peso", label: "Peso" },
+  { value: "franc", label: "Franc" },
+  { value: "dinar", label: "Dinar" },
 ];
 
 const IMAGE_PROCESSING_OPTIONS: {
@@ -174,7 +174,7 @@ export function SettingsSidebarDialog() {
                 }}
                 value={themeName}
               >
-                {THEME_NAMES.map(({ value, label, color }) => (
+                {THEME_NAMES.map(({ value, label }) => (
                   <label
                     className={cn(
                       "p-3 pt-4 flex flex-col items-center gap-2.5 border rounded hover:cursor-pointer hover:bg-muted",
@@ -184,11 +184,11 @@ export function SettingsSidebarDialog() {
                   >
                     <RadioGroupItem
                       className={cn(
-                        "size-6 border-2 border-transparent transition-all [&_svg]:fill-background!",
+                        "size-6 border-2 border-transparent transition-all [&_svg]:fill-background! hover:cursor-pointer",
                         themeName === value &&
                           "ring-2 ring-ring ring-offset-2 ring-offset-background"
                       )}
-                      style={{ backgroundColor: color }}
+                      style={{ backgroundColor: `var(--theme-${value})` }}
                       value={value}
                     />
                     <span
