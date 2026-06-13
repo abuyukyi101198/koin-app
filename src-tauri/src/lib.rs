@@ -12,6 +12,19 @@ use crate::commands::notebooks::{
 use crate::commands::settings::{get_settings, update_settings};
 use tauri::Manager;
 
+#[tauri::command]
+async fn close_splashscreen(app: tauri::AppHandle) {
+    // Close the splashscreen window if it exists
+    if let Some(splash) = app.get_webview_window("splashscreen") {
+        splash.close().expect("failed to close splashscreen window");
+    }
+    // Show and focus the main window
+    if let Some(main) = app.get_webview_window("main") {
+        main.show().expect("failed to show main window");
+        main.set_focus().expect("failed to focus main window");
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -34,6 +47,7 @@ pub fn run() {
             reorder_coins,
             get_settings,
             update_settings,
+            close_splashscreen,
         ])
         .setup(|app| {
             // Initialize database on app startup

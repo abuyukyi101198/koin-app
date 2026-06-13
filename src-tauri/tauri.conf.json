@@ -10,18 +10,34 @@
     "frontendDist": "../dist"
   },
   "app": {
+    "macOSPrivateApi": true,
     "windows": [
       {
         "title": "Koin",
         "label": "main",
         "width": 1600,
         "height": 1080,
+        "visible": false,
         "titleBarStyle": "Overlay",
         "hiddenTitle": true,
+        "center": true,
         "trafficLightPosition": {
           "x": 12,
           "y": 20
         }
+      },
+      {
+        "title": "Koin",
+        "label": "splashscreen",
+        "url": "splashscreen.html",
+        "width": 1600,
+        "height": 1080,
+        "decorations": false,
+        "titleBarStyle": "Overlay",
+        "transparent": true,
+        "center": true,
+        "resizable": false,
+        "alwaysOnTop": true
       }
     ],
     "security": {
