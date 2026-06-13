@@ -40,3 +40,29 @@ pub fn get_image_processing_default(conn: &Connection) -> ImageProcessingMode {
     })
     .unwrap_or(ImageProcessingMode::None)
 }
+
+pub fn get_default_export_dir() -> String {
+    #[cfg(target_os = "macos")]
+    {
+        if let Some(home) = std::env::var("HOME").ok() {
+            return format!("{}/Downloads", home);
+        }
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        if let Some(user_profile) = std::env::var("USERPROFILE").ok() {
+            return format!("{}\\Downloads", user_profile);
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        if let Some(home) = std::env::var("HOME").ok() {
+            return format!("{}/Downloads", home);
+        }
+    }
+
+    // Fallback
+    std::env::temp_dir().to_string_lossy().to_string()
+}
