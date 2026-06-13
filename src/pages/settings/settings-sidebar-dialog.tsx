@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { Moon, Settings, Sun } from "lucide-react";
+import { Folder, Moon, Settings, Sun } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -18,6 +18,11 @@ import {
   FieldLegend,
   FieldSet,
 } from "@/components/ui/field.tsx";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group.tsx";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
 import {
   Select,
@@ -79,12 +84,14 @@ export function SettingsSidebarDialog() {
   const [themeMode, setThemeModeState] = useState<ThemeMode>("dark");
   const [imageProcessing, setImageProcessingState] =
     useState<ImageProcessingMode>("none");
+  const [exportDirectory, setExportDirectoryState] = useState<string>("");
 
   useEffect(() => {
     if (settings) {
       setThemeNameState(settings.theme_name);
       setThemeModeState(settings.theme_mode);
       setImageProcessingState(settings.image_processing_default);
+      setExportDirectoryState(settings.export_directory || "");
     }
   }, [settings]);
 
@@ -121,6 +128,19 @@ export function SettingsSidebarDialog() {
       {
         onError: () =>
           toast.error("Failed to save image setting", {
+            position: "bottom-right",
+          }),
+      }
+    );
+  }
+
+  function handleExportDirectoryChange(dir: string) {
+    setExportDirectoryState(dir);
+    updateSettings.mutate(
+      { export_directory: dir },
+      {
+        onError: () =>
+          toast.error("Failed to save export directory", {
             position: "bottom-right",
           }),
       }
@@ -209,25 +229,20 @@ export function SettingsSidebarDialog() {
 
           {/* Images */}
           <FieldSet>
-            <Field
-              className="items-start justify-between"
-              orientation="horizontal"
-            >
-              <div>
-                <FieldLegend className="font-serif text-lg!" variant="label">
-                  Image processing
-                </FieldLegend>
-                <FieldDescription>
-                  Default image download behavior.
-                </FieldDescription>
-              </div>
+            <Field>
+              <FieldLegend className="mb-0 font-serif text-lg!" variant="label">
+                Image processing
+              </FieldLegend>
+              <FieldDescription>
+                Default image download behavior.
+              </FieldDescription>
               <Select
                 onValueChange={(v) => {
                   handleImageProcessing(v as ImageProcessingMode);
                 }}
                 value={imageProcessing}
               >
-                <SelectTrigger className="h-20! w-1/2 hover:cursor-pointer">
+                <SelectTrigger className="h-16! w-1/2 hover:cursor-pointer">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -251,6 +266,31 @@ export function SettingsSidebarDialog() {
                   )}
                 </SelectContent>
               </Select>
+            </Field>
+          </FieldSet>
+
+          {/* Export Directory */}
+          <FieldSet>
+            <Field>
+              <FieldLegend className="mb-0 font-serif text-lg!" variant="label">
+                Export directory
+              </FieldLegend>
+              <FieldDescription>
+                Default location for exported files.
+              </FieldDescription>
+              <InputGroup className="w-1/2">
+                <InputGroupAddon align="inline-start">
+                  <Folder className="size-4" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  onChange={(e) => {
+                    handleExportDirectoryChange(e.target.value);
+                  }}
+                  placeholder="path/to/directory"
+                  type="text"
+                  value={exportDirectory}
+                />
+              </InputGroup>
             </Field>
           </FieldSet>
         </FieldGroup>
