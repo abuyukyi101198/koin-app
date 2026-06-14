@@ -57,6 +57,7 @@ export const coinFormSchema = yup.object().shape({
       (value) => {
         if (value === "" || value === undefined) return true;
         if (value.startsWith("data:")) return true;
+        if (value.startsWith("/") || /^[A-Za-z]:[/\\]/.test(value)) return true;
         try {
           new URL(value);
           return true;
@@ -76,6 +77,7 @@ export const coinFormSchema = yup.object().shape({
       (value) => {
         if (value === "" || value === undefined) return true;
         if (value.startsWith("data:")) return true;
+        if (value.startsWith("/") || /^[A-Za-z]:[/\\]/.test(value)) return true;
         try {
           new URL(value);
           return true;

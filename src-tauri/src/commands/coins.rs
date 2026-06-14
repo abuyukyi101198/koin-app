@@ -5,6 +5,40 @@ use crate::types::coins::{
 };
 use validator::Validate;
 
+fn is_saved_image_path(value: &str, images_dir: &std::path::Path) -> bool {
+    std::path::Path::new(value).starts_with(images_dir)
+}
+
+fn is_local_path_syntax(value: &str) -> bool {
+    // Returns true for strings that look like an absolute file-system path
+    // (Unix `/…` or Windows `C:\…` / `C:/…`).
+    if value.starts_with('/') {
+        return true;
+    }
+    if value.len() >= 3 {
+        let mut chars = value.chars();
+        let drive = chars.next().unwrap_or_default();
+        let colon = chars.next().unwrap_or_default();
+        let sep = chars.next().unwrap_or_default();
+        if drive.is_ascii_alphabetic() && colon == ':' && (sep == '\\' || sep == '/') {
+            return true;
+        }
+    }
+    false
+}
+
+fn check_image_in_dir(field: &str, value: &Option<String>, images_dir: &std::path::Path) -> Result<(), String> {
+    // Validates that an image field value, if it is a local path, lives inside `images_dir`.
+    if let Some(v) = value {
+        if is_local_path_syntax(v) && !is_saved_image_path(v, images_dir) {
+            return Err(format!(
+                "Validation failed: {field} contains a local path that is not inside the managed images directory"
+            ));
+        }
+    }
+    Ok(())
+}
+
 fn resolve_image_value(stored: Option<String>) -> Option<String> {
     match stored {
         None => None,
@@ -182,6 +216,9 @@ pub async fn create_coin(
     let conn = get_db_connection(&app_handle)?;
     let images_dir = get_images_dir(&app_handle)?;
 
+    check_image_in_dir("obverse_image", &coin.obverse_image, &images_dir)?;
+    check_image_in_dir("reverse_image", &coin.reverse_image, &images_dir)?;
+
     let processing_mode = coin
         .image_processing
         .clone()
@@ -280,6 +317,9 @@ pub async fn update_coin(
     let conn = get_db_connection(&app_handle)?;
     let images_dir = get_images_dir(&app_handle)?;
 
+    check_image_in_dir("obverse_image", &coin.obverse_image, &images_dir)?;
+    check_image_in_dir("reverse_image", &coin.reverse_image, &images_dir)?;
+
     let processing_mode = coin
         .image_processing
         .clone()
@@ -293,10 +333,16 @@ pub async fn update_coin(
 
     // Data URLs (uploaded from disk) are always saved to a file even when download=false.
     // Remote http URLs are only downloaded when download=true.
+    // Local file paths (already-stored images sent back unchanged by the frontend) are kept as-is.
     let obverse_is_data_url = coin.obverse_image.as_ref().map_or(false, |v| v.starts_with("data:"));
     let reverse_is_data_url = coin.reverse_image.as_ref().map_or(false, |v| v.starts_with("data:"));
-    let save_obverse = download || obverse_is_data_url;
-    let save_reverse = download || reverse_is_data_url;
+    let obverse_is_local_path = coin.obverse_image.as_ref().map_or(false, |v| is_saved_image_path(v, &images_dir));
+    let reverse_is_local_path = coin.reverse_image.as_ref().map_or(false, |v| is_saved_image_path(v, &images_dir));
+
+    // Only process images that are genuinely new. A local file path means the image
+    // is unchanged, therefore download/processing is skipped.
+    let save_obverse = (download || obverse_is_data_url) && !obverse_is_local_path;
+    let save_reverse = (download || reverse_is_data_url) && !reverse_is_local_path;
 
     // remove_bg only applies in explicit download mode, not for plain data-URL saves.
     let apply_bg = remove_bg && download;
@@ -313,12 +359,19 @@ pub async fn update_coin(
         None
     };
 
-    // Delete old image files (safe – ignores missing files).
-    delete_image_file_if_local(&current_coin.obverse_image);
-    delete_image_file_if_local(&current_coin.reverse_image);
+    // Delete old image files only when the image is actually being replaced.
+    // If the new value is the same local path, skip deletion to avoid destroying the file.
+    if !obverse_is_local_path {
+        delete_image_file_if_local(&current_coin.obverse_image);
+    }
+    if !reverse_is_local_path {
+        delete_image_file_if_local(&current_coin.reverse_image);
+    }
 
     // Determine new stored values: file path if we saved a file, remote URL otherwise, None if cleared.
-    let new_obverse = if save_obverse {
+    let new_obverse = if obverse_is_local_path {
+        coin.obverse_image.clone() // image is unchanged
+    } else if save_obverse {
         if let Some(bytes) = obverse_bytes {
             let file_path = images_dir.join(format!("{}_obverse.{}", coin.id, ext));
             image_handler::save_to_file(&bytes, &file_path)?;
@@ -330,7 +383,9 @@ pub async fn update_coin(
         coin.obverse_image.clone() // remote URL or None
     };
 
-    let new_reverse = if save_reverse {
+    let new_reverse = if reverse_is_local_path {
+        coin.reverse_image.clone() // image is unchanged
+    } else if save_reverse {
         if let Some(bytes) = reverse_bytes {
             let file_path = images_dir.join(format!("{}_reverse.{}", coin.id, ext));
             image_handler::save_to_file(&bytes, &file_path)?;
